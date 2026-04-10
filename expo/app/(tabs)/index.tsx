@@ -22,6 +22,7 @@ import {
   Search,
   Share2,
   Sparkles,
+  TrendingUp,
 } from 'lucide-react-native';
 import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -78,18 +79,18 @@ function AppHeader() {
       </Text>
       <View style={[hs.headerActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable
-          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [hs.headerIconBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
           testID="search-btn"
           onPress={() => router.push('/explore')}
         >
-          <Search color={colors.textSecondary} size={20} strokeWidth={1.5} />
+          <Search color={colors.textSecondary} size={18} strokeWidth={1.5} />
         </Pressable>
         <Pressable
-          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [hs.headerIconBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
           testID="notifications-btn"
           onPress={() => router.push('/notifications')}
         >
-          <Bell color={colors.textSecondary} size={20} strokeWidth={1.5} />
+          <Bell color={colors.textSecondary} size={18} strokeWidth={1.5} />
           <View style={[hs.notifDot, { backgroundColor: colors.accent, borderColor: colors.bg }]} />
         </Pressable>
       </View>
@@ -98,16 +99,27 @@ function AppHeader() {
 }
 
 const hs = StyleSheet.create({
-  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10, height: 48 },
-  logoText: { fontSize: 17, fontWeight: '600' as const },
-  headerActions: { alignItems: 'center', gap: 16 },
-  notifDot: { position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: 3.5, borderWidth: 2 },
+  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10, height: 48 },
+  logoText: { fontSize: 20, fontWeight: '700' as const, letterSpacing: -0.3 },
+  headerActions: { alignItems: 'center', gap: 8 },
+  headerIconBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  notifDot: { position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: 3.5, borderWidth: 2 },
 });
 
 function SectionTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i: number) => void }) {
   const { language } = useLanguage();
   const { colors } = useTheme();
   const tabs = language === 'ar' ? SECTION_TABS_AR : SECTION_TABS_EN;
+  const indicatorAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(indicatorAnim, {
+      toValue: activeTab,
+      useNativeDriver: true,
+      damping: 20,
+      stiffness: 200,
+    }).start();
+  }, [activeTab, indicatorAnim]);
 
   return (
     <View style={[st.container, { borderBottomColor: colors.border }]}>
@@ -133,7 +145,7 @@ function SectionTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
 const st = StyleSheet.create({
   container: { flexDirection: 'row', borderBottomWidth: 1 },
   tabItem: { flex: 1, alignItems: 'center', paddingVertical: 12, position: 'relative' as const },
-  tabText: { fontSize: 15, fontWeight: '500' as const },
+  tabText: { fontSize: 14, fontWeight: '600' as const },
   tabIndicator: { position: 'absolute', bottom: -1, width: '50%', height: 2, borderRadius: 1 },
 });
 
@@ -165,18 +177,18 @@ function ComposeBar() {
         {language === 'ar' ? 'ماذا يدور في ذهنك؟' : "What's on your mind?"}
       </Text>
       <View style={[cb.btn, { backgroundColor: colors.accentLight }]}>
-        <Pen color={colors.accent} size={16} strokeWidth={1.5} />
+        <Pen color={colors.accent} size={14} strokeWidth={1.5} />
       </View>
     </PressableScale>
   );
 }
 
 const cb = StyleSheet.create({
-  bar: { alignItems: 'center', gap: 12, marginHorizontal: 16, marginVertical: 8, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12 },
-  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
-  placeholder: { flex: 1, fontSize: 15 },
-  btn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  bar: { alignItems: 'center', gap: 12, marginHorizontal: 16, marginVertical: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12 },
+  avatar: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 13, fontWeight: '700' as const },
+  placeholder: { flex: 1, fontSize: 14, opacity: 0.7 },
+  btn: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
 });
 
 function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCategory: string; onSelect: (cat: string) => void; extraCategories: string[] }) {
@@ -228,9 +240,50 @@ function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCat
 }
 
 const ct = StyleSheet.create({
-  row: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
-  pill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  row: { paddingHorizontal: 16, gap: 8, paddingBottom: 8 },
+  pill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   text: { fontSize: 13, fontWeight: '500' as const },
+});
+
+function TrendingBar() {
+  const { isRTL, language } = useLanguage();
+  const { colors } = useTheme();
+
+  return (
+    <View style={tb.wrap}>
+      <View style={[tb.header, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
+        <TrendingUp color={colors.accent} size={14} strokeWidth={2} />
+        <Text style={[tb.title, { color: colors.accent }]}>
+          {language === 'ar' ? 'رائج الآن' : 'Trending'}
+        </Text>
+      </View>
+      <FlatList
+        horizontal
+        inverted={isRTL}
+        data={trendingTopics.slice(0, 4)}
+        keyExtractor={(item) => item.id}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}
+        renderItem={({ item }) => (
+          <View style={[tb.chip, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
+            <Text style={[tb.chipText, { color: colors.textSecondary }]}>
+              {getLocalizedText(item.label, language)}
+            </Text>
+            {item.isHot && <View style={[tb.hotDot, { backgroundColor: colors.error }]} />}
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+const tb = StyleSheet.create({
+  wrap: { paddingBottom: 10, gap: 6 },
+  header: { alignItems: 'center', gap: 5, marginBottom: 2 },
+  title: { fontSize: 12, fontWeight: '600' as const },
+  chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
+  chipText: { fontSize: 12, fontWeight: '500' as const },
+  hotDot: { width: 5, height: 5, borderRadius: 2.5 },
 });
 
 const FeedCard = React.memo(function FeedCard({
@@ -254,17 +307,17 @@ const FeedCard = React.memo(function FeedCard({
   const heartScale = useRef(new Animated.Value(1)).current;
   const bookmarkScale = useRef(new Animated.Value(1)).current;
   const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideIn = useRef(new Animated.Value(20)).current;
+  const slideIn = useRef(new Animated.Value(16)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 140 }),
+      Animated.timing(fadeIn, { toValue: 1, duration: 350, useNativeDriver: true }),
+      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 22, stiffness: 160 }),
     ]).start();
   }, [fadeIn, slideIn]);
 
   const onPressIn = useCallback(() => {
-    Animated.spring(scaleAnim, { toValue: 0.975, useNativeDriver: true, damping: 18, stiffness: 240 }).start();
+    Animated.spring(scaleAnim, { toValue: 0.98, useNativeDriver: true, damping: 18, stiffness: 240 }).start();
   }, [scaleAnim]);
 
   const onPressOut = useCallback(() => {
@@ -301,7 +354,6 @@ const FeedCard = React.memo(function FeedCard({
         backgroundColor: colors.bgCard,
         borderColor: colors.border,
       },
-      isFirst && fc.featuredCard,
       isFirst && { borderLeftColor: colors.accent, borderLeftWidth: 3 },
     ]}>
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} onPress={onPress} testID={`feed-${post.id}`}>
@@ -320,7 +372,7 @@ const FeedCard = React.memo(function FeedCard({
           <Text style={[fc.time, { color: colors.textMuted }]}>{timeAgo}</Text>
         </View>
 
-        <Text style={[fc.content, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
+        <Text style={[fc.content, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={4}>
           {post.content}
         </Text>
 
@@ -375,21 +427,20 @@ const FeedCard = React.memo(function FeedCard({
 
 const fc = StyleSheet.create({
   card: { marginHorizontal: 16, marginTop: 8, borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
-  featuredCard: {},
-  header: { alignItems: 'center', gap: 10, padding: 16, paddingBottom: 8 },
+  header: { alignItems: 'center', gap: 10, padding: 14, paddingBottom: 6 },
   avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
-  authorInfo: { flex: 1, gap: 2 },
-  authorName: { fontSize: 15, fontWeight: '600' as const },
-  authorRole: { fontSize: 13 },
-  time: { fontSize: 13 },
-  content: { paddingHorizontal: 16, paddingBottom: 12, fontSize: 15, lineHeight: 22 },
-  topicRow: { paddingHorizontal: 16, paddingBottom: 12 },
+  authorInfo: { flex: 1, gap: 1 },
+  authorName: { fontSize: 14, fontWeight: '600' as const },
+  authorRole: { fontSize: 12 },
+  time: { fontSize: 12 },
+  content: { paddingHorizontal: 14, paddingBottom: 10, fontSize: 14, lineHeight: 21 },
+  topicRow: { paddingHorizontal: 14, paddingBottom: 10 },
   topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   topicText: { fontSize: 11, fontWeight: '600' as const },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16, borderTopWidth: 1 },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, paddingHorizontal: 14, borderTopWidth: 1 },
   actionsLeft: { gap: 16 },
-  actionsRight: { gap: 16 },
+  actionsRight: { gap: 14 },
   action: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   actionText: { fontSize: 13 },
   pressed: { opacity: 0.6 },
@@ -413,7 +464,7 @@ function EmptyFeed() {
   return (
     <View style={ef.wrap}>
       <View style={[ef.iconWrap, { backgroundColor: colors.accentLight }]}>
-        <Sparkles color={colors.accent} size={40} strokeWidth={1.5} />
+        <Sparkles color={colors.accent} size={36} strokeWidth={1.5} />
       </View>
       <Text style={[ef.title, { color: colors.text }]}>
         {language === 'ar' ? 'لا توجد منشورات بعد' : 'No posts yet'}
@@ -434,8 +485,8 @@ function EmptyFeed() {
 }
 
 const ef = StyleSheet.create({
-  wrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 40, gap: 10 },
-  iconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  wrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 40, gap: 8 },
+  iconWrap: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   title: { fontSize: 17, fontWeight: '600' as const },
   desc: { fontSize: 13, textAlign: 'center' as const },
   btn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 16 },
@@ -548,6 +599,7 @@ export default function HomeScreen() {
       <SectionTabs activeTab={activeSectionTab} onSelect={setActiveSectionTab} />
       <ComposeBar />
       <CategoryTabs activeCategory={activeCategory} onSelect={setActiveCategory} extraCategories={communityCategories} />
+      <TrendingBar />
     </>
   ), [activeCategory, communityCategories, activeSectionTab]);
 
@@ -636,5 +688,10 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
 });

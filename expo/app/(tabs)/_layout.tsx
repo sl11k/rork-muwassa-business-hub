@@ -24,15 +24,12 @@ export default function TabLayout() {
     more: language === 'ar' ? 'حسابي' : 'Profile',
   };
 
-  const activeColor = colors.accent;
-  const inactiveColor = colors.textMuted;
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: activeColor,
-        tabBarInactiveTintColor: inactiveColor,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
           backgroundColor: colors.tabBarBg,
           borderTopWidth: 1,
@@ -42,6 +39,7 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           elevation: 0,
+          shadowOpacity: 0,
           ...(Platform.OS === 'web' ? { height: 72 } : {}),
         },
         tabBarLabelStyle: {
@@ -59,7 +57,12 @@ export default function TabLayout() {
         options={{
           title: tabLabels.home,
           tabBarIcon: ({ color, focused }) => (
-            <Home color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+            <Home
+              color={color}
+              size={22}
+              strokeWidth={focused ? 2.2 : 1.5}
+              fill={focused ? color : 'transparent'}
+            />
           ),
         }}
       />
@@ -68,7 +71,12 @@ export default function TabLayout() {
         options={{
           title: tabLabels.communities,
           tabBarIcon: ({ color, focused }) => (
-            <Compass color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+            <Compass
+              color={color}
+              size={22}
+              strokeWidth={focused ? 2.2 : 1.5}
+              fill={focused ? color : 'transparent'}
+            />
           ),
         }}
       />
@@ -78,7 +86,12 @@ export default function TabLayout() {
           title: tabLabels.messages,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              <MessageSquare color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              <MessageSquare
+                color={color}
+                size={22}
+                strokeWidth={focused ? 2.2 : 1.5}
+                fill={focused ? color : 'transparent'}
+              />
               <View style={[s.unreadDot, { backgroundColor: colors.error }]} />
             </View>
           ),
@@ -89,7 +102,12 @@ export default function TabLayout() {
         options={{
           title: tabLabels.marketplace,
           tabBarIcon: ({ color, focused }) => (
-            <ShoppingBag color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+            <ShoppingBag
+              color={color}
+              size={22}
+              strokeWidth={focused ? 2.2 : 1.5}
+              fill={focused ? color : 'transparent'}
+            />
           ),
         }}
       />
@@ -98,7 +116,12 @@ export default function TabLayout() {
         options={{
           title: tabLabels.more,
           tabBarIcon: ({ color, focused }) => (
-            <User color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+            <User
+              color={color}
+              size={22}
+              strokeWidth={focused ? 2.2 : 1.5}
+              fill={focused ? color : 'transparent'}
+            />
           ),
         }}
       />

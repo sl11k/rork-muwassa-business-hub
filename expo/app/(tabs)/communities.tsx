@@ -48,12 +48,6 @@ interface CommunityItem {
 const FILTERS_AR = ['الكل', 'عام', 'خاص', 'مميز'];
 const FILTERS_EN = ['All', 'Public', 'Private', 'Premium'];
 
-const PRIVACY_LABELS: Record<string, Record<string, string>> = {
-  public: { ar: 'عام', en: 'Public' },
-  private: { ar: 'خاص', en: 'Private' },
-  premium: { ar: 'مميز', en: 'Premium' },
-};
-
 function Header({ searchText, onSearchChange }: { searchText: string; onSearchChange: (t: string) => void }) {
   const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
@@ -72,7 +66,7 @@ function Header({ searchText, onSearchChange }: { searchText: string; onSearchCh
           borderColor: colors.border,
         },
       ]}>
-        <Search color={colors.textMuted} size={18} strokeWidth={1.5} />
+        <Search color={colors.textMuted} size={17} strokeWidth={1.5} />
         <TextInput
           value={searchText}
           onChangeText={onSearchChange}
@@ -175,9 +169,9 @@ function FeaturedCard({ item, displayName, onJoinToggle, isJoining }: { item: Co
         <Pressable
           onPress={() => onJoinToggle(item.id, item.isMember)}
           disabled={isJoining}
-          style={({ pressed }) => [styles.joinSmallBtn, { backgroundColor: colors.accentLight }, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [styles.joinSmallBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.7 }]}
         >
-          <Text style={[styles.joinSmallText, { color: colors.accent }]}>{language === 'ar' ? 'انضمام' : 'Join'}</Text>
+          <Text style={styles.joinSmallText}>{language === 'ar' ? 'انضمام' : 'Join'}</Text>
         </Pressable>
       )}
     </PressableScale>
@@ -199,14 +193,11 @@ const CommunityRow = React.memo(function CommunityRow({
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    Animated.timing(fadeIn, { toValue: 1, duration: 350, useNativeDriver: true }).start();
   }, [fadeIn]);
 
   const displayName = language === 'ar' ? item.nameAr : item.name;
   const displayDesc = language === 'ar' ? item.descriptionAr : item.description;
-  const privacyLabel = PRIVACY_LABELS[item.privacy]?.[language] ?? item.privacy;
-  const isPremium = item.privacy === 'premium';
-  const isPrivate = item.privacy === 'private';
 
   return (
     <Animated.View style={{ opacity: fadeIn }}>
@@ -375,22 +366,22 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
-  headerTitle: { fontSize: 24, fontWeight: '700' as const },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
   searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
   searchInput: { flex: 1, fontSize: 15, paddingVertical: 0 },
   filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  filterPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   filterText: { fontSize: 13, fontWeight: '500' as const },
   featuredSection: { paddingBottom: 16, gap: 10 },
   featuredTitle: { fontSize: 17, fontWeight: '600' as const },
   featuredCard: { width: 200, padding: 14, borderRadius: 12, alignItems: 'center', gap: 8 },
-  featuredIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  featuredName: { fontSize: 15, fontWeight: '600' as const, textAlign: 'center' as const },
+  featuredIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  featuredName: { fontSize: 14, fontWeight: '600' as const, textAlign: 'center' as const },
   featuredMembers: { fontSize: 12 },
   memberBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   memberBadgeText: { fontSize: 12, fontWeight: '600' as const },
-  joinSmallBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
-  joinSmallText: { fontSize: 12, fontWeight: '600' as const },
+  joinSmallBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
+  joinSmallText: { fontSize: 12, fontWeight: '600' as const, color: '#FFF' },
   communityRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
   rowIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   rowContent: { flex: 1, gap: 3 },

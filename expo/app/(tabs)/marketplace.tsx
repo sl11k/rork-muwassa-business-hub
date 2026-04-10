@@ -76,11 +76,9 @@ function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void;
         {isAuthenticated ? (
           <Pressable
             onPress={onCreatePress}
-            style={({ pressed }) => [pressed && { opacity: 0.85 }]}
+            style={({ pressed }) => [styles.addBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
           >
-            <View style={[styles.addBtn, { backgroundColor: colors.accent }]}>
-              <Plus color="#FFF" size={20} strokeWidth={2} />
-            </View>
+            <Plus color="#FFF" size={18} strokeWidth={2} />
           </Pressable>
         ) : null}
       </View>
@@ -93,7 +91,7 @@ function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void;
           borderColor: colors.border,
         },
       ]}>
-        <Search color={colors.textMuted} size={18} strokeWidth={1.5} />
+        <Search color={colors.textMuted} size={17} strokeWidth={1.5} />
         <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textMuted }]}>
           {language === 'ar' ? 'ابحث عن خدمة...' : 'Search services...'}
         </Text>
@@ -213,7 +211,7 @@ const ServiceCard = React.memo(function ServiceCard({
   const bookmarkScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+    Animated.timing(fadeIn, { toValue: 1, duration: 350, useNativeDriver: true }).start();
   }, [fadeIn]);
 
   const isRequested = requestedIds.has(item.id);
@@ -423,12 +421,12 @@ const styles = StyleSheet.create({
   listContent: { paddingBottom: 100, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 24, fontWeight: '700' as const },
-  addBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
+  addBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
   searchText: { flex: 1, fontSize: 15 },
   catRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
-  catPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  catPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   catText: { fontSize: 13, fontWeight: '500' as const },
   featuredSection: { paddingBottom: 12, gap: 10 },
   featuredSectionTitle: { fontSize: 17, fontWeight: '600' as const },
@@ -437,8 +435,8 @@ const styles = StyleSheet.create({
   featCatText: { fontSize: 11, fontWeight: '600' as const },
   featTitle: { fontSize: 15, fontWeight: '600' as const, lineHeight: 21 },
   featProvider: { alignItems: 'center', gap: 6 },
-  featAvatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  featAvatarText: { color: '#FFF', fontSize: 12, fontWeight: '700' as const },
+  featAvatar: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  featAvatarText: { color: '#FFF', fontSize: 10, fontWeight: '700' as const },
   featProviderName: { fontSize: 13 },
   featBottom: { alignItems: 'center', justifyContent: 'space-between', paddingTop: 4 },
   featPrice: { fontSize: 15, fontWeight: '600' as const },
@@ -447,8 +445,8 @@ const styles = StyleSheet.create({
   cardTop: { gap: 10 },
   serviceTitle: { fontSize: 15, fontWeight: '600' as const, lineHeight: 22 },
   providerRow: { alignItems: 'center', gap: 6 },
-  providerAvatar: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  providerInitial: { color: '#FFF', fontSize: 10, fontWeight: '700' as const },
+  providerAvatar: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  providerInitial: { color: '#FFF', fontSize: 9, fontWeight: '700' as const },
   providerName: { fontSize: 13 },
   catBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
   catBadgeText: { fontSize: 11, fontWeight: '600' as const },

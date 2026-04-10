@@ -98,12 +98,10 @@ function Header() {
         </Text>
         <Pressable
           onPress={() => router.push('/new-conversation')}
-          style={({ pressed }) => [pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.newMsgBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
           testID="new-message-btn"
         >
-          <View style={[styles.newMsgBtn, { backgroundColor: colors.accent }]}>
-            <SquarePen color="#FFF" size={17} strokeWidth={2} />
-          </View>
+          <SquarePen color="#FFF" size={17} strokeWidth={2} />
         </Pressable>
       </View>
       <View style={[
@@ -201,7 +199,7 @@ const ConversationRow = React.memo(function ConversationRow({
           </View>
         )}
         {!isCommunity ? (
-          <View style={[styles.onlineDot, { backgroundColor: '#2DD4BF', borderColor: colors.bg }]} />
+          <View style={[styles.onlineDot, { backgroundColor: colors.success, borderColor: colors.bg }]} />
         ) : null}
       </View>
 
@@ -364,12 +362,12 @@ const styles = StyleSheet.create({
   listContent: { paddingBottom: 100, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 24, fontWeight: '700' as const },
-  newMsgBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
+  newMsgBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
   searchText: { flex: 1, fontSize: 15 },
   filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  filterPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   filterText: { fontSize: 13, fontWeight: '500' as const },
   chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 12 },
   avatarWrap: { position: 'relative' as const },

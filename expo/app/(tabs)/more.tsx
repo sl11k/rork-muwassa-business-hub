@@ -90,9 +90,9 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           {isAuthenticated && (
             <Pressable
               onPress={() => router.push('/settings')}
-              style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+              style={({ pressed }) => [ph.settingsBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
             >
-              <Settings color={colors.textSecondary} size={20} strokeWidth={1.5} />
+              <Settings color={colors.textSecondary} size={18} strokeWidth={1.5} />
             </Pressable>
           )}
         </View>
@@ -167,7 +167,8 @@ const ph = StyleSheet.create({
   section: { gap: 12, paddingBottom: 8 },
   topRow: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12 },
   screenTitle: { fontSize: 17, fontWeight: '600' as const },
-  topActions: { alignItems: 'center', gap: 12 },
+  topActions: { alignItems: 'center', gap: 8 },
+  settingsBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   profileArea: { alignItems: 'center', gap: 6, paddingVertical: 8 },
   avatar: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 28, fontWeight: '700' as const, color: '#FFF' },
