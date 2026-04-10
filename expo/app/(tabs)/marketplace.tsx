@@ -35,7 +35,7 @@ const CATS_AR = ['الكل', 'حوكمة', 'استشارات', 'أمن سيبر�
 const CATS_EN = ['All', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 const CAT_KEYS_EN = ['', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 
-const AVATAR_COLORS = ['#E8A838', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE', '#F472B6'];
+const AVATAR_COLORS = ['#D4A254', '#4A9FF5', '#FB7185', '#8B8DF8', '#22D3EE', '#F472B6'];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -95,9 +95,14 @@ function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void;
             onPress={onCreatePress}
             style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.9 }] }]}
           >
-            <View style={[styles.addBtn, { backgroundColor: colors.accent }]}>
-              <Plus color="#1C1C1E" size={18} strokeWidth={2.5} />
-            </View>
+            <LinearGradient
+              colors={[colors.accent, colors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.addBtn}
+            >
+              <Plus color="#FFF" size={18} strokeWidth={2.5} />
+            </LinearGradient>
           </Pressable>
         ) : null}
       </View>
@@ -106,14 +111,14 @@ function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void;
           styles.searchBar,
           {
             flexDirection: isRTL ? 'row-reverse' : 'row',
-            backgroundColor: isDark ? colors.bgCard : colors.white,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
             borderWidth: 1,
-            borderColor: isDark ? colors.border : colors.separator,
+            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
           },
           pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
         ]}>
-          <View style={[styles.searchIconWrap, { backgroundColor: colors.accent }]}>
-            <Search color="#1C1C1E" size={14} strokeWidth={2.2} />
+          <View style={[styles.searchIconWrap, { backgroundColor: colors.accentLight }]}>
+            <Search color={colors.accent} size={14} strokeWidth={2.2} />
           </View>
           <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
             {language === 'ar' ? 'ابحث عن خدمة...' : 'Search services...'}
@@ -122,11 +127,11 @@ function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void;
         <Pressable style={({ pressed }) => [
           styles.filterBtn,
           {
-            backgroundColor: isDark ? colors.bgCard : colors.white,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
             borderWidth: 1,
-            borderColor: isDark ? colors.border : colors.separator,
+            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
           },
-          pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
+          pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] },
         ]}>
           <Filter color={colors.textSecondary} size={17} strokeWidth={1.8} />
         </Pressable>
@@ -156,19 +161,19 @@ function CategoryTabs({ active, onSelect }: { active: number; onSelect: (i: numb
           }}
           style={({ pressed }) => [
             styles.catPill,
-            {
-              backgroundColor: active === index
-                ? colors.accent
-                : (isDark ? colors.bgCard : colors.white),
-              borderWidth: active === index ? 0 : 1,
-              borderColor: isDark ? colors.border : colors.separator,
-            },
-            pressed && { transform: [{ scale: 0.94 }] },
+            active === index
+              ? { backgroundColor: colors.accent }
+              : {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                },
+            pressed && { transform: [{ scale: 0.93 }] },
           ]}
         >
           <Text style={[
             styles.catText,
-            { color: active === index ? '#1C1C1E' : colors.textSecondary },
+            { color: active === index ? '#000' : colors.textSecondary },
             active === index && { fontWeight: '700' as const },
           ]}>{item}</Text>
         </Pressable>
@@ -190,21 +195,21 @@ function FeaturedBanner() {
         style={styles.featuredGradient}
       >
         <View style={styles.featuredInner}>
-          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(0,0,0,0.12)' }]}>
-            <Star color="#1C1C1E" size={11} fill="#1C1C1E" />
-            <Text style={[styles.featuredBadgeText, { color: '#1C1C1E' }]}>{language === 'ar' ? 'مميز' : 'Featured'}</Text>
+          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+            <Star color="#FFF" size={11} fill="#FFF" />
+            <Text style={styles.featuredBadgeText}>{language === 'ar' ? 'مميز' : 'Featured'}</Text>
           </View>
-          <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left', color: '#1C1C1E' }]}>
+          <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
             {language === 'ar' ? 'خدمات استشارية متميزة' : 'Premium Consulting'}
           </Text>
-          <Text style={[styles.featuredDesc, { textAlign: isRTL ? 'right' : 'left', color: 'rgba(28,28,30,0.7)' }]}>
+          <Text style={[styles.featuredDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
             {language === 'ar' ? 'من خبراء معتمدين في المنطقة' : 'From verified experts in the region'}
           </Text>
           <View style={[styles.featuredAction, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Text style={[styles.featuredActionText, { color: '#1C1C1E' }]}>
+            <Text style={styles.featuredActionText}>
               {language === 'ar' ? 'تصفح الخدمات' : 'Browse Services'}
             </Text>
-            <ArrowRight color="#1C1C1E" size={14} strokeWidth={2} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
+            <ArrowRight color="#FFF" size={14} strokeWidth={2} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
           </View>
         </View>
       </LinearGradient>
@@ -269,8 +274,6 @@ const ServiceCard = React.memo(function ServiceCard({
           styles.card,
           {
             backgroundColor: isDark ? colors.bgCard : colors.white,
-            borderWidth: 1,
-            borderColor: isDark ? colors.border : colors.separator,
           },
         ]}
         haptic
@@ -282,12 +285,12 @@ const ServiceCard = React.memo(function ServiceCard({
           </View>
           <View style={[styles.providerInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
             <Text style={[styles.providerName, { color: colors.text }]}>{item.ownerName}</Text>
-            <View style={[styles.catBadge, { backgroundColor: colors.accentLight }]}>
+            <View style={[styles.catBadge, { backgroundColor: colors.accentSoft }]}>
               <Text style={[styles.catBadgeText, { color: colors.accent }]}>{category}</Text>
             </View>
           </View>
           <View style={styles.cardHeaderRight}>
-            <View style={[styles.ratingWrap, { backgroundColor: colors.yellowLight }]}>
+            <View style={[styles.ratingWrap, { backgroundColor: isDark ? 'rgba(251,191,36,0.10)' : 'rgba(194,120,3,0.08)' }]}>
               <Star color={colors.yellow} fill={colors.yellow} size={10} />
               <Text style={[styles.ratingText, { color: colors.text }]}>4.8</Text>
             </View>
@@ -308,7 +311,7 @@ const ServiceCard = React.memo(function ServiceCard({
           {title}
         </Text>
 
-        <View style={[styles.cardFooter, { flexDirection: isRTL ? 'row-reverse' : 'row', borderTopColor: isDark ? colors.border : colors.separator }]}>
+        <View style={[styles.cardFooter, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <View style={styles.priceContainer}>
             <Text style={[styles.priceText, { color: colors.accent }]}>{price}</Text>
             <View style={[styles.deliveryWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -319,21 +322,26 @@ const ServiceCard = React.memo(function ServiceCard({
           <Pressable
             onPress={handleRequest}
             style={({ pressed }) => [
-              pressed && !isRequested && { opacity: 0.85, transform: [{ scale: 0.96 }] },
+              pressed && !isRequested && { opacity: 0.85, transform: [{ scale: 0.95 }] },
             ]}
           >
             {isRequested ? (
-              <View style={[styles.requestedBtn, { backgroundColor: colors.accentLight }]}>
+              <View style={[styles.requestedBtn, { backgroundColor: colors.accentSoft }]}>
                 <Text style={[styles.requestedText, { color: colors.accent }]}>
                   {language === 'ar' ? 'تم الطلب' : 'Requested'}
                 </Text>
               </View>
             ) : (
-              <View style={[styles.requestBtn, { backgroundColor: colors.accent }]}>
+              <LinearGradient
+                colors={[colors.accent, colors.gradientEnd]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.requestBtn}
+              >
                 <Text style={styles.requestText}>
                   {language === 'ar' ? 'طلب' : 'Request'}
                 </Text>
-              </View>
+              </LinearGradient>
             )}
           </Pressable>
         </View>
@@ -457,20 +465,20 @@ const styles = StyleSheet.create({
   listContent: { paddingBottom: 100, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, gap: 14 },
   headerRow: { alignItems: 'flex-start', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 32, fontWeight: '800' as const, letterSpacing: -1 },
-  headerSubtitle: { fontSize: 14, fontWeight: '500' as const, letterSpacing: 0.1, marginTop: 2 },
+  headerTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -1.2 },
+  headerSubtitle: { fontSize: 15, fontWeight: '400' as const, marginTop: 2 },
   addBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   searchRow: { gap: 8, alignItems: 'center' },
-  searchBar: { flex: 1, alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
-  searchIconWrap: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { flex: 1, alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 13, borderRadius: 18 },
+  searchIconWrap: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  filterBtn: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
+  filterBtn: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   catRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  catPill: { paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20 },
+  catPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
   catText: { fontSize: 13, fontWeight: '600' as const },
-  featuredBanner: { marginHorizontal: 16, marginTop: 4, marginBottom: 8, borderRadius: 18, overflow: 'hidden' },
-  featuredGradient: { borderRadius: 18 },
-  featuredInner: { padding: 20, gap: 8 },
+  featuredBanner: { marginHorizontal: 16, marginTop: 4, marginBottom: 8, borderRadius: 22, overflow: 'hidden' },
+  featuredGradient: { borderRadius: 22 },
+  featuredInner: { padding: 22, gap: 8 },
   featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -478,34 +486,34 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 12,
   },
-  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2 },
-  featuredTitle: { fontSize: 19, fontWeight: '800' as const, letterSpacing: -0.4, marginTop: 4 },
-  featuredDesc: { fontSize: 13, lineHeight: 20 },
+  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2, color: '#FFF' },
+  featuredTitle: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.4, marginTop: 4, color: '#FFF' },
+  featuredDesc: { fontSize: 13, lineHeight: 20, color: 'rgba(255,255,255,0.7)' },
   featuredAction: { alignItems: 'center', gap: 4, marginTop: 4 },
-  featuredActionText: { fontSize: 14, fontWeight: '700' as const, letterSpacing: -0.1 },
-  card: { marginHorizontal: 16, marginTop: 12, padding: 16, borderRadius: 18, gap: 12 },
+  featuredActionText: { fontSize: 14, fontWeight: '700' as const, letterSpacing: -0.1, color: '#FFF' },
+  card: { marginHorizontal: 16, marginTop: 10, padding: 18, borderRadius: 20, gap: 14 },
   cardHeader: { alignItems: 'center', gap: 12 },
-  providerAvatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  providerInitial: { color: '#FFF', fontSize: 16, fontWeight: '800' as const },
+  providerAvatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
+  providerInitial: { color: '#FFF', fontSize: 17, fontWeight: '800' as const },
   providerInfo: { flex: 1, gap: 5 },
   providerName: { fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.2 },
-  catBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  catBadge: { alignSelf: 'flex-start', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10 },
   catBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
   cardHeaderRight: { alignItems: 'flex-end', gap: 8 },
-  ratingWrap: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
+  ratingWrap: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
   ratingText: { fontSize: 13, fontWeight: '800' as const },
   saveBtn: { padding: 2 },
   serviceTitle: { fontSize: 16, fontWeight: '700' as const, lineHeight: 24, letterSpacing: -0.2 },
-  cardFooter: { alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1 },
+  cardFooter: { alignItems: 'center', justifyContent: 'space-between', paddingTop: 14 },
   priceContainer: { flex: 1, gap: 4 },
-  priceText: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.3 },
+  priceText: { fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.3 },
   deliveryWrap: { alignItems: 'center', gap: 4 },
   deliveryText: { fontSize: 12, fontWeight: '500' as const },
-  requestBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: 14, alignItems: 'center' },
-  requestText: { color: '#1C1C1E', fontSize: 14, fontWeight: '700' as const },
-  requestedBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: 14, alignItems: 'center' },
+  requestBtn: { paddingHorizontal: 24, paddingVertical: 11, borderRadius: 16, alignItems: 'center' },
+  requestText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
+  requestedBtn: { paddingHorizontal: 24, paddingVertical: 11, borderRadius: 16, alignItems: 'center' },
   requestedText: { fontSize: 14, fontWeight: '600' as const },
   emptyWrap: { flex: 1, padding: 40, alignItems: 'center', justifyContent: 'center', minHeight: 200, gap: 10 },
   emptyIconWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },

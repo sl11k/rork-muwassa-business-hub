@@ -43,7 +43,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 import type { EnrichedPost } from '@/types/post';
 
-const AVATAR_COLORS = ['#E8A838', '#4A9FF5', '#34D399', '#FB7185', '#818CF8', '#F472B6', '#22D3EE', '#FBBF24'];
+const AVATAR_COLORS = ['#D4A254', '#4A9FF5', '#2DD4A8', '#FB7185', '#8B8DF8', '#F472B6', '#22D3EE', '#FBBF24'];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -77,10 +77,12 @@ function AppHeader() {
   return (
     <View style={[hs.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
       <View style={[hs.logoArea, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={[hs.logoDot, { backgroundColor: colors.accent }]} />
         <Text style={[hs.logoText, { color: colors.text }]}>
           {language === 'ar' ? 'مُوسع' : 'Muwassa'}
         </Text>
+        <View style={[hs.logoBadge, { backgroundColor: colors.accentLight }]}>
+          <View style={[hs.logoDotInner, { backgroundColor: colors.accent }]} />
+        </View>
       </View>
       <View style={[hs.headerActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <LanguageToggle />
@@ -88,7 +90,7 @@ function AppHeader() {
           style={({ pressed }) => [
             hs.headerBtn,
             { backgroundColor: isDark ? colors.bgCard : colors.bgMuted },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.92 }] },
+            pressed && { opacity: 0.7, transform: [{ scale: 0.9 }] },
           ]}
           testID="search-btn"
           onPress={() => router.push('/explore')}
@@ -99,13 +101,13 @@ function AppHeader() {
           style={({ pressed }) => [
             hs.headerBtn,
             { backgroundColor: isDark ? colors.bgCard : colors.bgMuted },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.92 }] },
+            pressed && { opacity: 0.7, transform: [{ scale: 0.9 }] },
           ]}
           testID="notifications-btn"
           onPress={() => router.push('/notifications')}
         >
           <Bell color={colors.textSecondary} size={18} strokeWidth={1.8} />
-          <View style={[hs.notifDot, { backgroundColor: colors.accent }]} />
+          <View style={[hs.notifDot, { backgroundColor: colors.rose }]} />
         </Pressable>
       </View>
     </View>
@@ -113,13 +115,14 @@ function AppHeader() {
 }
 
 const hs = StyleSheet.create({
-  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 6, paddingBottom: 14 },
   logoArea: { alignItems: 'center', gap: 8 },
-  logoDot: { width: 10, height: 10, borderRadius: 5 },
-  logoText: { fontSize: 26, fontWeight: '800' as const, letterSpacing: -0.8 },
-  headerActions: { alignItems: 'center', gap: 8 },
-  headerBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  notifDot: { position: 'absolute', top: 9, right: 9, width: 7, height: 7, borderRadius: 3.5 },
+  logoText: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -1 },
+  logoBadge: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  logoDotInner: { width: 8, height: 8, borderRadius: 4 },
+  headerActions: { alignItems: 'center', gap: 6 },
+  headerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  notifDot: { position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: 3.5, borderWidth: 1.5, borderColor: '#000' },
 });
 
 function StoriesRow() {
@@ -141,11 +144,6 @@ function StoriesRow() {
 
   return (
     <View style={sr.container}>
-      <View style={[sr.titleRow, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 20 }]}>
-        <Text style={[sr.title, { color: colors.text }]}>
-          {language === 'ar' ? 'فرص اليوم' : "Today's Highlights"}
-        </Text>
-      </View>
       <FlatList
         horizontal
         inverted={isRTL}
@@ -158,11 +156,16 @@ function StoriesRow() {
             return (
               <Pressable
                 onPress={() => { router.push('/create-post'); void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-                style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }]}
+                style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] }]}
               >
-                <View style={[sr.addCircle, { backgroundColor: isDark ? colors.bgCard : colors.bgMuted, borderColor: colors.accent }]}>
-                  <Plus color={colors.accent} size={20} strokeWidth={2.2} />
-                </View>
+                <LinearGradient
+                  colors={[colors.accent, colors.gradientEnd]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={sr.addCircle}
+                >
+                  <Plus color="#FFF" size={22} strokeWidth={2.5} />
+                </LinearGradient>
                 <Text style={[sr.storyName, { color: colors.textSecondary }]}>{item.name}</Text>
               </Pressable>
             );
@@ -170,15 +173,22 @@ function StoriesRow() {
           return (
             <Pressable
               onPress={() => void Haptics.selectionAsync()}
-              style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }]}
+              style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] }]}
             >
-              <View style={[sr.storyRing, { borderColor: item.type === 'trending' ? '#FB7185' : colors.accent }]}>
-                <View style={[sr.storyCircle, { backgroundColor: 'color' in item ? item.color : colors.accent }]}>
-                  {'initial' in item ? (
-                    <Text style={sr.storyInitial}>{item.initial}</Text>
-                  ) : null}
+              <LinearGradient
+                colors={item.type === 'trending' ? ['#FB7185', '#F472B6'] : [colors.storyRing1, colors.storyRing2]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={sr.storyRing}
+              >
+                <View style={[sr.storyRingInner, { backgroundColor: isDark ? colors.bg : colors.bgCard }]}>
+                  <View style={[sr.storyCircle, { backgroundColor: 'color' in item ? item.color : colors.accent }]}>
+                    {'initial' in item ? (
+                      <Text style={sr.storyInitial}>{item.initial}</Text>
+                    ) : null}
+                  </View>
                 </View>
-              </View>
+              </LinearGradient>
               <Text style={[sr.storyName, { color: colors.textSecondary }]} numberOfLines={1}>{item.name}</Text>
             </Pressable>
           );
@@ -189,15 +199,14 @@ function StoriesRow() {
 }
 
 const sr = StyleSheet.create({
-  container: { paddingTop: 4, paddingBottom: 16, gap: 12 },
-  titleRow: { alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2 },
-  listContent: { paddingHorizontal: 20, gap: 14 },
-  storyItem: { alignItems: 'center', width: 68, gap: 6 },
-  addCircle: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderStyle: 'dashed' as const },
-  storyRing: { width: 62, height: 62, borderRadius: 31, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
-  storyCircle: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  storyInitial: { color: '#FFF', fontSize: 19, fontWeight: '700' as const },
+  container: { paddingTop: 2, paddingBottom: 18 },
+  listContent: { paddingHorizontal: 16, gap: 12 },
+  storyItem: { alignItems: 'center', width: 72, gap: 6 },
+  addCircle: { width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
+  storyRing: { width: 66, height: 66, borderRadius: 33, alignItems: 'center', justifyContent: 'center', padding: 2.5 },
+  storyRingInner: { width: 61, height: 61, borderRadius: 30.5, alignItems: 'center', justifyContent: 'center' },
+  storyCircle: { width: 55, height: 55, borderRadius: 27.5, alignItems: 'center', justifyContent: 'center' },
+  storyInitial: { color: '#FFF', fontSize: 20, fontWeight: '700' as const },
   storyName: { fontSize: 11, fontWeight: '500' as const, textAlign: 'center' as const },
 });
 
@@ -227,19 +236,19 @@ function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCat
             onPress={() => handleSelect(item)}
             style={({ pressed }) => [
               ct.pill,
-              {
-                backgroundColor: isActive
-                  ? colors.accent
-                  : (isDark ? colors.bgCard : colors.white),
-                borderWidth: isActive ? 0 : 1,
-                borderColor: isDark ? colors.border : colors.separator,
-              },
-              pressed && { transform: [{ scale: 0.94 }] },
+              isActive
+                ? { backgroundColor: colors.accent }
+                : {
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                    borderWidth: 1,
+                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                  },
+              pressed && { transform: [{ scale: 0.93 }] },
             ]}
           >
             <Text style={[
               ct.text,
-              { color: isActive ? '#1C1C1E' : colors.textSecondary },
+              { color: isActive ? '#000' : colors.textSecondary },
               isActive && { fontWeight: '700' as const },
             ]}>{item}</Text>
           </Pressable>
@@ -250,8 +259,8 @@ function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCat
 }
 
 const ct = StyleSheet.create({
-  row: { paddingHorizontal: 20, gap: 8, paddingBottom: 16 },
-  pill: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20 },
+  row: { paddingHorizontal: 16, gap: 8, paddingBottom: 14 },
+  pill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
   text: { fontSize: 13, fontWeight: '600' as const },
 });
 
@@ -270,19 +279,24 @@ function ComposeBar() {
           flexDirection: isRTL ? 'row-reverse' : 'row',
           backgroundColor: isDark ? colors.bgCard : colors.white,
           borderWidth: 1,
-          borderColor: isDark ? colors.border : colors.separator,
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
         },
       ]}
       haptic
       testID="compose-post"
     >
-      <View style={[cb.avatar, { backgroundColor: colors.accent }]}>
+      <LinearGradient
+        colors={[colors.accent, colors.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={cb.avatar}
+      >
         <Text style={cb.avatarText}>{(profile?.name ?? 'U').charAt(0).toUpperCase()}</Text>
-      </View>
+      </LinearGradient>
       <Text style={[cb.placeholder, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
         {language === 'ar' ? 'شارك فكرة أو تحليل...' : "Share an insight..."}
       </Text>
-      <View style={[cb.btn, { backgroundColor: colors.accentLight }]}>
+      <View style={[cb.btn, { backgroundColor: colors.accentSoft }]}>
         <Sparkles color={colors.accent} size={14} strokeWidth={2} />
       </View>
     </PressableScale>
@@ -290,11 +304,11 @@ function ComposeBar() {
 }
 
 const cb = StyleSheet.create({
-  bar: { alignItems: 'center', gap: 12, marginHorizontal: 20, marginBottom: 8, padding: 12, borderRadius: 16 },
-  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#1C1C1E', fontSize: 14, fontWeight: '800' as const },
+  bar: { alignItems: 'center', gap: 12, marginHorizontal: 16, marginBottom: 6, padding: 12, borderRadius: 20 },
+  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 15, fontWeight: '800' as const },
   placeholder: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  btn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  btn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 });
 
 function ExpertsRow() {
@@ -303,7 +317,7 @@ function ExpertsRow() {
 
   return (
     <View style={er.section}>
-      <View style={[er.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 20 }]}>
+      <View style={[er.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
         <Text style={[er.title, { color: colors.text }]}>
           {language === 'ar' ? 'خبراء مقترحون' : 'Suggested Experts'}
         </Text>
@@ -329,7 +343,7 @@ function ExpertsRow() {
               {
                 backgroundColor: isDark ? colors.bgCard : colors.white,
                 borderWidth: 1,
-                borderColor: isDark ? colors.border : colors.separator,
+                borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
               },
             ]}
             testID={`expert-${item.id}`}
@@ -339,9 +353,14 @@ function ExpertsRow() {
             </View>
             <Text style={[er.name, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
             <Text style={[er.role, { color: colors.textTertiary }]} numberOfLines={1}>{getLocalizedText(item.role, language)}</Text>
-            <View style={[er.followBtn, { backgroundColor: colors.accent }]}>
+            <LinearGradient
+              colors={[colors.accent, colors.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={er.followBtn}
+            >
               <Text style={er.followText}>{language === 'ar' ? 'متابعة' : 'Follow'}</Text>
-            </View>
+            </LinearGradient>
           </PressableScale>
         )}
       />
@@ -352,16 +371,16 @@ function ExpertsRow() {
 const er = StyleSheet.create({
   section: { paddingTop: 20, gap: 14 },
   head: { alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.3 },
+  title: { fontSize: 18, fontWeight: '700' as const, letterSpacing: -0.3 },
   seeAll: { fontSize: 13, fontWeight: '600' as const },
-  listContent: { paddingHorizontal: 20, gap: 10 },
-  card: { width: 120, alignItems: 'center', gap: 8, paddingVertical: 18, paddingHorizontal: 10, borderRadius: 18 },
-  avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 18, fontWeight: '800' as const },
+  listContent: { paddingHorizontal: 16, gap: 10 },
+  card: { width: 130, alignItems: 'center', gap: 8, paddingVertical: 20, paddingHorizontal: 12, borderRadius: 20 },
+  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 19, fontWeight: '800' as const },
   name: { fontSize: 13, fontWeight: '700' as const, textAlign: 'center' as const },
   role: { fontSize: 11, textAlign: 'center' as const, lineHeight: 15 },
-  followBtn: { paddingHorizontal: 20, paddingVertical: 7, borderRadius: 12 },
-  followText: { fontSize: 11, fontWeight: '700' as const, color: '#1C1C1E' },
+  followBtn: { paddingHorizontal: 22, paddingVertical: 8, borderRadius: 14, marginTop: 4 },
+  followText: { fontSize: 12, fontWeight: '700' as const, color: '#FFF' },
 });
 
 function TrendingBar() {
@@ -370,7 +389,7 @@ function TrendingBar() {
 
   return (
     <View style={tb.section}>
-      <View style={[tb.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 20 }]}>
+      <View style={[tb.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
         <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }}>
           <TrendingUp color={colors.rose} size={16} strokeWidth={2} />
           <Text style={[tb.title, { color: colors.text }]}>
@@ -389,19 +408,21 @@ function TrendingBar() {
           <Pressable style={({ pressed }) => [
             tb.chip,
             {
-              backgroundColor: isDark ? colors.bgCard : colors.white,
+              backgroundColor: isDark
+                ? (item.isHot ? 'rgba(251,113,133,0.08)' : 'rgba(255,255,255,0.04)')
+                : (item.isHot ? 'rgba(214,41,74,0.06)' : 'rgba(0,0,0,0.03)'),
               borderWidth: 1,
               borderColor: item.isHot
-                ? (isDark ? 'rgba(251,113,133,0.2)' : 'rgba(225,29,72,0.12)')
-                : (isDark ? colors.border : colors.separator),
+                ? (isDark ? 'rgba(251,113,133,0.15)' : 'rgba(214,41,74,0.10)')
+                : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
             },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] },
+            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
           ]}>
             {item.isHot ? <Flame color={colors.rose} size={12} /> : null}
             <Text style={[tb.text, { color: colors.textSecondary }, item.isHot && { color: colors.rose }]}>
               {getLocalizedText(item.label, language)}
             </Text>
-            <View style={[tb.count, { backgroundColor: isDark ? colors.bgElevated : colors.bgMuted }]}>
+            <View style={[tb.count, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
               <Text style={[tb.countText, { color: colors.textTertiary }]}>{item.posts}</Text>
             </View>
           </Pressable>
@@ -414,9 +435,9 @@ function TrendingBar() {
 const tb = StyleSheet.create({
   section: { paddingTop: 20, gap: 12 },
   head: { alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.2 },
-  row: { paddingHorizontal: 20, gap: 8, paddingTop: 4 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
+  title: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2 },
+  row: { paddingHorizontal: 16, gap: 8, paddingTop: 4 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
   text: { fontSize: 13, fontWeight: '600' as const },
   count: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
   countText: { fontSize: 10, fontWeight: '700' as const },
@@ -443,17 +464,17 @@ const FeedCard = React.memo(function FeedCard({
   const heartScale = useRef(new Animated.Value(1)).current;
   const bookmarkScale = useRef(new Animated.Value(1)).current;
   const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideIn = useRef(new Animated.Value(40)).current;
+  const slideIn = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 120 }),
+      Animated.timing(fadeIn, { toValue: 1, duration: 450, useNativeDriver: true }),
+      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 130 }),
     ]).start();
   }, [fadeIn, slideIn]);
 
   const onPressIn = useCallback(() => {
-    Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: true, damping: 18, stiffness: 240 }).start();
+    Animated.spring(scaleAnim, { toValue: 0.975, useNativeDriver: true, damping: 18, stiffness: 240 }).start();
   }, [scaleAnim]);
 
   const onPressOut = useCallback(() => {
@@ -488,14 +509,16 @@ const FeedCard = React.memo(function FeedCard({
         transform: [{ scale: scaleAnim }, { translateY: slideIn }],
         opacity: fadeIn,
         backgroundColor: isDark ? colors.bgCard : colors.white,
-        borderWidth: 1,
-        borderColor: isFirst
-          ? (isDark ? 'rgba(232,168,56,0.25)' : 'rgba(196,142,44,0.15)')
-          : (isDark ? colors.border : colors.separator),
       },
+      isFirst && fc.featuredCard,
     ]}>
       {isFirst && (
-        <View style={[fc.featuredStripe, { backgroundColor: colors.accent }]} />
+        <LinearGradient
+          colors={[colors.accent, colors.gradientEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={fc.featuredStripe}
+        />
       )}
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} onPress={onPress} testID={`feed-${post.id}`}>
         <View style={[fc.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -522,7 +545,7 @@ const FeedCard = React.memo(function FeedCard({
 
         {post.topic ? (
           <View style={[fc.topicRow, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <View style={[fc.topicBadge, { backgroundColor: colors.accentLight }]}>
+            <View style={[fc.topicBadge, { backgroundColor: colors.accentSoft }]}>
               <Text style={[fc.topicText, { color: colors.accent }]}>{post.topic}</Text>
             </View>
           </View>
@@ -532,13 +555,13 @@ const FeedCard = React.memo(function FeedCard({
           {post.content}
         </Text>
 
-        <View style={[fc.actions, { flexDirection: isRTL ? 'row-reverse' : 'row', borderTopColor: isDark ? colors.border : colors.separator }]}>
+        <View style={[fc.actions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Pressable onPress={handleLike} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`like-${post.id}`}>
             <Animated.View style={{ transform: [{ scale: heartScale }] }}>
               <Heart
                 color={post.isLiked ? colors.rose : colors.textTertiary}
                 fill={post.isLiked ? colors.rose : 'transparent'}
-                size={17}
+                size={18}
                 strokeWidth={1.8}
               />
             </Animated.View>
@@ -547,7 +570,7 @@ const FeedCard = React.memo(function FeedCard({
             </Text>
           </Pressable>
           <Pressable onPress={onPress} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`comment-${post.id}`}>
-            <MessageCircle color={colors.textTertiary} size={17} strokeWidth={1.8} />
+            <MessageCircle color={colors.textTertiary} size={18} strokeWidth={1.8} />
             <Text style={[fc.actionText, { color: colors.textTertiary }]}>{post.commentsCount}</Text>
           </Pressable>
           <Pressable onPress={handleSave} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`save-${post.id}`}>
@@ -555,7 +578,7 @@ const FeedCard = React.memo(function FeedCard({
               <Bookmark
                 color={post.isSaved ? colors.accent : colors.textTertiary}
                 fill={post.isSaved ? colors.accent : 'transparent'}
-                size={17}
+                size={18}
                 strokeWidth={1.8}
               />
             </Animated.View>
@@ -570,10 +593,17 @@ const FeedCard = React.memo(function FeedCard({
 });
 
 const fc = StyleSheet.create({
-  card: { marginHorizontal: 16, marginTop: 12, borderRadius: 18, overflow: 'hidden' },
+  card: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden' },
+  featuredCard: {
+    shadowColor: '#D4A254',
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
   featuredStripe: { height: 3 },
-  header: { alignItems: 'center', gap: 10, padding: 14, paddingBottom: 8 },
-  avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  header: { alignItems: 'center', gap: 10, padding: 16, paddingBottom: 8 },
+  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFF', fontSize: 16, fontWeight: '700' as const },
   authorInfo: { flex: 1, gap: 2 },
   authorNameRow: { alignItems: 'center', gap: 6 },
@@ -581,11 +611,11 @@ const fc = StyleSheet.create({
   featuredBadge: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   authorRole: { fontSize: 12, letterSpacing: -0.1 },
   time: { fontSize: 12, fontWeight: '500' as const },
-  topicRow: { paddingHorizontal: 14, paddingBottom: 6 },
-  topicBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  topicRow: { paddingHorizontal: 16, paddingBottom: 6 },
+  topicBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   topicText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
-  content: { paddingHorizontal: 14, paddingBottom: 14, fontSize: 15, lineHeight: 24, letterSpacing: -0.2 },
-  actions: { justifyContent: 'space-around', paddingVertical: 10, paddingHorizontal: 12, borderTopWidth: 1 },
+  content: { paddingHorizontal: 16, paddingBottom: 14, fontSize: 15, lineHeight: 24, letterSpacing: -0.2 },
+  actions: { justifyContent: 'space-around', paddingVertical: 12, paddingHorizontal: 12 },
   action: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingHorizontal: 8 },
   actionText: { fontSize: 13, fontWeight: '600' as const },
   pressed: { opacity: 0.6 },
@@ -623,11 +653,16 @@ function EmptyFeed() {
         onPress={() => router.push('/create-post')}
         style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }]}
       >
-        <View style={[ef.btn, { backgroundColor: colors.accent }]}>
+        <LinearGradient
+          colors={[colors.accent, colors.gradientEnd]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={ef.btn}
+        >
           <Text style={ef.btnText}>
             {language === 'ar' ? 'أنشئ منشوراً' : 'Create Post'}
           </Text>
-        </View>
+        </LinearGradient>
       </Pressable>
     </View>
   );
@@ -639,8 +674,8 @@ const ef = StyleSheet.create({
   iconWrap: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' as const, letterSpacing: -0.3 },
   desc: { fontSize: 14, textAlign: 'center' as const, lineHeight: 21 },
-  btn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 16, alignItems: 'center', marginTop: 14 },
-  btnText: { color: '#1C1C1E', fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.1 },
+  btn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 20, alignItems: 'center', marginTop: 14 },
+  btnText: { color: '#FFF', fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.1 },
 });
 
 export default function HomeScreen() {
@@ -828,12 +863,18 @@ export default function HomeScreen() {
           onPress={() => { router.push('/create-post'); void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }}
           style={({ pressed }) => [
             styles.fab,
-            { backgroundColor: colors.accent },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.92 }] },
+            pressed && { opacity: 0.9, transform: [{ scale: 0.9 }] },
           ]}
           testID="fab-create"
         >
-          <Plus color="#1C1C1E" size={24} strokeWidth={2.5} />
+          <LinearGradient
+            colors={[colors.accent, colors.gradientEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.fabGradient}
+          >
+            <Plus color="#FFF" size={24} strokeWidth={2.5} />
+          </LinearGradient>
         </Pressable>
 
         <Toast visible={toastVisible} message={toastMsg} type="success" onDismiss={() => setToastVisible(false)} />
@@ -859,12 +900,17 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#E8A838',
+    shadowColor: '#D4A254',
     shadowOpacity: 0.35,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
+  },
+  fabGradient: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

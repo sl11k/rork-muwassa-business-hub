@@ -10,7 +10,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Archive,
   Inbox,
@@ -30,8 +29,8 @@ const FILTER_TABS_AR = ['الكل', 'غير مقروء'];
 const FILTER_TABS_EN = ['All', 'Unread'];
 
 const AVATAR_COLORS = [
-  '#E8A838', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE',
-  '#F472B6', '#34D399', '#38BDF8', '#A78BFA', '#FBBF24',
+  '#D4A254', '#4A9FF5', '#FB7185', '#8B8DF8', '#22D3EE',
+  '#F472B6', '#2DD4A8', '#38BDF8', '#A78BFA', '#FBBF24',
 ];
 
 function getAvatarColor(id: string): string {
@@ -99,11 +98,11 @@ function Header() {
         </Text>
         <Pressable
           onPress={() => router.push('/new-conversation')}
-          style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.92 }] }]}
+          style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.9 }] }]}
           testID="new-message-btn"
         >
           <View style={[styles.newMsgBtn, { backgroundColor: colors.accent }]}>
-            <SquarePen color="#1C1C1E" size={17} strokeWidth={2} />
+            <SquarePen color="#FFF" size={17} strokeWidth={2} />
           </View>
         </Pressable>
       </View>
@@ -111,9 +110,9 @@ function Header() {
         styles.searchBar,
         {
           flexDirection: isRTL ? 'row-reverse' : 'row',
-          backgroundColor: isDark ? colors.bgCard : colors.bgMuted,
+          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
           borderWidth: 1,
-          borderColor: isDark ? colors.border : colors.separator,
+          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
         },
         pressed && { opacity: 0.7 },
       ]}>
@@ -148,18 +147,18 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
           }}
           style={[
             styles.filterPill,
-            {
-              backgroundColor: active === index
-                ? colors.accent
-                : (isDark ? colors.bgCard : colors.white),
-              borderWidth: active === index ? 0 : 1,
-              borderColor: isDark ? colors.border : colors.separator,
-            },
+            active === index
+              ? { backgroundColor: colors.accent }
+              : {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                },
           ]}
         >
           <Text style={[
             styles.filterText,
-            { color: active === index ? '#1C1C1E' : colors.textSecondary },
+            { color: active === index ? '#000' : colors.textSecondary },
             active === index && { fontWeight: '700' as const },
           ]}>{item}</Text>
         </Pressable>
@@ -182,7 +181,7 @@ const ConversationRow = React.memo(function ConversationRow({
   const isCommunity = !!item.communityId;
   const name = isCommunity ? (item.communityName ?? 'Community') : item.otherUser.name;
   const initial = isCommunity ? '' : getInitial(name);
-  const avatarColor = isCommunity ? '#818CF8' : getAvatarColor(item.otherUser.id);
+  const avatarColor = isCommunity ? '#8B8DF8' : getAvatarColor(item.otherUser.id);
   const time = item.lastMessage ? formatTime(item.lastMessage.createdAt) : formatTime(item.updatedAt);
   const preview = item.lastMessage
     ? (item.lastMessage.senderId === currentUserId ? 'You: ' : '') + item.lastMessage.content
@@ -197,7 +196,7 @@ const ConversationRow = React.memo(function ConversationRow({
     >
       <View style={styles.avatarWrap}>
         {isCommunity ? (
-          <View style={[styles.avatar, { backgroundColor: 'rgba(129,140,248,0.15)' }]}>
+          <View style={[styles.avatar, { backgroundColor: 'rgba(139,141,248,0.12)' }]}>
             <Text style={{ fontSize: 22 }}>{item.communityIcon ?? '👥'}</Text>
           </View>
         ) : (
@@ -206,7 +205,7 @@ const ConversationRow = React.memo(function ConversationRow({
           </View>
         )}
         {!isCommunity ? (
-          <View style={[styles.onlineDot, { backgroundColor: '#34D399', borderColor: isDark ? colors.bg : colors.bgCard }]} />
+          <View style={[styles.onlineDot, { backgroundColor: '#2DD4A8', borderColor: isDark ? colors.bg : colors.bgCard }]} />
         ) : null}
       </View>
 
@@ -215,8 +214,8 @@ const ConversationRow = React.memo(function ConversationRow({
           <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6, flex: 1 }}>
             <Text style={[styles.chatName, { color: colors.text }, hasUnread && styles.chatNameUnread]} numberOfLines={1}>{name}</Text>
             {isCommunity ? (
-              <View style={[styles.communityBadge, { backgroundColor: 'rgba(129,140,248,0.12)' }]}>
-                <Text style={[styles.communityBadgeText, { color: '#818CF8' }]}>Group</Text>
+              <View style={[styles.communityBadge, { backgroundColor: 'rgba(139,141,248,0.10)' }]}>
+                <Text style={[styles.communityBadgeText, { color: '#8B8DF8' }]}>Group</Text>
               </View>
             ) : null}
           </View>
@@ -355,7 +354,7 @@ export default function MessagesScreen() {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => (
-              <View style={[styles.separator, { backgroundColor: isDark ? colors.border : colors.separator }]} />
+              <View style={[styles.separator, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} />
             )}
             testID="messages-list"
             refreshControl={
@@ -374,24 +373,24 @@ const styles = StyleSheet.create({
   listContent: { paddingBottom: 100, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 32, fontWeight: '800' as const, letterSpacing: -1 },
+  headerTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -1.2 },
   newMsgBtn: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
-  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 13, borderRadius: 18 },
   searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
   filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20 },
+  filterPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
   filterText: { fontSize: 13, fontWeight: '600' as const },
   chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14 },
   avatarWrap: { position: 'relative' as const },
-  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 18, fontWeight: '700' as const },
+  avatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 19, fontWeight: '700' as const },
   onlineDot: {
     position: 'absolute' as const,
     bottom: 1,
     right: 1,
-    width: 13,
-    height: 13,
-    borderRadius: 6.5,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     borderWidth: 2.5,
   },
   chatInfo: { flex: 1, gap: 5 },
@@ -402,8 +401,8 @@ const styles = StyleSheet.create({
   previewRow: { alignItems: 'center', gap: 8 },
   chatPreview: { flex: 1, fontSize: 14, lineHeight: 20 },
   unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  unreadText: { color: '#1C1C1E', fontSize: 11, fontWeight: '700' as const },
-  separator: { height: 1, marginLeft: 86, marginRight: 20 },
-  communityBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
+  unreadText: { color: '#FFF', fontSize: 11, fontWeight: '700' as const },
+  separator: { height: 1, marginLeft: 88, marginRight: 20 },
+  communityBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
   communityBadgeText: { fontSize: 10, fontWeight: '700' as const, letterSpacing: 0.2 },
 });

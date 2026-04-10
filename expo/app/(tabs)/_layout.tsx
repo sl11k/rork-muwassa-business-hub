@@ -26,7 +26,7 @@ export default function TabLayout() {
   };
 
   const activeColor = colors.accent;
-  const inactiveColor = isDark ? '#555560' : '#AEAEB2';
+  const inactiveColor = isDark ? '#444448' : '#B0B0B4';
 
   return (
     <Tabs
@@ -42,27 +42,27 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           elevation: 0,
-          ...(Platform.OS === 'web' ? { height: 70 } : {}),
+          ...(Platform.OS === 'web' ? { height: 72 } : {}),
         },
         tabBarBackground: () => (
           Platform.OS === 'web' ? (
             <View style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? 'rgba(9,9,11,0.97)' : 'rgba(255,255,255,0.97)',
+                backgroundColor: isDark ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.95)',
                 borderTopWidth: StyleSheet.hairlineWidth,
-                borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                borderTopColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
               },
             ]} />
           ) : (
             <BlurView
-              intensity={100}
+              intensity={isDark ? 80 : 100}
               tint={isDark ? 'dark' : 'light'}
               style={[
                 StyleSheet.absoluteFill,
                 {
                   borderTopWidth: StyleSheet.hairlineWidth,
-                  borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                  borderTopColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
                 },
               ]}
             />
@@ -71,8 +71,8 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600' as const,
-          letterSpacing: 0.2,
-          marginTop: -1,
+          letterSpacing: 0.1,
+          marginTop: -2,
         },
         tabBarItemStyle: {
           paddingTop: 6,
@@ -85,8 +85,8 @@ export default function TabLayout() {
           title: tabLabels.home,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
-              <Home color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
+              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
+              <Home color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
             </View>
           ),
         }}
@@ -97,8 +97,8 @@ export default function TabLayout() {
           title: tabLabels.communities,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
-              <Compass color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
+              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
+              <Compass color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
             </View>
           ),
         }}
@@ -109,8 +109,8 @@ export default function TabLayout() {
           title: tabLabels.messages,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
-              <MessageSquare color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
+              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
+              <MessageSquare color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
             </View>
           ),
         }}
@@ -121,8 +121,8 @@ export default function TabLayout() {
           title: tabLabels.marketplace,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
-              <ShoppingBag color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
+              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
+              <ShoppingBag color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
             </View>
           ),
         }}
@@ -133,8 +133,8 @@ export default function TabLayout() {
           title: tabLabels.more,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
-              <User color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
+              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
+              <User color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
             </View>
           ),
         }}
@@ -147,14 +147,14 @@ const s = StyleSheet.create({
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 44,
-    height: 30,
+    width: 48,
+    height: 32,
   },
-  activeDot: {
+  activeLine: {
     position: 'absolute',
-    top: -3,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    top: -6,
+    width: 20,
+    height: 2.5,
+    borderRadius: 2,
   },
 });
