@@ -8,9 +8,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowRight, Globe, Shield, TrendingUp, Users } from 'lucide-react-native';
+import { Globe, Shield, TrendingUp, Users } from 'lucide-react-native';
 
-import { theme } from '@/constants/theme';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -65,46 +64,35 @@ export default function WelcomeScreen() {
 
   const features = language === 'ar'
     ? [
-        { icon: Users, title: 'مجتمعات مهنية متخصصة', color: colors.accent },
-        { icon: TrendingUp, title: 'سوق خدمات احترافية', color: colors.orange },
-        { icon: Shield, title: 'مركز الحوكمة والامتثال', color: colors.teal },
+        { icon: Users, title: 'مجتمعات مهنية', color: colors.accent },
+        { icon: TrendingUp, title: 'سوق الخدمات', color: colors.orange },
+        { icon: Shield, title: 'مركز الحوكمة', color: colors.teal },
       ]
     : [
-        { icon: Users, title: 'Specialized professional communities', color: colors.accent },
-        { icon: TrendingUp, title: 'Professional services marketplace', color: colors.orange },
-        { icon: Shield, title: 'Governance & compliance hub', color: colors.teal },
+        { icon: Users, title: 'Professional communities', color: colors.accent },
+        { icon: TrendingUp, title: 'Services marketplace', color: colors.orange },
+        { icon: Shield, title: 'Governance hub', color: colors.teal },
       ];
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       <SafeAreaView style={styles.safe}>
         <View style={[styles.langRow, { alignSelf: isRTL ? 'flex-start' : 'flex-end' }]}>
-          <Pressable onPress={toggleLanguage} style={({ pressed }) => [styles.langBtn, pressed && { opacity: 0.7 }]}>
-            <Globe color="rgba(255,255,255,0.6)" size={15} strokeWidth={1.5} />
-            <Text style={styles.langText}>{language === 'ar' ? 'English' : 'العربية'}</Text>
+          <Pressable onPress={toggleLanguage} style={({ pressed }) => [styles.langBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.7 }]}>
+            <Globe color={colors.textSecondary} size={15} strokeWidth={1.5} />
+            <Text style={[styles.langText, { color: colors.textSecondary }]}>{language === 'ar' ? 'English' : 'العربية'}</Text>
           </Pressable>
         </View>
 
         <View style={styles.content}>
           <Animated.View style={[styles.hero, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
-            <View style={styles.logoMark}>
-              <View style={styles.logoInner}>
-                <View style={styles.logoNode} />
-                <View style={styles.logoLine1} />
-                <View style={styles.logoLine2} />
-                <View style={styles.logoNode2} />
-                <View style={styles.logoNode3} />
-              </View>
-            </View>
-
-            <Text style={[styles.heroTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {language === 'ar' ? 'مجتمع\nالأعمال' : 'Business\nHub'}
+            <Text style={[styles.appName, { color: colors.text, textAlign: 'center' }]}>
+              {language === 'ar' ? 'مُوَثَّق' : 'Muwassa'}
             </Text>
-            <Text style={[styles.heroSub, { textAlign: isRTL ? 'right' : 'left' }]}>
-              {language === 'ar'
-                ? 'المنصة المهنية الأولى للتواصل والمعرفة والخدمات الاحترافية'
-                : 'The premier professional platform for networking, knowledge, and expert services'}
+            <Text style={[styles.appSub, { color: colors.textSecondary, textAlign: 'center' }]}>
+              {language === 'ar' ? 'Business Hub' : 'Business Hub'}
             </Text>
+            <View style={[styles.accentLine, { backgroundColor: colors.accent }]} />
           </Animated.View>
 
           <View style={styles.features}>
@@ -117,22 +105,21 @@ export default function WelcomeScreen() {
         <View style={styles.actions}>
           <Pressable
             onPress={handleGetStarted}
-            style={({ pressed }) => [styles.primaryBtn, pressed && { opacity: 0.85 }]}
+            style={({ pressed }) => [styles.primaryBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
             testID="welcome-enter-btn"
           >
             <Text style={styles.primaryBtnText}>
               {language === 'ar' ? 'ابدأ الآن' : 'Get Started'}
             </Text>
-            <ArrowRight color="#0A0A0F" size={18} strokeWidth={2} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
           </Pressable>
 
           <Pressable
             onPress={handleGuest}
-            style={({ pressed }) => [styles.guestBtn, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [pressed && { opacity: 0.7 }]}
             testID="welcome-guest-btn"
           >
-            <Text style={styles.guestBtnText}>
-              {language === 'ar' ? 'تصفح كضيف' : 'Browse as Guest'}
+            <Text style={[styles.guestBtnText, { color: colors.textSecondary }]}>
+              {language === 'ar' ? 'تصفح كزائر' : 'Browse as Guest'}
             </Text>
           </Pressable>
         </View>
@@ -144,118 +131,57 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
   },
   safe: {
     flex: 1,
   },
   langRow: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 8,
   },
   langBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
   },
   langText: {
-    color: 'rgba(255,255,255,0.6)',
     fontSize: 13,
     fontWeight: '500' as const,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    paddingHorizontal: 32,
   },
   hero: {
-    gap: 16,
+    alignItems: 'center',
+    gap: 8,
     marginBottom: 44,
   },
-  logoMark: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: theme.colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  logoInner: {
-    width: 36,
-    height: 36,
-    position: 'relative',
-  },
-  logoNode: {
-    position: 'absolute',
-    top: 2,
-    left: 13,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-  },
-  logoLine1: {
-    position: 'absolute',
-    top: 12,
-    left: 7,
-    width: 1.5,
-    height: 14,
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    transform: [{ rotate: '-30deg' }],
-  },
-  logoLine2: {
-    position: 'absolute',
-    top: 12,
-    right: 7,
-    width: 1.5,
-    height: 14,
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    transform: [{ rotate: '30deg' }],
-  },
-  logoNode2: {
-    position: 'absolute',
-    bottom: 2,
-    left: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-  },
-  logoNode3: {
-    position: 'absolute',
-    bottom: 2,
-    right: 4,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-  },
-  heroTitle: {
-    fontSize: 42,
+  appName: {
+    fontSize: 32,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
-    lineHeight: 50,
-    letterSpacing: -0.5,
   },
-  heroSub: {
-    fontSize: 17,
-    lineHeight: 26,
-    color: 'rgba(255,255,255,0.5)',
-    fontWeight: '400' as const,
-    letterSpacing: -0.41,
+  appSub: {
+    fontSize: 15,
+  },
+  accentLine: {
+    width: 24,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 8,
   },
   features: {
     gap: 16,
+    paddingHorizontal: 0,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
   },
   featureIcon: {
     width: 44,
@@ -266,41 +192,29 @@ const styles = StyleSheet.create({
   },
   featureText: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '500' as const,
-    color: 'rgba(255,255,255,0.8)',
-    letterSpacing: -0.32,
+    fontSize: 15,
+    fontWeight: '400' as const,
   },
   actions: {
-    paddingHorizontal: 28,
-    paddingBottom: 16,
-    gap: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    gap: 8,
+    alignItems: 'center',
   },
   primaryBtn: {
-    flexDirection: 'row',
+    width: '100%',
+    height: 48,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: theme.colors.accent,
   },
   primaryBtnText: {
-    color: '#0A0A0F',
-    fontSize: 17,
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '600' as const,
-    letterSpacing: -0.41,
-  },
-  guestBtn: {
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   guestBtnText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 16,
-    fontWeight: '500' as const,
-    letterSpacing: -0.32,
+    fontSize: 15,
+    paddingVertical: 8,
   },
 });

@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   BookOpen,
   Calendar,
@@ -27,7 +26,6 @@ import {
   Settings,
   Shield,
   Sun,
-  TrendingUp,
   UserRound,
   Users,
 } from 'lucide-react-native';
@@ -51,16 +49,6 @@ interface UserStats {
   reputationProgress: number;
 }
 
-const REPUTATION_LEVELS = [
-  { emoji: '🌱', labelAr: 'مساهم', labelEn: 'Contributor' },
-  { emoji: '⭐', labelAr: 'متخصص', labelEn: 'Specialist' },
-  { emoji: '🏆', labelAr: 'خبير', labelEn: 'Expert' },
-  { emoji: '👑', labelAr: 'قائد', labelEn: 'Leader' },
-];
-
-const PROFILE_TABS_AR = ['المنشورات', 'الإعجابات', 'المجتمعات'];
-const PROFILE_TABS_EN = ['Posts', 'Likes', 'Communities'];
-
 function formatTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -72,96 +60,100 @@ function formatTimeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStatPress: (tab: number) => void }) {
+function ProfileHeader({ stats }: { stats: UserStats | null }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
   const { profile, isAuthenticated } = useAuth();
   const { colors, isDark, toggleTheme } = useTheme();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(25)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 15, stiffness: 100 }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
 
   const displayName = profile?.name || (language === 'ar' ? 'زائر' : 'Guest');
   const displayRole = profile?.role || (language === 'ar' ? 'مستخدم جديد' : 'New member');
   const nameInitial = displayName.charAt(0).toUpperCase();
 
-  const repLevel = stats?.reputationLevel ?? 0;
-  const repLabel = language === 'ar' ? REPUTATION_LEVELS[repLevel].labelAr : REPUTATION_LEVELS[repLevel].labelEn;
-
   return (
-    <Animated.View style={[ph.section, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <LinearGradient
-        colors={isDark
-          ? [colors.heroGradientStart, colors.heroGradientMid, colors.heroGradientEnd]
-          : [colors.heroGradientStart, colors.heroGradientMid, colors.heroGradientEnd]
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={ph.gradient}
-      />
-
-      <View style={ph.topBar}>
-        <View style={[ph.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={ph.avatarContainer}>
-            <LinearGradient
-              colors={[colors.accent, colors.gradientEnd]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={ph.avatarRing}
-            >
-              <View style={[ph.avatarInner, { backgroundColor: isDark ? colors.bg : colors.bgCard }]}>
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={ph.avatarLarge}
-                >
-                  {isAuthenticated ? (
-                    <Text style={ph.avatarLargeText}>{nameInitial}</Text>
-                  ) : (
-                    <UserRound color="#FFF" size={28} strokeWidth={1.8} />
-                  )}
-                </LinearGradient>
-              </View>
-            </LinearGradient>
-            {isAuthenticated && (
-              <View style={[ph.onlineIndicator, { backgroundColor: '#2DD4A8', borderColor: isDark ? colors.bg : colors.bgCard }]} />
-            )}
-          </View>
-          <View style={[ph.info, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <Text style={[ph.name, { color: colors.text }]}>{displayName}</Text>
-            <Text style={[ph.role, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
-              {displayRole}
-            </Text>
-            {isAuthenticated ? (
-              <View style={[ph.repBadge, { backgroundColor: colors.accentSoft }]}>
-                <Text style={ph.repEmoji}>{REPUTATION_LEVELS[repLevel].emoji}</Text>
-                <Text style={[ph.repText, { color: colors.accent }]}>{repLabel}</Text>
-              </View>
-            ) : null}
-          </View>
+    <View style={ph.section}>
+      <View style={[ph.topRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Text style={[ph.screenTitle, { color: colors.text }]}>
+          {isAuthenticated ? displayName : (language === 'ar' ? 'الملف الشخصي' : 'Profile')}
+        </Text>
+        <View style={[ph.topActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <LanguageToggle />
+          {isAuthenticated && (
+            <Pressable
+              onPress={() => router.push('/settings')}
+              style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+            >
+              <Settings color={colors.textSecondary} size={20} strokeWidth={1.5} />
+            </Pressable>
+          )}
         </View>
       </View>
 
-      <View style={[
-        ph.themeRow,
-        {
-          backgroundColor: isDark ? colors.bgCard : colors.white,
-        },
-      ]}>
+      <View style={ph.profileArea}>
+        <View style={[ph.avatar, { backgroundColor: colors.accent }]}>
+          {isAuthenticated ? (
+            <Text style={ph.avatarText}>{nameInitial}</Text>
+          ) : (
+            <UserRound color="#FFF" size={28} strokeWidth={1.5} />
+          )}
+        </View>
+        <Text style={[ph.name, { color: colors.text }]}>{displayName}</Text>
+        <Text style={[ph.role, { color: colors.textSecondary }]}>{displayRole}</Text>
+      </View>
+
+      <View style={[ph.statsCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
+        <View style={ph.statItem}>
+          <Text style={[ph.statValue, { color: colors.text }]}>{stats?.postsCount ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
+        </View>
+        <View style={ph.statItem}>
+          <Text style={[ph.statValue, { color: colors.text }]}>{stats?.receivedLikes ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'متابعين' : 'Followers'}</Text>
+        </View>
+        <View style={ph.statItem}>
+          <Text style={[ph.statValue, { color: colors.text }]}>{stats?.communitiesJoined ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'يتابعهم' : 'Following'}</Text>
+        </View>
+      </View>
+
+      {isAuthenticated ? (
+        <View style={[ph.btnRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <Pressable
+            onPress={() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/edit-profile'); }}
+            style={({ pressed }) => [ph.editBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.8 }]}
+            testID="edit-profile-btn"
+          >
+            <Text style={[ph.editBtnText, { color: colors.text }]}>
+              {language === 'ar' ? 'تعديل البروفايل' : 'Edit Profile'}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [ph.editBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.8 }]}
+          >
+            <Text style={[ph.editBtnText, { color: colors.text }]}>
+              {language === 'ar' ? 'مشاركة البروفايل' : 'Share Profile'}
+            </Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable
+          onPress={() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/login'); }}
+          style={({ pressed }) => [ph.signInBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
+          testID="profile-login-btn"
+        >
+          <Text style={ph.signInBtnText}>
+            {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+          </Text>
+        </Pressable>
+      )}
+
+      <View style={[ph.themeRow, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
         <View style={[ph.themeInner, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={[ph.themeIconWrap, { backgroundColor: isDark ? 'rgba(139,141,248,0.12)' : 'rgba(212,162,84,0.12)' }]}>
+          <View style={[ph.themeIconWrap, { backgroundColor: isDark ? colors.indigoLight : colors.accentLight }]}>
             {isDark ? (
-              <Moon color={colors.indigo} size={16} strokeWidth={1.8} />
+              <Moon color={colors.indigo} size={16} strokeWidth={1.5} />
             ) : (
-              <Sun color={colors.accent} size={16} strokeWidth={1.8} />
+              <Sun color={colors.accent} size={16} strokeWidth={1.5} />
             )}
           </View>
           <Text style={[ph.themeLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
@@ -173,131 +165,62 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               toggleTheme();
             }}
-            trackColor={{ false: colors.bgMuted, true: 'rgba(212,162,84,0.3)' }}
+            trackColor={{ false: colors.bgMuted, true: colors.accentLight }}
             thumbColor={isDark ? colors.accent : colors.textMuted}
           />
         </View>
       </View>
-
-      <View style={[
-        ph.statsCard,
-        {
-          backgroundColor: isDark ? colors.bgCard : colors.white,
-        },
-      ]}>
-        <Pressable onPress={() => onStatPress(0)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[ph.statValue, { color: colors.accent }]}>{stats?.postsCount ?? 0}</Text>
-          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
-        </Pressable>
-        <View style={[ph.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} />
-        <Pressable onPress={() => onStatPress(1)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[ph.statValue, { color: colors.rose }]}>{stats?.receivedLikes ?? 0}</Text>
-          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'إعجابات' : 'Likes'}</Text>
-        </Pressable>
-        <View style={[ph.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} />
-        <Pressable onPress={() => onStatPress(2)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[ph.statValue, { color: colors.indigo }]}>{stats?.communitiesJoined ?? 0}</Text>
-          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'مجتمعات' : 'Groups'}</Text>
-        </Pressable>
-      </View>
-
-      {isAuthenticated ? (
-        <Pressable
-          onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/edit-profile');
-          }}
-          style={({ pressed }) => [
-            ph.editBtn,
-            {
-              backgroundColor: isDark ? colors.bgCard : colors.white,
-            },
-            pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
-          ]}
-          testID="edit-profile-btn"
-        >
-          <Text style={[ph.editBtnText, { color: colors.accent }]}>
-            {language === 'ar' ? 'تعديل الملف الشخصي' : 'Edit Profile'}
-          </Text>
-        </Pressable>
-      ) : (
-        <Pressable
-          onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/login');
-          }}
-          style={({ pressed }) => [
-            pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
-          ]}
-          testID="profile-login-btn"
-        >
-          <LinearGradient
-            colors={[colors.accent, colors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={ph.signInBtn}
-          >
-            <Text style={ph.signInBtnText}>
-              {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-            </Text>
-          </LinearGradient>
-        </Pressable>
-      )}
-    </Animated.View>
+    </View>
   );
 }
 
 const ph = StyleSheet.create({
-  section: { paddingBottom: 14, gap: 12, overflow: 'hidden' },
-  gradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 220 },
-  topBar: { paddingHorizontal: 20, paddingTop: 16 },
-  row: { alignItems: 'center', gap: 14 },
-  avatarContainer: { position: 'relative' as const },
-  avatarRing: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
-  avatarInner: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
-  avatarLarge: { width: 66, height: 66, borderRadius: 33, alignItems: 'center', justifyContent: 'center' },
-  avatarLargeText: { fontSize: 26, fontWeight: '800' as const, color: '#FFF' },
-  onlineIndicator: { position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: 7, borderWidth: 3 },
-  info: { flex: 1, gap: 3 },
-  name: { fontSize: 24, fontWeight: '800' as const, letterSpacing: -0.5 },
-  role: { fontSize: 14, letterSpacing: -0.1 },
-  repBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, marginTop: 4 },
-  repEmoji: { fontSize: 12 },
-  repText: { fontSize: 12, fontWeight: '700' as const },
-  themeRow: { marginHorizontal: 20, borderRadius: 18, overflow: 'hidden' },
+  section: { gap: 12, paddingBottom: 8 },
+  topRow: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12 },
+  screenTitle: { fontSize: 17, fontWeight: '600' as const },
+  topActions: { alignItems: 'center', gap: 12 },
+  profileArea: { alignItems: 'center', gap: 6, paddingVertical: 8 },
+  avatar: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 28, fontWeight: '700' as const, color: '#FFF' },
+  name: { fontSize: 20, fontWeight: '700' as const },
+  role: { fontSize: 14 },
+  statsCard: { flexDirection: 'row', marginHorizontal: 16, borderRadius: 12, padding: 16 },
+  statItem: { flex: 1, alignItems: 'center', gap: 4 },
+  statValue: { fontSize: 20, fontWeight: '700' as const },
+  statLabel: { fontSize: 12 },
+  btnRow: { gap: 8, paddingHorizontal: 16 },
+  editBtn: { flex: 1, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  editBtnText: { fontSize: 13, fontWeight: '500' as const },
+  signInBtn: { marginHorizontal: 16, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  signInBtnText: { fontSize: 15, fontWeight: '600' as const, color: '#FFF' },
+  themeRow: { marginHorizontal: 16, borderRadius: 12, overflow: 'hidden' },
   themeInner: { alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  themeIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  themeLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  statsCard: { flexDirection: 'row', marginHorizontal: 20, borderRadius: 18, overflow: 'hidden' },
-  statItem: { flex: 1, alignItems: 'center', paddingVertical: 22, gap: 4 },
-  statDivider: { width: 1, marginVertical: 16 },
-  statValue: { fontSize: 26, fontWeight: '800' as const, letterSpacing: -0.3 },
-  statLabel: { fontSize: 12, fontWeight: '600' as const, letterSpacing: 0.1 },
-  editBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 14, borderRadius: 18 },
-  editBtnText: { fontSize: 15, fontWeight: '600' as const, letterSpacing: -0.2 },
-  signInBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 15, borderRadius: 18 },
-  signInBtnText: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2, color: '#FFF' },
+  themeIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  themeLabel: { fontSize: 15, fontWeight: '500' as const },
 });
 
 function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i: number) => void }) {
   const { language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const tabs = language === 'ar' ? PROFILE_TABS_AR : PROFILE_TABS_EN;
+  const { colors } = useTheme();
+  const tabs = language === 'ar' ? ['المنشورات', 'الخدمات'] : ['Posts', 'Services'];
+  const icons = [MessageCircle, Shield];
 
   return (
-    <View style={[styles.tabsContainer, { borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]}>
-      {tabs.map((item, index) => (
-        <Pressable
-          key={item}
-          onPress={() => {
-            onSelect(index);
-            void Haptics.selectionAsync();
-          }}
-          style={({ pressed }) => [styles.profileTabItem, activeTab === index && { borderBottomColor: colors.accent }, pressed && { opacity: 0.6 }]}
-        >
-          <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === index && { color: colors.accent, fontWeight: '700' as const }]}>{item}</Text>
-        </Pressable>
-      ))}
+    <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
+      {tabs.map((item, index) => {
+        const Icon = icons[index];
+        return (
+          <Pressable
+            key={item}
+            onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
+            style={({ pressed }) => [styles.profileTabItem, pressed && { opacity: 0.6 }]}
+          >
+            <Icon color={activeTab === index ? colors.text : colors.textMuted} size={18} strokeWidth={1.5} />
+            <Text style={[styles.tabText, { color: colors.textMuted }, activeTab === index && { color: colors.text }]}>{item}</Text>
+            {activeTab === index && <View style={[styles.tabIndicator, { backgroundColor: colors.accent }]} />}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -305,7 +228,7 @@ function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
 function MyPostsList({ userId }: { userId: string }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const [posts, setPosts] = useState<EnrichedPost[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -342,242 +265,31 @@ function MyPostsList({ userId }: { userId: string }) {
           onPress={() => router.push(`/post/${post.id}`)}
           style={({ pressed }) => [
             styles.postCard,
-            {
-              backgroundColor: isDark ? colors.bgCard : colors.white,
-            },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
+            { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+            pressed && { opacity: 0.7 },
           ]}
         >
           <Text style={[styles.postContent, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={3}>
             {post.content}
           </Text>
           {post.topic ? (
-            <View style={[styles.topicBadge, { alignSelf: isRTL ? 'flex-end' : 'flex-start', backgroundColor: colors.accentSoft }]}>
-              <Text style={[styles.topicText, { color: colors.accent }]}>{post.topic}</Text>
+            <View style={[styles.topicBadge, { alignSelf: isRTL ? 'flex-end' : 'flex-start', backgroundColor: colors.accentLight }]}>
+              <Text style={[styles.topicText, { color: colors.accent }]}>#{post.topic}</Text>
             </View>
           ) : null}
           <View style={[styles.postMeta, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <Heart color={colors.textTertiary} size={12} strokeWidth={2} />
+              <Heart color={colors.textMuted} size={12} strokeWidth={1.5} />
               <Text style={[styles.postMetaText, { color: colors.textSecondary }]}>{post.likesCount}</Text>
             </View>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <MessageCircle color={colors.textTertiary} size={12} strokeWidth={2} />
+              <MessageCircle color={colors.textMuted} size={12} strokeWidth={1.5} />
               <Text style={[styles.postMetaText, { color: colors.textSecondary }]}>{post.commentsCount}</Text>
             </View>
-            <Text style={[styles.postMetaTime, { color: colors.textTertiary }]}>{formatTimeAgo(post.createdAt)}</Text>
+            <Text style={[styles.postMetaTime, { color: colors.textMuted }]}>{formatTimeAgo(post.createdAt)}</Text>
           </View>
         </Pressable>
       ))}
-    </View>
-  );
-}
-
-function MyLikesList({ userId }: { userId: string }) {
-  const router = useRouter();
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const [posts, setPosts] = useState<EnrichedPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await trpcClient.users.userLikedPosts.query({ userId });
-        setPosts(data);
-      } catch (err) {
-        console.log('[Profile] liked posts error', err);
-      } finally {
-        setLoading(false);
-      }
-    })().catch(() => {});
-  }, [userId]);
-
-  if (loading) return <ActivityIndicator style={{ marginTop: 20 }} color={colors.accent} />;
-  if (posts.length === 0) {
-    return (
-      <View style={styles.emptyTab}>
-        <View style={[styles.emptyTabIcon, { backgroundColor: colors.roseLight }]}>
-          <Heart color={colors.rose} size={22} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>{language === 'ar' ? 'لا توجد إعجابات' : 'No liked posts yet'}</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.tabListContent}>
-      {posts.map((post) => (
-        <Pressable
-          key={post.id}
-          onPress={() => router.push(`/post/${post.id}`)}
-          style={({ pressed }) => [
-            styles.postCard,
-            {
-              backgroundColor: isDark ? colors.bgCard : colors.white,
-            },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
-          ]}
-        >
-          <View style={[styles.postAuthorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Text style={[styles.postAuthorName, { color: colors.text }]}>{post.authorName}</Text>
-            <Text style={[styles.postMetaTime, { color: colors.textTertiary }]}>{formatTimeAgo(post.createdAt)}</Text>
-          </View>
-          <Text style={[styles.postContent, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={3}>
-            {post.content}
-          </Text>
-          <View style={[styles.postMeta, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <Heart color={colors.rose} fill={colors.rose} size={12} />
-              <Text style={[styles.postMetaText, { color: colors.rose }]}>{post.likesCount}</Text>
-            </View>
-            <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <MessageCircle color={colors.textTertiary} size={12} strokeWidth={2} />
-              <Text style={[styles.postMetaText, { color: colors.textSecondary }]}>{post.commentsCount}</Text>
-            </View>
-          </View>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-interface CommunityBrief {
-  id: string;
-  name: string;
-  nameAr: string;
-  icon: string;
-  accent: string;
-  memberCount: number;
-  privacy: string;
-}
-
-function MyCommunitiesList({ userId }: { userId: string }) {
-  const router = useRouter();
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const [communities, setCommunities] = useState<CommunityBrief[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await trpcClient.users.userCommunities.query({ userId });
-        setCommunities(data);
-      } catch (err) {
-        console.log('[Profile] communities error', err);
-      } finally {
-        setLoading(false);
-      }
-    })().catch(() => {});
-  }, [userId]);
-
-  if (loading) return <ActivityIndicator style={{ marginTop: 20 }} color={colors.accent} />;
-  if (communities.length === 0) {
-    return (
-      <View style={styles.emptyTab}>
-        <View style={[styles.emptyTabIcon, { backgroundColor: colors.accentLight }]}>
-          <Users color={colors.accent} size={22} strokeWidth={1.5} />
-        </View>
-        <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>{language === 'ar' ? 'لم تنضم لأي مجتمع' : 'No communities joined'}</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.communityListContent}>
-      {communities.map((c) => (
-        <Pressable
-          key={c.id}
-          onPress={() => router.push(`/community/${c.id}`)}
-          style={({ pressed }) => [
-            styles.communityRow,
-            { flexDirection: isRTL ? 'row-reverse' : 'row' },
-            pressed && { opacity: 0.7, backgroundColor: isDark ? colors.bgElevated : colors.bgMuted },
-          ]}
-        >
-          <View style={[styles.communityIcon, { backgroundColor: c.accent + '14' }]}>
-            <Text style={styles.communityEmoji}>{c.icon}</Text>
-          </View>
-          <View style={[styles.communityInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <Text style={[styles.communityName, { color: colors.text }]}>{language === 'ar' ? c.nameAr : c.name}</Text>
-            <Text style={[styles.communityMembers, { color: colors.textSecondary }]}>{c.memberCount} {language === 'ar' ? 'عضو' : 'members'}</Text>
-          </View>
-          <ChevronRight color={colors.textTertiary} size={16} strokeWidth={1.8} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-function ReputationCard({ stats }: { stats: UserStats | null }) {
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const progress = (stats?.reputationProgress ?? 0) / 100;
-  const currentLevel = stats?.reputationLevel ?? 0;
-  const nextLevelIdx = Math.min(currentLevel + 1, 3);
-  const nextLabel = language === 'ar' ? REPUTATION_LEVELS[nextLevelIdx].labelAr : REPUTATION_LEVELS[nextLevelIdx].labelEn;
-
-  useEffect(() => {
-    Animated.timing(progressAnim, { toValue: progress, duration: 1200, delay: 400, useNativeDriver: false }).start();
-  }, [progressAnim, progress]);
-
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
-
-  return (
-    <View style={[
-      styles.repCard,
-      {
-        backgroundColor: isDark ? colors.bgCard : colors.white,
-      },
-    ]}>
-      <View style={[styles.repCardHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={[styles.repCardIconWrap, { backgroundColor: colors.accentSoft }]}>
-          <TrendingUp color={colors.accent} size={15} strokeWidth={2.2} />
-        </View>
-        <Text style={[styles.repCardTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-          {language === 'ar' ? 'نظام السمعة' : 'Reputation'}
-        </Text>
-      </View>
-      <View style={styles.repProgressRow}>
-        <Text style={[styles.repProgressLabel, { color: colors.textSecondary }]}>
-          {language === 'ar' ? `التالي: ${nextLabel}` : `Next: ${nextLabel}`}
-        </Text>
-        <Text style={[styles.repProgressPct, { color: colors.accent }]}>{stats?.reputationProgress ?? 0}%</Text>
-      </View>
-      <View style={[styles.progressTrack, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]}>
-        <Animated.View style={[styles.progressFill, { width: progressWidth as any }]}>
-          <LinearGradient
-            colors={[colors.accent, colors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.progressBar}
-          />
-        </Animated.View>
-      </View>
-      <View style={[styles.repLevels, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        {REPUTATION_LEVELS.map((level, i) => {
-          const isActive = i <= currentLevel;
-          return (
-            <View key={i} style={styles.repLevelItem}>
-              <View style={[
-                styles.repLevel,
-                { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                isActive && { opacity: 1, backgroundColor: colors.accentSoft },
-              ]}>
-                <Text style={styles.repLevelEmoji}>{level.emoji}</Text>
-              </View>
-              <Text style={[styles.repLevelLabel, { color: colors.textTertiary }, isActive && { color: colors.accent, fontWeight: '700' as const }]}>
-                {language === 'ar' ? level.labelAr : level.labelEn}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
     </View>
   );
 }
@@ -585,24 +297,18 @@ function ReputationCard({ stats }: { stats: UserStats | null }) {
 function QuickLinks() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const links = [
-    { icon: Shield, label: language === 'ar' ? 'الحوكمة والامتثال' : 'Governance', color: '#D4A254', route: '/governance' as const },
-    { icon: BookOpen, label: language === 'ar' ? 'مركز المعرفة' : 'Knowledge Hub', color: '#22D3EE', route: '/knowledge' as const },
-    { icon: Calendar, label: language === 'ar' ? 'الفعاليات' : 'Events', color: '#2DD4A8', route: '/events' as const },
-    { icon: Bookmark, label: language === 'ar' ? 'المحفوظات' : 'Saved', color: '#8B8DF8', route: '/saved' as const },
-    { icon: ClipboardList, label: language === 'ar' ? 'طلبات الخدمات' : 'Requests', color: '#FB7185', route: '/my-requests' as const },
+    { icon: Shield, label: language === 'ar' ? 'الحوكمة والامتثال' : 'Governance', color: colors.accent, route: '/governance' as const },
+    { icon: BookOpen, label: language === 'ar' ? 'مركز المعرفة' : 'Knowledge Hub', color: colors.cyan, route: '/knowledge' as const },
+    { icon: Calendar, label: language === 'ar' ? 'الفعاليات' : 'Events', color: colors.teal, route: '/events' as const },
+    { icon: Bookmark, label: language === 'ar' ? 'المحفوظات' : 'Saved', color: colors.indigo, route: '/saved' as const },
+    { icon: ClipboardList, label: language === 'ar' ? 'طلبات الخدمات' : 'Requests', color: colors.rose, route: '/my-requests' as const },
   ];
 
   return (
-    <View style={[
-      styles.linksCard,
-      {
-        backgroundColor: isDark ? colors.bgCard : colors.white,
-      },
-    ]}>
-      <Text style={[styles.linksTitle, { color: colors.textTertiary }]}>{language === 'ar' ? 'الوصول السريع' : 'QUICK ACCESS'}</Text>
+    <View style={[styles.linksCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
       {links.map((link, index) => (
         <React.Fragment key={index}>
           <Pressable
@@ -610,28 +316,28 @@ function QuickLinks() {
             style={({ pressed }) => [
               styles.linkItem,
               { flexDirection: isRTL ? 'row-reverse' : 'row' },
-              pressed && { backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', transform: [{ scale: 0.99 }] },
+              pressed && { opacity: 0.7 },
             ]}
             testID={`profile-link-${index}`}
           >
             <View style={[styles.linkIcon, { backgroundColor: link.color + '14' }]}>
-              <link.icon color={link.color} size={17} strokeWidth={1.8} />
+              <link.icon color={link.color} size={18} strokeWidth={1.5} />
             </View>
             <Text style={[styles.linkLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>{link.label}</Text>
-            <ChevronRight color={colors.textTertiary} size={15} strokeWidth={1.8} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
+            <ChevronRight color={colors.textMuted} size={16} strokeWidth={1.5} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
           </Pressable>
-          {index < links.length - 1 ? <View style={[styles.linkDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} /> : null}
+          {index < links.length - 1 ? <View style={[styles.linkDivider, { backgroundColor: colors.border }]} /> : null}
         </React.Fragment>
       ))}
     </View>
   );
 }
 
-function MenuLinks() {
+function LogoutButton() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
   const { logout, isAuthenticated } = useAuth();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const handleSignOut = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -639,61 +345,31 @@ function MenuLinks() {
     router.replace('/welcome');
   }, [logout, router]);
 
+  if (!isAuthenticated) return null;
+
   return (
-    <View style={[
-      styles.menuCard,
-      {
-        backgroundColor: isDark ? colors.bgCard : colors.white,
-      },
-    ]}>
-      {isAuthenticated ? (
-        <>
-          <Pressable
-            onPress={() => router.push('/settings')}
-            style={({ pressed }) => [
-              styles.menuItem,
-              { flexDirection: isRTL ? 'row-reverse' : 'row' },
-              pressed && { backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' },
-            ]}
-          >
-            <View style={[styles.menuIconWrap, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }]}>
-              <Settings color={colors.textSecondary} size={18} strokeWidth={1.8} />
-            </View>
-            <Text style={[styles.menuLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-              {language === 'ar' ? 'الإعدادات' : 'Settings'}
-            </Text>
-            <ChevronRight color={colors.textTertiary} size={15} strokeWidth={1.8} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
-          </Pressable>
-          <View style={[styles.menuDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} />
-          <Pressable
-            onPress={handleSignOut}
-            style={({ pressed }) => [
-              styles.menuItem,
-              { flexDirection: isRTL ? 'row-reverse' : 'row' },
-              pressed && { backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' },
-            ]}
-          >
-            <View style={[styles.menuIconWrap, { backgroundColor: colors.errorLight }]}>
-              <LogOut color={colors.destructive} size={18} strokeWidth={1.8} />
-            </View>
-            <Text style={[styles.menuLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.destructive }]}>
-              {language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
-            </Text>
-          </Pressable>
-        </>
-      ) : null}
-    </View>
+    <Pressable
+      onPress={handleSignOut}
+      style={({ pressed }) => [
+        styles.logoutBtn,
+        { flexDirection: isRTL ? 'row-reverse' : 'row' },
+        pressed && { opacity: 0.7 },
+      ]}
+    >
+      <LogOut color={colors.destructive} size={16} strokeWidth={1.5} />
+      <Text style={[styles.logoutText, { color: colors.destructive }]}>
+        {language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
+      </Text>
+    </Pressable>
   );
 }
 
 export default function MoreScreen() {
   const { isAuthenticated, user } = useAuth();
-  const { language } = useLanguage();
   const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [activeTab, setActiveTab] = useState<number | null>(null);
-  const scrollRef = useRef<ScrollView>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   const fetchStats = useCallback(async () => {
     if (!isAuthenticated) { setStats(null); return; }
@@ -716,23 +392,12 @@ export default function MoreScreen() {
     setRefreshing(false);
   }, [fetchStats]);
 
-  const handleStatPress = useCallback((tab: number) => {
-    if (!isAuthenticated) return;
-    setActiveTab(tab);
-    void Haptics.selectionAsync();
-  }, [isAuthenticated]);
-
-  const handleCloseTab = useCallback(() => {
-    setActiveTab(null);
-  }, []);
-
   const userId = user?.id ?? '';
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView
-          ref={scrollRef}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           testID="profile-scroll"
@@ -740,28 +405,29 @@ export default function MoreScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent} colors={[colors.accent]} />
           }
         >
-          <ProfileHeader stats={stats} onStatPress={handleStatPress} />
+          <ProfileHeader stats={stats} />
 
-          {activeTab !== null && isAuthenticated ? (
-            <View style={styles.tabSection}>
+          {isAuthenticated && (
+            <>
               <ProfileTabs activeTab={activeTab} onSelect={setActiveTab} />
-              <Pressable onPress={handleCloseTab} style={({ pressed }) => [styles.closeTabBtn, pressed && { opacity: 0.6 }]}>
-                <Text style={[styles.closeTabText, { color: colors.accent }]}>{language === 'ar' ? 'إغلاق' : 'Close'}</Text>
-              </Pressable>
               <View style={styles.tabContent}>
                 {activeTab === 0 ? <MyPostsList userId={userId} /> : null}
-                {activeTab === 1 ? <MyLikesList userId={userId} /> : null}
-                {activeTab === 2 ? <MyCommunitiesList userId={userId} /> : null}
+                {activeTab === 1 ? (
+                  <View style={styles.emptyTab}>
+                    <View style={[styles.emptyTabIcon, { backgroundColor: colors.accentLight }]}>
+                      <Shield color={colors.accent} size={22} strokeWidth={1.5} />
+                    </View>
+                    <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>No services yet</Text>
+                  </View>
+                ) : null}
               </View>
-            </View>
-          ) : (
-            <>
-              <ReputationCard stats={stats} />
-              <QuickLinks />
-              <MenuLinks />
             </>
           )}
-          <Text style={[styles.versionText, { color: colors.textTertiary }]}>مُوسع v1.0.0</Text>
+
+          <QuickLinks />
+          <LogoutButton />
+
+          <Text style={[styles.versionText, { color: colors.textMuted }]}>مُوسع v1.0.0</Text>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -772,58 +438,28 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
-  tabSection: { marginTop: 4 },
-  tabsContainer: { flexDirection: 'row', borderBottomWidth: 1 },
-  profileTabItem: { flex: 1, alignItems: 'center', paddingVertical: 14, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
-  tabText: { fontSize: 14, fontWeight: '600' as const, letterSpacing: -0.1 },
-  closeTabBtn: { alignSelf: 'flex-end', paddingHorizontal: 20, paddingVertical: 8, marginTop: 4 },
-  closeTabText: { fontSize: 14, fontWeight: '600' as const },
+  tabsContainer: { flexDirection: 'row', borderBottomWidth: 1, marginTop: 8 },
+  profileTabItem: { flex: 1, alignItems: 'center', paddingVertical: 12, gap: 4, position: 'relative' as const },
+  tabText: { fontSize: 12, fontWeight: '500' as const },
+  tabIndicator: { position: 'absolute', bottom: -1, width: '60%', height: 2, borderRadius: 1 },
   tabContent: { minHeight: 100, paddingBottom: 16 },
-  tabListContent: { paddingHorizontal: 20, gap: 10, paddingTop: 4 },
+  tabListContent: { paddingHorizontal: 16, gap: 8, paddingTop: 8 },
   emptyTab: { alignItems: 'center', paddingVertical: 44, gap: 10 },
-  emptyTabIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  emptyTabText: { fontSize: 14, fontWeight: '500' as const },
-  postCard: { padding: 16, borderRadius: 18, gap: 8 },
-  postContent: { fontSize: 14, lineHeight: 22, letterSpacing: -0.2 },
-  topicBadge: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10 },
-  topicText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
+  emptyTabIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  emptyTabText: { fontSize: 13 },
+  postCard: { padding: 16, borderRadius: 12, gap: 8 },
+  postContent: { fontSize: 15, lineHeight: 22 },
+  topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  topicText: { fontSize: 11, fontWeight: '600' as const },
   postMeta: { gap: 14, alignItems: 'center', paddingTop: 4 },
-  postMetaText: { fontSize: 12, fontWeight: '600' as const },
-  postMetaTime: { fontSize: 12, fontWeight: '500' as const },
-  postAuthorRow: { alignItems: 'center', justifyContent: 'space-between' },
-  postAuthorName: { fontSize: 14, fontWeight: '700' as const },
-  communityListContent: { paddingTop: 4 },
-  communityRow: { alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14 },
-  communityIcon: { width: 50, height: 50, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  communityEmoji: { fontSize: 22 },
-  communityInfo: { flex: 1, gap: 3 },
-  communityName: { fontSize: 15, fontWeight: '600' as const, letterSpacing: -0.2 },
-  communityMembers: { fontSize: 12, fontWeight: '500' as const },
-  repCard: { marginHorizontal: 20, marginTop: 4, padding: 20, borderRadius: 20, gap: 14 },
-  repCardHeader: { alignItems: 'center', gap: 10 },
-  repCardIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  repCardTitle: { flex: 1, fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.3 },
-  repProgressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  repProgressLabel: { fontSize: 13, fontWeight: '500' as const },
-  repProgressPct: { fontSize: 13, fontWeight: '700' as const },
-  progressTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 3, overflow: 'hidden' },
-  progressBar: { flex: 1, borderRadius: 3 },
-  repLevels: { justifyContent: 'space-between', paddingHorizontal: 4, paddingTop: 4 },
-  repLevelItem: { alignItems: 'center', gap: 4 },
-  repLevel: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', opacity: 0.35 },
-  repLevelEmoji: { fontSize: 18 },
-  repLevelLabel: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.1 },
-  linksCard: { marginHorizontal: 20, marginTop: 14, borderRadius: 20, overflow: 'hidden' },
-  linksTitle: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 4 },
-  linkItem: { alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
-  linkDivider: { height: 1, marginLeft: 68 },
-  linkIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  linkLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  menuCard: { marginHorizontal: 20, marginTop: 14, borderRadius: 20, overflow: 'hidden' },
-  menuItem: { alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
-  menuIconWrap: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  menuDivider: { height: 1, marginLeft: 68 },
-  menuLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  versionText: { fontSize: 12, fontWeight: '500' as const, textAlign: 'center' as const, marginTop: 24 },
+  postMetaText: { fontSize: 12 },
+  postMetaTime: { fontSize: 12 },
+  linksCard: { marginHorizontal: 16, marginTop: 14, borderRadius: 12, overflow: 'hidden' },
+  linkItem: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
+  linkDivider: { height: 1, marginLeft: 64 },
+  linkIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  linkLabel: { fontSize: 15, fontWeight: '500' as const },
+  logoutBtn: { alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 12 },
+  logoutText: { fontSize: 15, fontWeight: '500' as const },
+  versionText: { fontSize: 12, textAlign: 'center' as const, marginTop: 16 },
 });

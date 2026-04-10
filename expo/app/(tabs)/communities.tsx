@@ -7,18 +7,17 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Crown,
   Globe,
   Lock,
   Search,
-  Sparkles,
   Users,
 } from 'lucide-react-native';
 
@@ -55,51 +54,40 @@ const PRIVACY_LABELS: Record<string, Record<string, string>> = {
   premium: { ar: 'مميز', en: 'Premium' },
 };
 
-function Header() {
+function Header({ searchText, onSearchChange }: { searchText: string; onSearchChange: (t: string) => void }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 16, stiffness: 110 }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
+  const { colors } = useTheme();
 
   return (
-    <Animated.View style={[styles.headerWrap, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+    <View style={styles.headerWrap}>
       <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-        {language === 'ar' ? 'المجتمعات' : 'Communities'}
+        {language === 'ar' ? 'اكتشف' : 'Discover'}
       </Text>
-      <Text style={[styles.headerSubtitle, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
-        {language === 'ar' ? 'اكتشف مجتمعات تناسب اهتماماتك' : 'Find communities that match your interests'}
-      </Text>
-      <Pressable style={({ pressed }) => [
+      <View style={[
         styles.searchBar,
         {
           flexDirection: isRTL ? 'row-reverse' : 'row',
-          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+          backgroundColor: colors.bgCard,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+          borderColor: colors.border,
         },
-        pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
       ]}>
-        <View style={[styles.searchIconWrap, { backgroundColor: colors.accentLight }]}>
-          <Search color={colors.accent} size={14} strokeWidth={2.2} />
-        </View>
-        <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
-          {language === 'ar' ? 'ابحث عن مجتمع...' : 'Search communities...'}
-        </Text>
-      </Pressable>
-    </Animated.View>
+        <Search color={colors.textMuted} size={18} strokeWidth={1.5} />
+        <TextInput
+          value={searchText}
+          onChangeText={onSearchChange}
+          placeholder={language === 'ar' ? 'ابحث عن مجتمع...' : 'Search communities...'}
+          placeholderTextColor={colors.textMuted}
+          style={[styles.searchInput, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}
+        />
+      </View>
+    </View>
   );
 }
 
 function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const filters = language === 'ar' ? FILTERS_AR : FILTERS_EN;
 
   return (
@@ -113,26 +101,19 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
       contentContainerStyle={styles.filterRow}
       renderItem={({ item, index }) => (
         <Pressable
-          onPress={() => {
-            onSelect(index);
-            void Haptics.selectionAsync();
-          }}
+          onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
           style={({ pressed }) => [
             styles.filterPill,
             active === index
               ? { backgroundColor: colors.accent }
-              : {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                  borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-                },
+              : { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
             pressed && { transform: [{ scale: 0.93 }] },
           ]}
         >
           <Text style={[
             styles.filterText,
-            { color: active === index ? '#000' : colors.textSecondary },
-            active === index && { fontWeight: '700' as const },
+            { color: active === index ? '#FFF' : colors.textMuted },
+            active === index && { fontWeight: '600' as const },
           ]}>{item}</Text>
         </Pressable>
       )}
@@ -140,49 +121,70 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
   );
 }
 
-function FeaturedCommunityBanner() {
+function FeaturedSection({ communities, onJoinToggle, joiningId }: { communities: CommunityItem[]; onJoinToggle: (id: string, isMember: boolean) => void; joiningId: string | null }) {
   const { isRTL, language } = useLanguage();
+  const { colors } = useTheme();
+  const featured = communities.filter(c => c.memberCount > 5);
+
+  if (featured.length === 0) return null;
+
+  return (
+    <View style={styles.featuredSection}>
+      <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text, paddingHorizontal: 16 }]}>
+        {language === 'ar' ? 'مميزة' : 'Featured'}
+      </Text>
+      <FlatList
+        horizontal
+        inverted={isRTL}
+        data={featured.slice(0, 5)}
+        keyExtractor={(item) => item.id + '-featured'}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
+        renderItem={({ item }) => {
+          const displayName = language === 'ar' ? item.nameAr : item.name;
+          return (
+            <FeaturedCard item={item} displayName={displayName} onJoinToggle={onJoinToggle} isJoining={joiningId === item.id} />
+          );
+        }}
+      />
+    </View>
+  );
+}
+
+function FeaturedCard({ item, displayName, onJoinToggle, isJoining }: { item: CommunityItem; displayName: string; onJoinToggle: (id: string, isMember: boolean) => void; isJoining: boolean }) {
+  const router = useRouter();
+  const { language } = useLanguage();
   const { colors } = useTheme();
 
   return (
-    <View style={styles.featuredBanner}>
-      <LinearGradient
-        colors={[colors.accent, colors.gradientEnd]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.featuredGradient}
-      >
-        <View style={styles.featuredContent}>
-          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Sparkles color="#FFF" size={12} strokeWidth={2.2} />
-            <Text style={styles.featuredBadgeText}>{language === 'ar' ? 'جديد' : 'New'}</Text>
-          </View>
-          <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {language === 'ar' ? 'مجتمعات جديدة هذا الأسبوع' : 'New communities this week'}
-          </Text>
-          <Text style={[styles.featuredDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {language === 'ar' ? 'اكتشف مجتمعات تناسب اهتماماتك المهنية' : 'Discover communities that match your interests'}
-          </Text>
+    <PressableScale
+      onPress={() => router.push(`/community/${item.id}`)}
+      style={[styles.featuredCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}
+      haptic
+    >
+      <View style={[styles.featuredIcon, { backgroundColor: colors.accentLight }]}>
+        <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+      </View>
+      <Text style={[styles.featuredName, { color: colors.text }]} numberOfLines={1}>{displayName}</Text>
+      <Text style={[styles.featuredMembers, { color: colors.textMuted }]}>{item.memberCount} {language === 'ar' ? 'عضو' : 'members'}</Text>
+      {item.isMember ? (
+        <View style={[styles.memberBadge, { backgroundColor: colors.accentLight }]}>
+          <Text style={[styles.memberBadgeText, { color: colors.accent }]}>{language === 'ar' ? 'عضو' : 'Joined'}</Text>
         </View>
-      </LinearGradient>
-    </View>
+      ) : (
+        <Pressable
+          onPress={() => onJoinToggle(item.id, item.isMember)}
+          disabled={isJoining}
+          style={({ pressed }) => [styles.joinSmallBtn, { backgroundColor: colors.accentLight }, pressed && { opacity: 0.7 }]}
+        >
+          <Text style={[styles.joinSmallText, { color: colors.accent }]}>{language === 'ar' ? 'انضمام' : 'Join'}</Text>
+        </Pressable>
+      )}
+    </PressableScale>
   );
 }
 
-function MemberAvatarStack({ count }: { count: number }) {
-  const { colors, isDark } = useTheme();
-  const avatarColors = ['#D4A254', '#4A9FF5', '#8B8DF8', '#FB7185'];
-  return (
-    <View style={styles.avatarStack}>
-      {avatarColors.slice(0, Math.min(3, count)).map((c, i) => (
-        <View key={i} style={[styles.stackAvatar, { backgroundColor: c, marginLeft: i > 0 ? -8 : 0, zIndex: 3 - i, borderColor: isDark ? colors.bgCard : colors.white }]} />
-      ))}
-      <Text style={[styles.stackCount, { color: colors.textSecondary }]}>{count}</Text>
-    </View>
-  );
-}
-
-const CommunityCard = React.memo(function CommunityCard({
+const CommunityRow = React.memo(function CommunityRow({
   item,
   onJoinToggle,
   isJoining,
@@ -193,107 +195,61 @@ const CommunityCard = React.memo(function CommunityCard({
 }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideIn = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+  }, [fadeIn]);
+
   const displayName = language === 'ar' ? item.nameAr : item.name;
   const displayDesc = language === 'ar' ? item.descriptionAr : item.description;
   const privacyLabel = PRIVACY_LABELS[item.privacy]?.[language] ?? item.privacy;
   const isPremium = item.privacy === 'premium';
   const isPrivate = item.privacy === 'private';
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 120 }),
-    ]).start();
-  }, [fadeIn, slideIn]);
-
-  const handleJoin = useCallback(() => {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onJoinToggle(item.id, item.isMember);
-  }, [item.id, item.isMember, onJoinToggle]);
-
   return (
-    <Animated.View style={{ opacity: fadeIn, transform: [{ translateY: slideIn }] }}>
-      <PressableScale
+    <Animated.View style={{ opacity: fadeIn }}>
+      <Pressable
         onPress={() => router.push(`/community/${item.id}`)}
-        style={[
-          styles.card,
-          {
-            backgroundColor: isDark ? colors.bgCard : colors.white,
-          },
+        style={({ pressed }) => [
+          styles.communityRow,
+          { flexDirection: isRTL ? 'row-reverse' : 'row' },
+          pressed && { opacity: 0.7 },
         ]}
-        haptic
         testID={`community-${item.id}`}
       >
-        <View style={styles.cardBody}>
-          <View style={[styles.cardTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={[styles.cardIcon, { backgroundColor: item.accent + '14' }]}>
-              <Text style={styles.cardEmoji}>{item.icon}</Text>
-            </View>
-            <View style={[styles.cardInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-              <Text style={[styles.cardName, { color: colors.text }]} numberOfLines={1}>{displayName}</Text>
-              <Text style={[styles.cardDesc, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]} numberOfLines={2}>
-                {displayDesc}
-              </Text>
-            </View>
-          </View>
-
-          <View style={[styles.cardBottom, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={[styles.statRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <MemberAvatarStack count={item.memberCount} />
-              <View style={[
-                styles.privacyBadge,
-                isPremium && { backgroundColor: isDark ? 'rgba(245,158,11,0.10)' : 'rgba(194,120,3,0.08)' },
-                isPrivate && { backgroundColor: isDark ? 'rgba(34,211,238,0.10)' : 'rgba(7,136,163,0.08)' },
-                !isPremium && !isPrivate && { backgroundColor: isDark ? 'rgba(45,212,168,0.10)' : 'rgba(13,147,115,0.08)' },
-              ]}>
-                {isPremium ? <Crown color={colors.orange} size={10} /> : isPrivate ? <Lock color={colors.cyan} size={10} /> : <Globe color={colors.teal} size={10} />}
-                <Text style={[
-                  styles.privacyText,
-                  isPremium && { color: colors.orange },
-                  isPrivate && { color: colors.cyan },
-                  !isPremium && !isPrivate && { color: colors.teal },
-                ]}>
-                  {privacyLabel}
-                </Text>
-              </View>
-            </View>
-            {item.isMember ? (
-              <View style={[styles.joinedBtn, { backgroundColor: colors.accentSoft }]}>
-                <Users color={colors.accent} size={12} strokeWidth={2} />
-                <Text style={[styles.joinedText, { color: colors.accent }]}>
-                  {language === 'ar' ? 'عضو' : 'Joined'}
-                </Text>
-              </View>
-            ) : (
-              <Pressable
-                onPress={handleJoin}
-                style={({ pressed }) => [
-                  pressed && !isJoining && { opacity: 0.85, transform: [{ scale: 0.95 }] },
-                ]}
-                disabled={isJoining}
-              >
-                {isJoining ? (
-                  <View style={[styles.joinBtn, { backgroundColor: colors.accent }]}>
-                    <ActivityIndicator size="small" color="#FFF" />
-                  </View>
-                ) : (
-                  <LinearGradient
-                    colors={[colors.accent, colors.gradientEnd]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.joinBtn}
-                  >
-                    <Text style={styles.joinText}>{language === 'ar' ? 'انضم' : 'Join'}</Text>
-                  </LinearGradient>
-                )}
-              </Pressable>
-            )}
+        <View style={[styles.rowIcon, { backgroundColor: item.accent + '14' }]}>
+          <Text style={{ fontSize: 22 }}>{item.icon}</Text>
+        </View>
+        <View style={[styles.rowContent, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+          <Text style={[styles.rowName, { color: colors.text }]} numberOfLines={1}>{displayName}</Text>
+          <Text style={[styles.rowDesc, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]} numberOfLines={1}>{displayDesc}</Text>
+          <View style={[styles.rowMeta, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Text style={[styles.rowMetaText, { color: colors.textMuted }]}>{item.memberCount} {language === 'ar' ? 'عضو' : 'members'}</Text>
+            <Text style={[styles.rowMetaDot, { color: colors.textMuted }]}>·</Text>
+            <Text style={[styles.rowMetaText, { color: colors.textMuted }]}>{item.postCount} {language === 'ar' ? 'منشور' : 'posts'}</Text>
           </View>
         </View>
-      </PressableScale>
+        {item.isMember ? (
+          <View style={[styles.joinedPill, { backgroundColor: colors.accentLight }]}>
+            <Text style={[styles.joinedPillText, { color: colors.accent }]}>{language === 'ar' ? 'عضو' : 'Joined'}</Text>
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => { void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); onJoinToggle(item.id, item.isMember); }}
+            disabled={isJoining}
+            style={({ pressed }) => [styles.joinPill, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
+          >
+            {isJoining ? (
+              <ActivityIndicator size="small" color="#FFF" />
+            ) : (
+              <Text style={styles.joinPillText}>{language === 'ar' ? 'انضم' : 'Join'}</Text>
+            )}
+          </Pressable>
+        )}
+      </Pressable>
+      <View style={[styles.rowSeparator, { backgroundColor: colors.border }]} />
     </Animated.View>
   );
 });
@@ -301,7 +257,6 @@ const CommunityCard = React.memo(function CommunityCard({
 function LoadingSkeleton() {
   return (
     <View>
-      <CommunityCardSkeleton />
       <CommunityCardSkeleton />
       <CommunityCardSkeleton />
       <CommunityCardSkeleton />
@@ -315,15 +270,13 @@ export default function CommunitiesScreen() {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [activeFilter, setActiveFilter] = useState(0);
+  const [searchText, setSearchText] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [joiningId, setJoiningId] = useState<string | null>(null);
 
   const filterMap: Record<number, 'public' | 'private' | 'premium' | undefined> = {
-    0: undefined,
-    1: 'public',
-    2: 'private',
-    3: 'premium',
+    0: undefined, 1: 'public', 2: 'private', 3: 'premium',
   };
 
   const communitiesQuery = useQuery({
@@ -332,9 +285,7 @@ export default function CommunitiesScreen() {
   });
 
   const joinMutation = useMutation({
-    mutationFn: async (communityId: string) => {
-      return trpcClient.communities.join.mutate({ communityId });
-    },
+    mutationFn: async (communityId: string) => trpcClient.communities.join.mutate({ communityId }),
     onSuccess: (_data, communityId) => {
       void queryClient.invalidateQueries({ queryKey: ['communities'] });
       const community = communitiesQuery.data?.find((c: CommunityItem) => c.id === communityId);
@@ -342,19 +293,13 @@ export default function CommunitiesScreen() {
       setToastMsg(language === 'ar' ? `انضممت إلى ${name}` : `Joined ${name}`);
       setToastVisible(true);
       setJoiningId(null);
-      console.log('[Communities] joined community, group chat created by API');
     },
     onError: () => { setJoiningId(null); },
   });
 
   const leaveMutation = useMutation({
-    mutationFn: async (communityId: string) => {
-      return trpcClient.communities.leave.mutate({ communityId });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['communities'] });
-      setJoiningId(null);
-    },
+    mutationFn: async (communityId: string) => trpcClient.communities.leave.mutate({ communityId }),
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['communities'] }); setJoiningId(null); },
     onError: () => { setJoiningId(null); },
   });
 
@@ -365,11 +310,7 @@ export default function CommunitiesScreen() {
       return;
     }
     setJoiningId(communityId);
-    if (isMember) {
-      leaveMutation.mutate(communityId);
-    } else {
-      joinMutation.mutate(communityId);
-    }
+    if (isMember) { leaveMutation.mutate(communityId); } else { joinMutation.mutate(communityId); }
   }, [isAuthenticated, language, joinMutation, leaveMutation]);
 
   const handleRefresh = useCallback(() => {
@@ -384,7 +325,7 @@ export default function CommunitiesScreen() {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         {communitiesQuery.isLoading ? (
           <>
-            <Header />
+            <Header searchText={searchText} onSearchChange={setSearchText} />
             <FilterTabs active={activeFilter} onSelect={setActiveFilter} />
             <LoadingSkeleton />
           </>
@@ -393,13 +334,13 @@ export default function CommunitiesScreen() {
             data={communities}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <CommunityCard item={item} onJoinToggle={handleJoinToggle} isJoining={joiningId === item.id} />
+              <CommunityRow item={item} onJoinToggle={handleJoinToggle} isJoining={joiningId === item.id} />
             )}
             ListHeaderComponent={
               <>
-                <Header />
+                <Header searchText={searchText} onSearchChange={setSearchText} />
                 <FilterTabs active={activeFilter} onSelect={setActiveFilter} />
-                <FeaturedCommunityBanner />
+                <FeaturedSection communities={communities} onJoinToggle={handleJoinToggle} joiningId={joiningId} />
               </>
             }
             ListEmptyComponent={
@@ -433,51 +374,38 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
-  headerWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16, gap: 10 },
-  headerTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -1.2 },
-  headerSubtitle: { fontSize: 15, fontWeight: '400' as const, letterSpacing: 0, marginBottom: 4 },
-  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 13, borderRadius: 18 },
-  searchIconWrap: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  filterPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
-  filterText: { fontSize: 13, fontWeight: '600' as const },
-  featuredBanner: { marginHorizontal: 16, marginBottom: 8, borderRadius: 22, overflow: 'hidden' },
-  featuredGradient: { borderRadius: 22 },
-  featuredContent: { padding: 22, gap: 8 },
-  featuredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2, color: '#FFF' },
-  featuredTitle: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.4, color: '#FFF' },
-  featuredDesc: { fontSize: 13, lineHeight: 20, color: 'rgba(255,255,255,0.7)' },
-  card: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden' },
-  cardBody: { padding: 18, gap: 16 },
-  cardTop: { gap: 14, alignItems: 'flex-start' },
-  cardIcon: { width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  cardEmoji: { fontSize: 26 },
-  cardInfo: { flex: 1, gap: 4 },
-  cardName: { fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.3 },
-  cardDesc: { fontSize: 13, lineHeight: 19 },
-  cardBottom: { alignItems: 'center', justifyContent: 'space-between' },
-  statRow: { alignItems: 'center', gap: 10 },
-  avatarStack: { flexDirection: 'row', alignItems: 'center' },
-  stackAvatar: { width: 22, height: 22, borderRadius: 11, borderWidth: 2.5 },
-  stackCount: { fontSize: 13, fontWeight: '700' as const, marginLeft: 6 },
-  privacyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
-  privacyText: { fontSize: 11, fontWeight: '700' as const },
-  joinBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  joinText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
-  joinedBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 18, paddingVertical: 9, borderRadius: 16 },
-  joinedText: { fontSize: 13, fontWeight: '600' as const },
+  headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
+  searchInput: { flex: 1, fontSize: 15, paddingVertical: 0 },
+  filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
+  filterPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  filterText: { fontSize: 13, fontWeight: '500' as const },
+  featuredSection: { paddingBottom: 16, gap: 10 },
+  featuredTitle: { fontSize: 17, fontWeight: '600' as const },
+  featuredCard: { width: 200, padding: 14, borderRadius: 12, alignItems: 'center', gap: 8 },
+  featuredIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  featuredName: { fontSize: 15, fontWeight: '600' as const, textAlign: 'center' as const },
+  featuredMembers: { fontSize: 12 },
+  memberBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  memberBadgeText: { fontSize: 12, fontWeight: '600' as const },
+  joinSmallBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8 },
+  joinSmallText: { fontSize: 12, fontWeight: '600' as const },
+  communityRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
+  rowIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  rowContent: { flex: 1, gap: 3 },
+  rowName: { fontSize: 15, fontWeight: '600' as const },
+  rowDesc: { fontSize: 13 },
+  rowMeta: { alignItems: 'center', gap: 4 },
+  rowMetaText: { fontSize: 12 },
+  rowMetaDot: { fontSize: 12 },
+  rowSeparator: { height: 1, marginLeft: 74 },
+  joinedPill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  joinedPillText: { fontSize: 13, fontWeight: '600' as const },
+  joinPill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  joinPillText: { color: '#FFF', fontSize: 13, fontWeight: '600' as const },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, gap: 10, minHeight: 200 },
   emptyIconWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle: { fontSize: 19, fontWeight: '700' as const, letterSpacing: -0.3 },
-  emptyDesc: { fontSize: 14 },
+  emptyTitle: { fontSize: 17, fontWeight: '600' as const },
+  emptyDesc: { fontSize: 13 },
 });

@@ -19,13 +19,11 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Globe,
   Lock,
   Mail,
   UserRound,
 } from 'lucide-react-native';
 
-import { theme } from '@/constants/theme';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -34,9 +32,9 @@ type AuthMode = 'login' | 'register';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { isRTL, language, toggleLanguage } = useLanguage();
+  const { isRTL, language } = useLanguage();
   const { login, register, isLoggingIn, isRegistering, loginError, registerError } = useAuth();
-  const _theme = useTheme();
+  const { colors } = useTheme();
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -94,19 +92,15 @@ export default function LoginScreen() {
   const displayError = localError ?? serverError;
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       <SafeAreaView style={styles.safe}>
         <View style={[styles.topBar, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} testID="login-back">
             {isRTL ? (
-              <ArrowRight color="#FFFFFF" size={20} strokeWidth={1.8} />
+              <ArrowRight color={colors.text} size={20} strokeWidth={2} />
             ) : (
-              <ArrowLeft color="#FFFFFF" size={20} strokeWidth={1.8} />
+              <ArrowLeft color={colors.text} size={20} strokeWidth={2} />
             )}
-          </Pressable>
-          <Pressable onPress={toggleLanguage} style={({ pressed }) => [styles.langBtn, pressed && { opacity: 0.7 }]}>
-            <Globe color="rgba(255,255,255,0.6)" size={15} strokeWidth={1.5} />
-            <Text style={styles.langText}>{language === 'ar' ? 'English' : 'العربية'}</Text>
           </Pressable>
         </View>
 
@@ -120,34 +114,34 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.heroSection}>
-              <Text style={[styles.heroTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.heroTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
                 {mode === 'login'
                   ? (language === 'ar' ? 'تسجيل الدخول' : 'Sign In')
                   : (language === 'ar' ? 'إنشاء حساب' : 'Create Account')
                 }
               </Text>
-              <Text style={[styles.heroSub, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.heroSub, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                 {mode === 'login'
-                  ? (language === 'ar' ? 'ادخل إلى مجتمعك المهني' : 'Access your professional community')
+                  ? (language === 'ar' ? 'مرحباً بعودتك' : 'Welcome back')
                   : (language === 'ar' ? 'انضم إلى المنصة المهنية الأولى' : 'Join the premier professional platform')
                 }
               </Text>
             </View>
 
-            <View style={styles.tabRow}>
+            <View style={[styles.tabRow, { backgroundColor: colors.bgMuted }]}>
               <Pressable
                 onPress={() => switchMode('login')}
-                style={[styles.tab, mode === 'login' && styles.tabActive]}
+                style={[styles.tab, mode === 'login' && { backgroundColor: colors.accent }]}
               >
-                <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>
+                <Text style={[styles.tabText, { color: colors.textMuted }, mode === 'login' && styles.tabTextActive]}>
                   {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
                 </Text>
               </Pressable>
               <Pressable
                 onPress={() => switchMode('register')}
-                style={[styles.tab, mode === 'register' && styles.tabActive]}
+                style={[styles.tab, mode === 'register' && { backgroundColor: colors.accent }]}
               >
-                <Text style={[styles.tabText, mode === 'register' && styles.tabTextActive]}>
+                <Text style={[styles.tabText, { color: colors.textMuted }, mode === 'register' && styles.tabTextActive]}>
                   {language === 'ar' ? 'حساب جديد' : 'Register'}
                 </Text>
               </Pressable>
@@ -156,17 +150,17 @@ export default function LoginScreen() {
             <Animated.View style={[styles.formSection, { opacity: fadeAnim }]}>
               {mode === 'register' ? (
                 <View style={styles.fieldWrap}>
-                  <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+                  <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                     {language === 'ar' ? 'الاسم الكامل' : 'Full Name'}
                   </Text>
-                  <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                    <UserRound color="rgba(255,255,255,0.35)" size={18} strokeWidth={1.5} />
+                  <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                    <UserRound color={colors.textMuted} size={18} strokeWidth={1.5} />
                     <TextInput
                       value={name}
                       onChangeText={setName}
                       placeholder={language === 'ar' ? 'أدخل اسمك...' : 'Enter your name...'}
-                      placeholderTextColor="rgba(255,255,255,0.25)"
-                      style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+                      placeholderTextColor={colors.textMuted}
+                      style={[styles.input, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}
                       autoCapitalize="words"
                       testID="register-name"
                     />
@@ -175,17 +169,17 @@ export default function LoginScreen() {
               ) : null}
 
               <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+                <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </Text>
-                <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                  <Mail color="rgba(255,255,255,0.35)" size={18} strokeWidth={1.5} />
+                <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Mail color={colors.textMuted} size={18} strokeWidth={1.5} />
                   <TextInput
                     value={email}
                     onChangeText={setEmail}
                     placeholder="example@email.com"
-                    placeholderTextColor="rgba(255,255,255,0.25)"
-                    style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+                    placeholderTextColor={colors.textMuted}
+                    style={[styles.input, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -195,34 +189,34 @@ export default function LoginScreen() {
               </View>
 
               <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+                <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                   {language === 'ar' ? 'كلمة المرور' : 'Password'}
                 </Text>
-                <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                  <Lock color="rgba(255,255,255,0.35)" size={18} strokeWidth={1.5} />
+                <View style={[styles.fieldInput, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+                  <Lock color={colors.textMuted} size={18} strokeWidth={1.5} />
                   <TextInput
                     value={password}
                     onChangeText={setPassword}
                     placeholder={language === 'ar' ? '٦ أحرف على الأقل' : 'At least 6 characters'}
-                    placeholderTextColor="rgba(255,255,255,0.25)"
-                    style={[styles.input, { textAlign: isRTL ? 'right' : 'left', flex: 1 }]}
+                    placeholderTextColor={colors.textMuted}
+                    style={[styles.input, { textAlign: isRTL ? 'right' : 'left', flex: 1, color: colors.text }]}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     testID="auth-password"
                   />
                   <Pressable onPress={() => setShowPassword((v) => !v)} hitSlop={8}>
                     {showPassword ? (
-                      <EyeOff color="rgba(255,255,255,0.35)" size={18} strokeWidth={1.5} />
+                      <EyeOff color={colors.textMuted} size={18} strokeWidth={1.5} />
                     ) : (
-                      <Eye color="rgba(255,255,255,0.35)" size={18} strokeWidth={1.5} />
+                      <Eye color={colors.textMuted} size={18} strokeWidth={1.5} />
                     )}
                   </Pressable>
                 </View>
               </View>
 
               {displayError ? (
-                <View style={styles.errorBox}>
-                  <Text style={styles.errorText}>{displayError}</Text>
+                <View style={[styles.errorBox, { backgroundColor: colors.errorLight, borderColor: colors.error + '30' }]}>
+                  <Text style={[styles.errorText, { color: colors.error }]}>{displayError}</Text>
                 </View>
               ) : null}
 
@@ -231,13 +225,14 @@ export default function LoginScreen() {
                 disabled={isPending}
                 style={({ pressed }) => [
                   styles.submitBtn,
+                  { backgroundColor: colors.accent },
                   pressed && !isPending && { opacity: 0.85 },
                   isPending && styles.submitBtnDisabled,
                 ]}
                 testID="auth-submit"
               >
                 {isPending ? (
-                  <ActivityIndicator color={theme.colors.white} size="small" />
+                  <ActivityIndicator color="#FFF" size="small" />
                 ) : (
                   <Text style={styles.submitBtnText}>
                     {mode === 'login'
@@ -258,7 +253,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
   },
   safe: {
     flex: 1,
@@ -268,124 +262,88 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
+    height: 48,
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  langBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  langText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    fontWeight: '500' as const,
-  },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingBottom: 40,
   },
   heroSection: {
-    gap: 10,
-    marginTop: 32,
-    marginBottom: 32,
+    gap: 6,
+    marginTop: 24,
+    marginBottom: 28,
   },
   heroTitle: {
-    fontSize: 34,
+    fontSize: 24,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
-    letterSpacing: 0.37,
   },
   heroSub: {
-    fontSize: 17,
-    lineHeight: 24,
-    color: 'rgba(255,255,255,0.45)',
-    fontWeight: '400' as const,
-    letterSpacing: -0.41,
+    fontSize: 15,
   },
   tabRow: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 12,
     padding: 3,
-    marginBottom: 28,
+    marginBottom: 24,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 10,
     alignItems: 'center',
   },
-  tabActive: {
-    backgroundColor: theme.colors.accent,
-  },
   tabText: {
     fontSize: 15,
-    fontWeight: '600' as const,
-    color: 'rgba(255,255,255,0.4)',
-    letterSpacing: -0.24,
+    fontWeight: '500' as const,
   },
   tabTextActive: {
-    color: '#0A0A0F',
+    color: '#FFFFFF',
+    fontWeight: '600' as const,
   },
   formSection: {
-    gap: 20,
+    gap: 16,
   },
   fieldWrap: {
-    gap: 8,
+    gap: 6,
   },
   fieldLabel: {
     fontSize: 13,
     fontWeight: '500' as const,
-    color: 'rgba(255,255,255,0.5)',
-    letterSpacing: -0.08,
   },
   fieldInput: {
     alignItems: 'center',
     gap: 10,
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    height: 48,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: '#FFFFFF',
+    fontSize: 15,
     paddingVertical: 0,
-    letterSpacing: -0.32,
   },
   errorBox: {
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,59,48,0.12)',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,59,48,0.2)',
   },
   errorText: {
-    fontSize: 14,
-    color: '#FF6961',
+    fontSize: 12,
     fontWeight: '500' as const,
-    textAlign: 'center',
-    letterSpacing: -0.08,
+    textAlign: 'center' as const,
   },
   submitBtn: {
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: theme.colors.accent,
+    height: 48,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 4,
@@ -394,9 +352,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitBtnText: {
-    color: '#0A0A0F',
-    fontSize: 17,
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '600' as const,
-    letterSpacing: -0.41,
   },
 });

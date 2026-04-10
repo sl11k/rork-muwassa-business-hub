@@ -29,8 +29,8 @@ const FILTER_TABS_AR = ['الكل', 'غير مقروء'];
 const FILTER_TABS_EN = ['All', 'Unread'];
 
 const AVATAR_COLORS = [
-  '#D4A254', '#4A9FF5', '#FB7185', '#8B8DF8', '#22D3EE',
-  '#F472B6', '#2DD4A8', '#38BDF8', '#A78BFA', '#FBBF24',
+  '#0D9488', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE',
+  '#F472B6', '#2DD4BF', '#38BDF8', '#A78BFA', '#FBBF24',
 ];
 
 function getAvatarColor(id: string): string {
@@ -88,7 +88,7 @@ const POLL_INTERVAL = 8000;
 function Header() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={styles.headerWrap}>
@@ -98,7 +98,7 @@ function Header() {
         </Text>
         <Pressable
           onPress={() => router.push('/new-conversation')}
-          style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.9 }] }]}
+          style={({ pressed }) => [pressed && { opacity: 0.85 }]}
           testID="new-message-btn"
         >
           <View style={[styles.newMsgBtn, { backgroundColor: colors.accent }]}>
@@ -106,28 +106,27 @@ function Header() {
           </View>
         </Pressable>
       </View>
-      <Pressable style={({ pressed }) => [
+      <View style={[
         styles.searchBar,
         {
           flexDirection: isRTL ? 'row-reverse' : 'row',
-          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+          backgroundColor: colors.bgCard,
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+          borderColor: colors.border,
         },
-        pressed && { opacity: 0.7 },
       ]}>
-        <Search color={colors.textTertiary} size={17} strokeWidth={1.8} />
-        <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
+        <Search color={colors.textMuted} size={17} strokeWidth={1.5} />
+        <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textMuted }]}>
           {language === 'ar' ? 'ابحث في المحادثات...' : 'Search conversations...'}
         </Text>
-      </Pressable>
+      </View>
     </View>
   );
 }
 
 function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const tabs = language === 'ar' ? FILTER_TABS_AR : FILTER_TABS_EN;
 
   return (
@@ -141,25 +140,18 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
       contentContainerStyle={styles.filterRow}
       renderItem={({ item, index }) => (
         <Pressable
-          onPress={() => {
-            onSelect(index);
-            void Haptics.selectionAsync();
-          }}
+          onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
           style={[
             styles.filterPill,
             active === index
               ? { backgroundColor: colors.accent }
-              : {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                  borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-                },
+              : { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
           ]}
         >
           <Text style={[
             styles.filterText,
-            { color: active === index ? '#000' : colors.textSecondary },
-            active === index && { fontWeight: '700' as const },
+            { color: active === index ? '#FFF' : colors.textMuted },
+            active === index && { fontWeight: '600' as const },
           ]}>{item}</Text>
         </Pressable>
       )}
@@ -176,12 +168,12 @@ const ConversationRow = React.memo(function ConversationRow({
 }) {
   const router = useRouter();
   const { isRTL } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const hasUnread = item.unreadCount > 0;
   const isCommunity = !!item.communityId;
   const name = isCommunity ? (item.communityName ?? 'Community') : item.otherUser.name;
   const initial = isCommunity ? '' : getInitial(name);
-  const avatarColor = isCommunity ? '#8B8DF8' : getAvatarColor(item.otherUser.id);
+  const avatarColor = isCommunity ? '#818CF8' : getAvatarColor(item.otherUser.id);
   const time = item.lastMessage ? formatTime(item.lastMessage.createdAt) : formatTime(item.updatedAt);
   const preview = item.lastMessage
     ? (item.lastMessage.senderId === currentUserId ? 'You: ' : '') + item.lastMessage.content
@@ -190,13 +182,17 @@ const ConversationRow = React.memo(function ConversationRow({
   return (
     <PressableScale
       onPress={() => router.push(`/chat/${item.id}`)}
-      style={[styles.chatRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+      style={[
+        styles.chatRow,
+        { flexDirection: isRTL ? 'row-reverse' : 'row' },
+        hasUnread && { backgroundColor: colors.accentSoft2 },
+      ]}
       haptic
       testID={`conversation-${item.id}`}
     >
       <View style={styles.avatarWrap}>
         {isCommunity ? (
-          <View style={[styles.avatar, { backgroundColor: 'rgba(139,141,248,0.12)' }]}>
+          <View style={[styles.avatar, { backgroundColor: 'rgba(129,140,248,0.12)' }]}>
             <Text style={{ fontSize: 22 }}>{item.communityIcon ?? '👥'}</Text>
           </View>
         ) : (
@@ -205,7 +201,7 @@ const ConversationRow = React.memo(function ConversationRow({
           </View>
         )}
         {!isCommunity ? (
-          <View style={[styles.onlineDot, { backgroundColor: '#2DD4A8', borderColor: isDark ? colors.bg : colors.bgCard }]} />
+          <View style={[styles.onlineDot, { backgroundColor: '#2DD4BF', borderColor: colors.bg }]} />
         ) : null}
       </View>
 
@@ -213,18 +209,13 @@ const ConversationRow = React.memo(function ConversationRow({
         <View style={[styles.chatNameRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6, flex: 1 }}>
             <Text style={[styles.chatName, { color: colors.text }, hasUnread && styles.chatNameUnread]} numberOfLines={1}>{name}</Text>
-            {isCommunity ? (
-              <View style={[styles.communityBadge, { backgroundColor: 'rgba(139,141,248,0.10)' }]}>
-                <Text style={[styles.communityBadgeText, { color: '#8B8DF8' }]}>Group</Text>
-              </View>
-            ) : null}
           </View>
-          <Text style={[styles.chatTime, { color: colors.textTertiary }, hasUnread && { color: colors.accent, fontWeight: '700' as const }]}>{time}</Text>
+          <Text style={[styles.chatTime, { color: colors.textMuted }, hasUnread && { color: colors.accent, fontWeight: '600' as const }]}>{time}</Text>
         </View>
         <View style={[styles.previewRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text
             style={[styles.chatPreview, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }, hasUnread && { color: colors.text, fontWeight: '500' as const }]}
-            numberOfLines={2}
+            numberOfLines={1}
           >
             {preview}
           </Text>
@@ -254,7 +245,7 @@ export default function MessagesScreen() {
   const router = useRouter();
   const { language } = useLanguage();
   const { isAuthenticated, user } = useAuth();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -354,7 +345,7 @@ export default function MessagesScreen() {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => (
-              <View style={[styles.separator, { backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} />
+              <View style={[styles.separator, { backgroundColor: colors.border }]} />
             )}
             testID="messages-list"
             refreshControl={
@@ -371,38 +362,36 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
-  headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
+  headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -1.2 },
-  newMsgBtn: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
-  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 13, borderRadius: 18 },
-  searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
-  filterText: { fontSize: 13, fontWeight: '600' as const },
-  chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14 },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const },
+  newMsgBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
+  searchText: { flex: 1, fontSize: 15 },
+  filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
+  filterPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  filterText: { fontSize: 13, fontWeight: '500' as const },
+  chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 12 },
   avatarWrap: { position: 'relative' as const },
-  avatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 19, fontWeight: '700' as const },
+  avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 18, fontWeight: '700' as const },
   onlineDot: {
     position: 'absolute' as const,
-    bottom: 1,
-    right: 1,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 2.5,
+    bottom: 0,
+    right: 0,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
   },
-  chatInfo: { flex: 1, gap: 5 },
+  chatInfo: { flex: 1, gap: 4 },
   chatNameRow: { alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  chatName: { fontSize: 16, fontWeight: '500' as const, letterSpacing: -0.2 },
+  chatName: { fontSize: 15, fontWeight: '500' as const },
   chatNameUnread: { fontWeight: '700' as const },
-  chatTime: { fontSize: 12, fontWeight: '500' as const },
+  chatTime: { fontSize: 12 },
   previewRow: { alignItems: 'center', gap: 8 },
-  chatPreview: { flex: 1, fontSize: 14, lineHeight: 20 },
-  unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  chatPreview: { flex: 1, fontSize: 13, lineHeight: 18 },
+  unreadBadge: { minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
   unreadText: { color: '#FFF', fontSize: 11, fontWeight: '700' as const },
-  separator: { height: 1, marginLeft: 88, marginRight: 20 },
-  communityBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
-  communityBadgeText: { fontSize: 10, fontWeight: '700' as const, letterSpacing: 0.2 },
+  separator: { height: 1, marginLeft: 78 },
 });

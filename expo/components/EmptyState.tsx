@@ -23,7 +23,7 @@ export function EmptyState({
   iconColor,
   compact = false,
 }: EmptyStateProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const resolvedIconColor = iconColor ?? colors.accent;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -38,9 +38,7 @@ export function EmptyState({
   return (
     <Animated.View style={[styles.container, compact && styles.containerCompact, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <View style={[styles.iconWrap, { backgroundColor: resolvedIconColor + '14' }]}>
-        <View style={[styles.iconInner, { backgroundColor: resolvedIconColor + '1A' }]}>
-          <Icon color={resolvedIconColor} size={compact ? 24 : 28} strokeWidth={1.5} />
-        </View>
+        <Icon color={resolvedIconColor} size={compact ? 24 : 40} strokeWidth={1.5} />
       </View>
       <Text style={[styles.title, { color: colors.text }, compact && styles.titleCompact]}>{title}</Text>
       <Text style={[styles.description, { color: colors.textSecondary }, compact && styles.descCompact]}>{description}</Text>
@@ -50,13 +48,6 @@ export function EmptyState({
           style={({ pressed }) => [
             styles.actionBtn,
             { backgroundColor: colors.accent },
-            isDark && {
-              shadowColor: colors.accent,
-              shadowOpacity: 0.3,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 4 },
-              elevation: 6,
-            },
             pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] },
           ]}
         >
@@ -71,8 +62,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 44,
+    paddingVertical: 80,
+    paddingHorizontal: 40,
     gap: 10,
   },
   containerCompact: {
@@ -80,49 +71,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
   },
   iconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 28,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
-  iconInner: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   title: {
-    fontSize: 19,
-    fontWeight: '700' as const,
+    fontSize: 17,
+    fontWeight: '600' as const,
     textAlign: 'center' as const,
-    letterSpacing: -0.3,
   },
   titleCompact: {
-    fontSize: 16,
+    fontSize: 15,
   },
   description: {
-    fontSize: 14,
+    fontSize: 13,
     textAlign: 'center' as const,
-    lineHeight: 21,
-    letterSpacing: -0.1,
+    lineHeight: 19,
   },
   descCompact: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 17,
   },
   actionBtn: {
     marginTop: 16,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 26,
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
   actionText: {
     fontSize: 15,
     fontWeight: '600' as const,
-    letterSpacing: -0.1,
-    color: '#0B0F14',
+    color: '#FFFFFF',
   },
 });

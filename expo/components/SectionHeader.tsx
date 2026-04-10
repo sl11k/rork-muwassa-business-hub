@@ -40,23 +40,21 @@ const styles = StyleSheet.create({
   row: {
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginTop: 12,
     marginBottom: 8,
   },
   title: {
     flex: 1,
-    fontSize: 19,
-    fontWeight: '700' as const,
-    letterSpacing: -0.3,
+    fontSize: 17,
+    fontWeight: '600' as const,
   },
   actionRow: {
     alignItems: 'center',
     gap: 2,
   },
   action: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600' as const,
-    letterSpacing: -0.1,
   },
 });

@@ -11,15 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Bookmark,
   Clock,
-  Filter,
   Plus,
   Search,
   Star,
-  ArrowRight,
 } from 'lucide-react-native';
 
 import { PressableScale } from '@/components/PressableScale';
@@ -35,7 +32,7 @@ const CATS_AR = ['الكل', 'حوكمة', 'استشارات', 'أمن سيبر�
 const CATS_EN = ['All', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 const CAT_KEYS_EN = ['', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 
-const AVATAR_COLORS = ['#D4A254', '#4A9FF5', '#FB7185', '#8B8DF8', '#22D3EE', '#F472B6'];
+const AVATAR_COLORS = ['#0D9488', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE', '#F472B6'];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -68,81 +65,46 @@ interface ServiceItem {
 
 function Header({ onCreatePress, isAuthenticated }: { onCreatePress: () => void; isAuthenticated: boolean }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 16, stiffness: 110 }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
+  const { colors } = useTheme();
 
   return (
-    <Animated.View style={[styles.headerWrap, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+    <View style={styles.headerWrap}>
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-            {language === 'ar' ? 'السوق' : 'Market'}
-          </Text>
-          <Text style={[styles.headerSubtitle, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
-            {language === 'ar' ? 'خدمات احترافية من خبراء معتمدين' : 'Professional services from verified experts'}
-          </Text>
-        </View>
+        <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
+          {language === 'ar' ? 'السوق' : 'Market'}
+        </Text>
         {isAuthenticated ? (
           <Pressable
             onPress={onCreatePress}
-            style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.9 }] }]}
+            style={({ pressed }) => [pressed && { opacity: 0.85 }]}
           >
-            <LinearGradient
-              colors={[colors.accent, colors.gradientEnd]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.addBtn}
-            >
-              <Plus color="#FFF" size={18} strokeWidth={2.5} />
-            </LinearGradient>
+            <View style={[styles.addBtn, { backgroundColor: colors.accent }]}>
+              <Plus color="#FFF" size={20} strokeWidth={2} />
+            </View>
           </Pressable>
         ) : null}
       </View>
-      <View style={[styles.searchRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <Pressable style={({ pressed }) => [
-          styles.searchBar,
-          {
-            flexDirection: isRTL ? 'row-reverse' : 'row',
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-            borderWidth: 1,
-            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-          },
-          pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
-        ]}>
-          <View style={[styles.searchIconWrap, { backgroundColor: colors.accentLight }]}>
-            <Search color={colors.accent} size={14} strokeWidth={2.2} />
-          </View>
-          <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
-            {language === 'ar' ? 'ابحث عن خدمة...' : 'Search services...'}
-          </Text>
-        </Pressable>
-        <Pressable style={({ pressed }) => [
-          styles.filterBtn,
-          {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-            borderWidth: 1,
-            borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-          },
-          pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] },
-        ]}>
-          <Filter color={colors.textSecondary} size={17} strokeWidth={1.8} />
-        </Pressable>
-      </View>
-    </Animated.View>
+      <Pressable style={[
+        styles.searchBar,
+        {
+          flexDirection: isRTL ? 'row-reverse' : 'row',
+          backgroundColor: colors.bgCard,
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+      ]}>
+        <Search color={colors.textMuted} size={18} strokeWidth={1.5} />
+        <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textMuted }]}>
+          {language === 'ar' ? 'ابحث عن خدمة...' : 'Search services...'}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 
 function CategoryTabs({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const cats = language === 'ar' ? CATS_AR : CATS_EN;
 
   return (
@@ -155,26 +117,19 @@ function CategoryTabs({ active, onSelect }: { active: number; onSelect: (i: numb
       contentContainerStyle={styles.catRow}
       renderItem={({ item, index }) => (
         <Pressable
-          onPress={() => {
-            onSelect(index);
-            void Haptics.selectionAsync();
-          }}
+          onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
           style={({ pressed }) => [
             styles.catPill,
             active === index
               ? { backgroundColor: colors.accent }
-              : {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
-                  borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-                },
+              : { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
             pressed && { transform: [{ scale: 0.93 }] },
           ]}
         >
           <Text style={[
             styles.catText,
-            { color: active === index ? '#000' : colors.textSecondary },
-            active === index && { fontWeight: '700' as const },
+            { color: active === index ? '#FFF' : colors.textMuted },
+            active === index && { fontWeight: '600' as const },
           ]}>{item}</Text>
         </Pressable>
       )}
@@ -182,37 +137,59 @@ function CategoryTabs({ active, onSelect }: { active: number; onSelect: (i: numb
   );
 }
 
-function FeaturedBanner() {
+function FeaturedSection({ services }: { services: ServiceItem[] }) {
   const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
+  const router = useRouter();
+  const featured = services.slice(0, 3);
+
+  if (featured.length === 0) return null;
 
   return (
-    <View style={styles.featuredBanner}>
-      <LinearGradient
-        colors={[colors.accent, colors.gradientEnd]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.featuredGradient}
-      >
-        <View style={styles.featuredInner}>
-          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Star color="#FFF" size={11} fill="#FFF" />
-            <Text style={styles.featuredBadgeText}>{language === 'ar' ? 'مميز' : 'Featured'}</Text>
-          </View>
-          <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {language === 'ar' ? 'خدمات استشارية متميزة' : 'Premium Consulting'}
-          </Text>
-          <Text style={[styles.featuredDesc, { textAlign: isRTL ? 'right' : 'left' }]}>
-            {language === 'ar' ? 'من خبراء معتمدين في المنطقة' : 'From verified experts in the region'}
-          </Text>
-          <View style={[styles.featuredAction, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Text style={styles.featuredActionText}>
-              {language === 'ar' ? 'تصفح الخدمات' : 'Browse Services'}
-            </Text>
-            <ArrowRight color="#FFF" size={14} strokeWidth={2} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
-          </View>
-        </View>
-      </LinearGradient>
+    <View style={styles.featuredSection}>
+      <Text style={[styles.featuredSectionTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text, paddingHorizontal: 16 }]}>
+        {language === 'ar' ? 'مميزة' : 'Featured'}
+      </Text>
+      <FlatList
+        horizontal
+        inverted={isRTL}
+        data={featured}
+        keyExtractor={(item) => item.id + '-feat'}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
+        renderItem={({ item }) => {
+          const title = language === 'ar' ? item.titleAr : item.title;
+          const category = language === 'ar' ? item.categoryAr : item.category;
+          const price = language === 'ar' ? item.priceAr : item.price;
+          const avatarColor = getAvatarColor(item.id);
+
+          return (
+            <PressableScale
+              onPress={() => router.push(`/service/${item.id}`)}
+              style={[styles.featuredCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}
+              haptic
+            >
+              <View style={[styles.featCatBadge, { backgroundColor: colors.accentLight }]}>
+                <Text style={[styles.featCatText, { color: colors.accent }]}>{category}</Text>
+              </View>
+              <Text style={[styles.featTitle, { color: colors.text }]} numberOfLines={2}>{title}</Text>
+              <View style={[styles.featProvider, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.featAvatar, { backgroundColor: avatarColor }]}>
+                  <Text style={styles.featAvatarText}>{item.ownerInitial}</Text>
+                </View>
+                <Text style={[styles.featProviderName, { color: colors.textSecondary }]}>{item.ownerName}</Text>
+              </View>
+              <View style={[styles.featBottom, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <Text style={[styles.featPrice, { color: colors.accent }]}>{price}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                  <Star color={colors.yellow} fill={colors.yellow} size={12} />
+                  <Text style={[styles.featRating, { color: colors.text }]}>4.8</Text>
+                </View>
+              </View>
+            </PressableScale>
+          );
+        }}
+      />
     </View>
   );
 }
@@ -230,18 +207,14 @@ const ServiceCard = React.memo(function ServiceCard({
 }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const [saved, setSaved] = useState(false);
   const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideIn = useRef(new Animated.Value(30)).current;
   const bookmarkScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 18, stiffness: 120 }),
-    ]).start();
-  }, [fadeIn, slideIn]);
+    Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+  }, [fadeIn]);
 
   const isRequested = requestedIds.has(item.id);
   const avatarColor = getAvatarColor(item.id);
@@ -267,83 +240,68 @@ const ServiceCard = React.memo(function ServiceCard({
   }, [saved, onSave, bookmarkScale]);
 
   return (
-    <Animated.View style={{ opacity: fadeIn, transform: [{ translateY: slideIn }] }}>
+    <Animated.View style={{ opacity: fadeIn }}>
       <PressableScale
         onPress={() => router.push(`/service/${item.id}`)}
-        style={[
-          styles.card,
-          {
-            backgroundColor: isDark ? colors.bgCard : colors.white,
-          },
-        ]}
+        style={[styles.serviceCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}
         haptic
         testID={`service-${item.id}`}
       >
-        <View style={[styles.cardHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={[styles.providerAvatar, { backgroundColor: avatarColor }]}>
-            <Text style={styles.providerInitial}>{item.ownerInitial}</Text>
-          </View>
-          <View style={[styles.providerInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <Text style={[styles.providerName, { color: colors.text }]}>{item.ownerName}</Text>
-            <View style={[styles.catBadge, { backgroundColor: colors.accentSoft }]}>
-              <Text style={[styles.catBadgeText, { color: colors.accent }]}>{category}</Text>
+        <View style={[styles.cardTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={{ flex: 1, gap: 6, alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
+            <Text style={[styles.serviceTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={2}>{title}</Text>
+            <View style={[styles.providerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <View style={[styles.providerAvatar, { backgroundColor: avatarColor }]}>
+                <Text style={styles.providerInitial}>{item.ownerInitial}</Text>
+              </View>
+              <Text style={[styles.providerName, { color: colors.textSecondary }]}>{item.ownerName}</Text>
+              <View style={[styles.catBadge, { backgroundColor: colors.accentLight }]}>
+                <Text style={[styles.catBadgeText, { color: colors.accent }]}>{category}</Text>
+              </View>
             </View>
           </View>
-          <View style={styles.cardHeaderRight}>
-            <View style={[styles.ratingWrap, { backgroundColor: isDark ? 'rgba(251,191,36,0.10)' : 'rgba(194,120,3,0.08)' }]}>
+          <Pressable onPress={handleSave} hitSlop={8}>
+            <Animated.View style={{ transform: [{ scale: bookmarkScale }] }}>
+              <Bookmark
+                color={saved ? colors.accent : colors.textMuted}
+                fill={saved ? colors.accent : 'transparent'}
+                size={18}
+                strokeWidth={1.5}
+              />
+            </Animated.View>
+          </Pressable>
+        </View>
+
+        <View style={[styles.cardFooter, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={{ gap: 4 }}>
+            <Text style={[styles.priceText, { color: colors.accent }]}>{price}</Text>
+            <View style={[styles.deliveryRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <Clock color={colors.textMuted} size={12} strokeWidth={1.5} />
+              <Text style={[styles.deliveryText, { color: colors.textMuted }]}>{delivery}</Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+            <View style={[styles.ratingWrap, { backgroundColor: colors.yellowLight }]}>
               <Star color={colors.yellow} fill={colors.yellow} size={10} />
               <Text style={[styles.ratingText, { color: colors.text }]}>4.8</Text>
             </View>
-            <Pressable onPress={handleSave} style={styles.saveBtn} hitSlop={8}>
-              <Animated.View style={{ transform: [{ scale: bookmarkScale }] }}>
-                <Bookmark
-                  color={saved ? colors.accent : colors.textTertiary}
-                  fill={saved ? colors.accent : 'transparent'}
-                  size={16}
-                  strokeWidth={1.8}
-                />
-              </Animated.View>
-            </Pressable>
-          </View>
-        </View>
-
-        <Text style={[styles.serviceTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-          {title}
-        </Text>
-
-        <View style={[styles.cardFooter, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={styles.priceContainer}>
-            <Text style={[styles.priceText, { color: colors.accent }]}>{price}</Text>
-            <View style={[styles.deliveryWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <Clock color={colors.textTertiary} size={11} strokeWidth={2} />
-              <Text style={[styles.deliveryText, { color: colors.textSecondary }]}>{delivery}</Text>
-            </View>
-          </View>
-          <Pressable
-            onPress={handleRequest}
-            style={({ pressed }) => [
-              pressed && !isRequested && { opacity: 0.85, transform: [{ scale: 0.95 }] },
-            ]}
-          >
             {isRequested ? (
-              <View style={[styles.requestedBtn, { backgroundColor: colors.accentSoft }]}>
+              <View style={[styles.requestedBtn, { backgroundColor: colors.accentLight }]}>
                 <Text style={[styles.requestedText, { color: colors.accent }]}>
                   {language === 'ar' ? 'تم الطلب' : 'Requested'}
                 </Text>
               </View>
             ) : (
-              <LinearGradient
-                colors={[colors.accent, colors.gradientEnd]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.requestBtn}
+              <Pressable
+                onPress={handleRequest}
+                style={({ pressed }) => [styles.requestBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
               >
                 <Text style={styles.requestText}>
                   {language === 'ar' ? 'طلب' : 'Request'}
                 </Text>
-              </LinearGradient>
+              </Pressable>
             )}
-          </Pressable>
+          </View>
         </View>
       </PressableScale>
     </Animated.View>
@@ -429,7 +387,7 @@ export default function MarketplaceScreen() {
               <>
                 <Header onCreatePress={handleCreatePress} isAuthenticated={isAuthenticated} />
                 <CategoryTabs active={activeCat} onSelect={setActiveCat} />
-                <FeaturedBanner />
+                <FeaturedSection services={services as ServiceItem[]} />
               </>
             }
             ListEmptyComponent={
@@ -463,60 +421,49 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
-  headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16, gap: 14 },
-  headerRow: { alignItems: 'flex-start', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 34, fontWeight: '800' as const, letterSpacing: -1.2 },
-  headerSubtitle: { fontSize: 15, fontWeight: '400' as const, marginTop: 2 },
-  addBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  searchRow: { gap: 8, alignItems: 'center' },
-  searchBar: { flex: 1, alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 13, borderRadius: 18 },
-  searchIconWrap: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  filterBtn: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  catRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  catPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
-  catText: { fontSize: 13, fontWeight: '600' as const },
-  featuredBanner: { marginHorizontal: 16, marginTop: 4, marginBottom: 8, borderRadius: 22, overflow: 'hidden' },
-  featuredGradient: { borderRadius: 22 },
-  featuredInner: { padding: 22, gap: 8 },
-  featuredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2, color: '#FFF' },
-  featuredTitle: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.4, marginTop: 4, color: '#FFF' },
-  featuredDesc: { fontSize: 13, lineHeight: 20, color: 'rgba(255,255,255,0.7)' },
-  featuredAction: { alignItems: 'center', gap: 4, marginTop: 4 },
-  featuredActionText: { fontSize: 14, fontWeight: '700' as const, letterSpacing: -0.1, color: '#FFF' },
-  card: { marginHorizontal: 16, marginTop: 10, padding: 18, borderRadius: 20, gap: 14 },
-  cardHeader: { alignItems: 'center', gap: 12 },
-  providerAvatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
-  providerInitial: { color: '#FFF', fontSize: 17, fontWeight: '800' as const },
-  providerInfo: { flex: 1, gap: 5 },
-  providerName: { fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.2 },
-  catBadge: { alignSelf: 'flex-start', paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10 },
-  catBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
-  cardHeaderRight: { alignItems: 'flex-end', gap: 8 },
-  ratingWrap: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
-  ratingText: { fontSize: 13, fontWeight: '800' as const },
-  saveBtn: { padding: 2 },
-  serviceTitle: { fontSize: 16, fontWeight: '700' as const, lineHeight: 24, letterSpacing: -0.2 },
-  cardFooter: { alignItems: 'center', justifyContent: 'space-between', paddingTop: 14 },
-  priceContainer: { flex: 1, gap: 4 },
-  priceText: { fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.3 },
-  deliveryWrap: { alignItems: 'center', gap: 4 },
-  deliveryText: { fontSize: 12, fontWeight: '500' as const },
-  requestBtn: { paddingHorizontal: 24, paddingVertical: 11, borderRadius: 16, alignItems: 'center' },
-  requestText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
-  requestedBtn: { paddingHorizontal: 24, paddingVertical: 11, borderRadius: 16, alignItems: 'center' },
-  requestedText: { fontSize: 14, fontWeight: '600' as const },
+  headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
+  headerRow: { alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const },
+  addBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
+  searchText: { flex: 1, fontSize: 15 },
+  catRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
+  catPill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  catText: { fontSize: 13, fontWeight: '500' as const },
+  featuredSection: { paddingBottom: 12, gap: 10 },
+  featuredSectionTitle: { fontSize: 17, fontWeight: '600' as const },
+  featuredCard: { width: 240, padding: 14, borderRadius: 12, gap: 8 },
+  featCatBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  featCatText: { fontSize: 11, fontWeight: '600' as const },
+  featTitle: { fontSize: 15, fontWeight: '600' as const, lineHeight: 21 },
+  featProvider: { alignItems: 'center', gap: 6 },
+  featAvatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  featAvatarText: { color: '#FFF', fontSize: 12, fontWeight: '700' as const },
+  featProviderName: { fontSize: 13 },
+  featBottom: { alignItems: 'center', justifyContent: 'space-between', paddingTop: 4 },
+  featPrice: { fontSize: 15, fontWeight: '600' as const },
+  featRating: { fontSize: 13, fontWeight: '600' as const },
+  serviceCard: { marginHorizontal: 16, marginTop: 8, padding: 14, borderRadius: 12, gap: 12 },
+  cardTop: { gap: 10 },
+  serviceTitle: { fontSize: 15, fontWeight: '600' as const, lineHeight: 22 },
+  providerRow: { alignItems: 'center', gap: 6 },
+  providerAvatar: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  providerInitial: { color: '#FFF', fontSize: 10, fontWeight: '700' as const },
+  providerName: { fontSize: 13 },
+  catBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
+  catBadgeText: { fontSize: 11, fontWeight: '600' as const },
+  cardFooter: { alignItems: 'center', justifyContent: 'space-between' },
+  priceText: { fontSize: 15, fontWeight: '600' as const },
+  deliveryRow: { alignItems: 'center', gap: 4 },
+  deliveryText: { fontSize: 12 },
+  ratingWrap: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6 },
+  ratingText: { fontSize: 12, fontWeight: '600' as const },
+  requestBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
+  requestText: { color: '#FFF', fontSize: 13, fontWeight: '600' as const },
+  requestedBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
+  requestedText: { fontSize: 13, fontWeight: '600' as const },
   emptyWrap: { flex: 1, padding: 40, alignItems: 'center', justifyContent: 'center', minHeight: 200, gap: 10 },
   emptyIconWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle: { fontSize: 19, fontWeight: '700' as const, letterSpacing: -0.3 },
-  emptyDesc: { fontSize: 14, textAlign: 'center' as const },
+  emptyTitle: { fontSize: 17, fontWeight: '600' as const },
+  emptyDesc: { fontSize: 13, textAlign: 'center' as const },
 });

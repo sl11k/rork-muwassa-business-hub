@@ -12,28 +12,23 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Bell,
   Bookmark,
-  ChevronRight,
-  Flame,
   Heart,
   MessageCircle,
+  Pen,
   Plus,
   Search,
   Share2,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react-native';
 import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
-import { LanguageToggle } from '@/components/LanguageToggle';
 import { PressableScale } from '@/components/PressableScale';
 import { Toast } from '@/components/Toast';
 import { FeedCardSkeleton } from '@/components/SkeletonLoader';
 import {
-  expertSuggestions,
   getLocalizedText,
   trendingTopics,
 } from '@/data/businessHub';
@@ -43,7 +38,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 import type { EnrichedPost } from '@/types/post';
 
-const AVATAR_COLORS = ['#D4A254', '#4A9FF5', '#2DD4A8', '#FB7185', '#8B8DF8', '#F472B6', '#22D3EE', '#FBBF24'];
+const AVATAR_COLORS = ['#0D9488', '#4A9FF5', '#2DD4BF', '#FB7185', '#818CF8', '#F472B6', '#22D3EE', '#FBBF24'];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -66,48 +61,36 @@ function formatTimeAgo(dateStr: string): string {
   return `${days}d`;
 }
 
-const BASE_CATEGORIES_AR = ['لك', 'الحوكمة', 'الفرص', 'تحليلات'];
-const BASE_CATEGORIES_EN = ['For you', 'Governance', 'Opportunities', 'Insights'];
+const SECTION_TABS_AR = ['لك', 'أتابعه', 'مركز المعرفة'];
+const SECTION_TABS_EN = ['For you', 'Following', 'Knowledge'];
+const BASE_CATEGORIES_AR = ['الكل', 'الحوكمة', 'الفرص', 'تحليلات'];
+const BASE_CATEGORIES_EN = ['All', 'Governance', 'Opportunities', 'Insights'];
 
 function AppHeader() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <View style={[hs.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-      <View style={[hs.logoArea, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <Text style={[hs.logoText, { color: colors.text }]}>
-          {language === 'ar' ? 'مُوسع' : 'Muwassa'}
-        </Text>
-        <View style={[hs.logoBadge, { backgroundColor: colors.accentLight }]}>
-          <View style={[hs.logoDotInner, { backgroundColor: colors.accent }]} />
-        </View>
-      </View>
+      <Text style={[hs.logoText, { color: colors.text }]}>
+        {language === 'ar' ? 'مُوسع' : 'Muwassa'}
+      </Text>
       <View style={[hs.headerActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <LanguageToggle />
         <Pressable
-          style={({ pressed }) => [
-            hs.headerBtn,
-            { backgroundColor: isDark ? colors.bgCard : colors.bgMuted },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.9 }] },
-          ]}
+          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
           testID="search-btn"
           onPress={() => router.push('/explore')}
         >
-          <Search color={colors.textSecondary} size={18} strokeWidth={1.8} />
+          <Search color={colors.textSecondary} size={20} strokeWidth={1.5} />
         </Pressable>
         <Pressable
-          style={({ pressed }) => [
-            hs.headerBtn,
-            { backgroundColor: isDark ? colors.bgCard : colors.bgMuted },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.9 }] },
-          ]}
+          style={({ pressed }) => [pressed && { opacity: 0.7 }]}
           testID="notifications-btn"
           onPress={() => router.push('/notifications')}
         >
-          <Bell color={colors.textSecondary} size={18} strokeWidth={1.8} />
-          <View style={[hs.notifDot, { backgroundColor: colors.rose }]} />
+          <Bell color={colors.textSecondary} size={20} strokeWidth={1.5} />
+          <View style={[hs.notifDot, { backgroundColor: colors.accent, borderColor: colors.bg }]} />
         </Pressable>
       </View>
     </View>
@@ -115,104 +98,90 @@ function AppHeader() {
 }
 
 const hs = StyleSheet.create({
-  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 6, paddingBottom: 14 },
-  logoArea: { alignItems: 'center', gap: 8 },
-  logoText: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -1 },
-  logoBadge: { width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  logoDotInner: { width: 8, height: 8, borderRadius: 4 },
-  headerActions: { alignItems: 'center', gap: 6 },
-  headerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  notifDot: { position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: 3.5, borderWidth: 1.5, borderColor: '#000' },
+  header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10, height: 48 },
+  logoText: { fontSize: 17, fontWeight: '600' as const },
+  headerActions: { alignItems: 'center', gap: 16 },
+  notifDot: { position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: 3.5, borderWidth: 2 },
 });
 
-function StoriesRow() {
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const router = useRouter();
-
-  const stories = useMemo(() => [
-    { id: 'add', type: 'add' as const, name: language === 'ar' ? 'جديد' : 'New' },
-    ...expertSuggestions.map((e) => ({
-      id: e.id,
-      type: 'expert' as const,
-      name: e.name.split(' ')[0],
-      initial: e.nameInitial,
-      color: e.avatarColor,
-    })),
-    { id: 'trending', type: 'trending' as const, name: language === 'ar' ? 'رائج' : 'Trending', initial: '🔥', color: '#FB7185' },
-  ], [language]);
+function SectionTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i: number) => void }) {
+  const { language } = useLanguage();
+  const { colors } = useTheme();
+  const tabs = language === 'ar' ? SECTION_TABS_AR : SECTION_TABS_EN;
 
   return (
-    <View style={sr.container}>
-      <FlatList
-        horizontal
-        inverted={isRTL}
-        data={stories}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={sr.listContent}
-        renderItem={({ item }) => {
-          if (item.type === 'add') {
-            return (
-              <Pressable
-                onPress={() => { router.push('/create-post'); void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-                style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] }]}
-              >
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={sr.addCircle}
-                >
-                  <Plus color="#FFF" size={22} strokeWidth={2.5} />
-                </LinearGradient>
-                <Text style={[sr.storyName, { color: colors.textSecondary }]}>{item.name}</Text>
-              </Pressable>
-            );
-          }
-          return (
-            <Pressable
-              onPress={() => void Haptics.selectionAsync()}
-              style={({ pressed }) => [sr.storyItem, pressed && { opacity: 0.7, transform: [{ scale: 0.93 }] }]}
-            >
-              <LinearGradient
-                colors={item.type === 'trending' ? ['#FB7185', '#F472B6'] : [colors.storyRing1, colors.storyRing2]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={sr.storyRing}
-              >
-                <View style={[sr.storyRingInner, { backgroundColor: isDark ? colors.bg : colors.bgCard }]}>
-                  <View style={[sr.storyCircle, { backgroundColor: 'color' in item ? item.color : colors.accent }]}>
-                    {'initial' in item ? (
-                      <Text style={sr.storyInitial}>{item.initial}</Text>
-                    ) : null}
-                  </View>
-                </View>
-              </LinearGradient>
-              <Text style={[sr.storyName, { color: colors.textSecondary }]} numberOfLines={1}>{item.name}</Text>
-            </Pressable>
-          );
-        }}
-      />
+    <View style={[st.container, { borderBottomColor: colors.border }]}>
+      {tabs.map((tab, index) => (
+        <Pressable
+          key={tab}
+          onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
+          style={st.tabItem}
+        >
+          <Text style={[
+            st.tabText,
+            { color: activeTab === index ? colors.accent : colors.textMuted },
+          ]}>{tab}</Text>
+          {activeTab === index && (
+            <View style={[st.tabIndicator, { backgroundColor: colors.accent }]} />
+          )}
+        </Pressable>
+      ))}
     </View>
   );
 }
 
-const sr = StyleSheet.create({
-  container: { paddingTop: 2, paddingBottom: 18 },
-  listContent: { paddingHorizontal: 16, gap: 12 },
-  storyItem: { alignItems: 'center', width: 72, gap: 6 },
-  addCircle: { width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
-  storyRing: { width: 66, height: 66, borderRadius: 33, alignItems: 'center', justifyContent: 'center', padding: 2.5 },
-  storyRingInner: { width: 61, height: 61, borderRadius: 30.5, alignItems: 'center', justifyContent: 'center' },
-  storyCircle: { width: 55, height: 55, borderRadius: 27.5, alignItems: 'center', justifyContent: 'center' },
-  storyInitial: { color: '#FFF', fontSize: 20, fontWeight: '700' as const },
-  storyName: { fontSize: 11, fontWeight: '500' as const, textAlign: 'center' as const },
+const st = StyleSheet.create({
+  container: { flexDirection: 'row', borderBottomWidth: 1 },
+  tabItem: { flex: 1, alignItems: 'center', paddingVertical: 12, position: 'relative' as const },
+  tabText: { fontSize: 15, fontWeight: '500' as const },
+  tabIndicator: { position: 'absolute', bottom: -1, width: '50%', height: 2, borderRadius: 1 },
+});
+
+function ComposeBar() {
+  const router = useRouter();
+  const { isRTL, language } = useLanguage();
+  const { profile } = useAuth();
+  const { colors } = useTheme();
+
+  return (
+    <PressableScale
+      onPress={() => router.push('/create-post')}
+      style={[
+        cb.bar,
+        {
+          flexDirection: isRTL ? 'row-reverse' : 'row',
+          backgroundColor: colors.bgCard,
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+      ]}
+      haptic
+      testID="compose-post"
+    >
+      <View style={[cb.avatar, { backgroundColor: colors.accent }]}>
+        <Text style={cb.avatarText}>{(profile?.name ?? 'U').charAt(0).toUpperCase()}</Text>
+      </View>
+      <Text style={[cb.placeholder, { textAlign: isRTL ? 'right' : 'left', color: colors.textMuted }]}>
+        {language === 'ar' ? 'ماذا يدور في ذهنك؟' : "What's on your mind?"}
+      </Text>
+      <View style={[cb.btn, { backgroundColor: colors.accentLight }]}>
+        <Pen color={colors.accent} size={16} strokeWidth={1.5} />
+      </View>
+    </PressableScale>
+  );
+}
+
+const cb = StyleSheet.create({
+  bar: { alignItems: 'center', gap: 12, marginHorizontal: 16, marginVertical: 8, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12 },
+  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
+  placeholder: { flex: 1, fontSize: 15 },
+  btn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
 });
 
 function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCategory: string; onSelect: (cat: string) => void; extraCategories: string[] }) {
   const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const categories = language === 'ar' ? [...BASE_CATEGORIES_AR, ...extraCategories] : [...BASE_CATEGORIES_EN, ...extraCategories];
 
   const firstCat = categories[0];
@@ -239,17 +208,17 @@ function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCat
               isActive
                 ? { backgroundColor: colors.accent }
                 : {
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                    backgroundColor: colors.bgCard,
                     borderWidth: 1,
-                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                    borderColor: colors.border,
                   },
               pressed && { transform: [{ scale: 0.93 }] },
             ]}
           >
             <Text style={[
               ct.text,
-              { color: isActive ? '#000' : colors.textSecondary },
-              isActive && { fontWeight: '700' as const },
+              { color: isActive ? '#FFF' : colors.textMuted },
+              isActive && { fontWeight: '600' as const },
             ]}>{item}</Text>
           </Pressable>
         );
@@ -259,188 +228,9 @@ function CategoryTabs({ activeCategory, onSelect, extraCategories }: { activeCat
 }
 
 const ct = StyleSheet.create({
-  row: { paddingHorizontal: 16, gap: 8, paddingBottom: 14 },
-  pill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24 },
-  text: { fontSize: 13, fontWeight: '600' as const },
-});
-
-function ComposeBar() {
-  const router = useRouter();
-  const { isRTL, language } = useLanguage();
-  const { profile } = useAuth();
-  const { colors, isDark } = useTheme();
-
-  return (
-    <PressableScale
-      onPress={() => router.push('/create-post')}
-      style={[
-        cb.bar,
-        {
-          flexDirection: isRTL ? 'row-reverse' : 'row',
-          backgroundColor: isDark ? colors.bgCard : colors.white,
-          borderWidth: 1,
-          borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-        },
-      ]}
-      haptic
-      testID="compose-post"
-    >
-      <LinearGradient
-        colors={[colors.accent, colors.gradientEnd]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={cb.avatar}
-      >
-        <Text style={cb.avatarText}>{(profile?.name ?? 'U').charAt(0).toUpperCase()}</Text>
-      </LinearGradient>
-      <Text style={[cb.placeholder, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
-        {language === 'ar' ? 'شارك فكرة أو تحليل...' : "Share an insight..."}
-      </Text>
-      <View style={[cb.btn, { backgroundColor: colors.accentSoft }]}>
-        <Sparkles color={colors.accent} size={14} strokeWidth={2} />
-      </View>
-    </PressableScale>
-  );
-}
-
-const cb = StyleSheet.create({
-  bar: { alignItems: 'center', gap: 12, marginHorizontal: 16, marginBottom: 6, padding: 12, borderRadius: 20 },
-  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 15, fontWeight: '800' as const },
-  placeholder: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
-  btn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-});
-
-function ExpertsRow() {
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-
-  return (
-    <View style={er.section}>
-      <View style={[er.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
-        <Text style={[er.title, { color: colors.text }]}>
-          {language === 'ar' ? 'خبراء مقترحون' : 'Suggested Experts'}
-        </Text>
-        <Pressable style={({ pressed }) => [
-          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 2 },
-          pressed && { opacity: 0.6 },
-        ]}>
-          <Text style={[er.seeAll, { color: colors.accent }]}>{language === 'ar' ? 'الكل' : 'All'}</Text>
-          <ChevronRight color={colors.accent} size={14} strokeWidth={2} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
-        </Pressable>
-      </View>
-      <FlatList
-        horizontal
-        inverted={isRTL}
-        data={expertSuggestions}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={er.listContent}
-        renderItem={({ item }) => (
-          <PressableScale
-            style={[
-              er.card,
-              {
-                backgroundColor: isDark ? colors.bgCard : colors.white,
-                borderWidth: 1,
-                borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-              },
-            ]}
-            testID={`expert-${item.id}`}
-          >
-            <View style={[er.avatar, { backgroundColor: item.avatarColor }]}>
-              <Text style={er.avatarText}>{item.nameInitial}</Text>
-            </View>
-            <Text style={[er.name, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
-            <Text style={[er.role, { color: colors.textTertiary }]} numberOfLines={1}>{getLocalizedText(item.role, language)}</Text>
-            <LinearGradient
-              colors={[colors.accent, colors.gradientEnd]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={er.followBtn}
-            >
-              <Text style={er.followText}>{language === 'ar' ? 'متابعة' : 'Follow'}</Text>
-            </LinearGradient>
-          </PressableScale>
-        )}
-      />
-    </View>
-  );
-}
-
-const er = StyleSheet.create({
-  section: { paddingTop: 20, gap: 14 },
-  head: { alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 18, fontWeight: '700' as const, letterSpacing: -0.3 },
-  seeAll: { fontSize: 13, fontWeight: '600' as const },
-  listContent: { paddingHorizontal: 16, gap: 10 },
-  card: { width: 130, alignItems: 'center', gap: 8, paddingVertical: 20, paddingHorizontal: 12, borderRadius: 20 },
-  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 19, fontWeight: '800' as const },
-  name: { fontSize: 13, fontWeight: '700' as const, textAlign: 'center' as const },
-  role: { fontSize: 11, textAlign: 'center' as const, lineHeight: 15 },
-  followBtn: { paddingHorizontal: 22, paddingVertical: 8, borderRadius: 14, marginTop: 4 },
-  followText: { fontSize: 12, fontWeight: '700' as const, color: '#FFF' },
-});
-
-function TrendingBar() {
-  const { isRTL, language } = useLanguage();
-  const { colors, isDark } = useTheme();
-
-  return (
-    <View style={tb.section}>
-      <View style={[tb.head, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
-        <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }}>
-          <TrendingUp color={colors.rose} size={16} strokeWidth={2} />
-          <Text style={[tb.title, { color: colors.text }]}>
-            {language === 'ar' ? 'رائج الآن' : 'Trending Now'}
-          </Text>
-        </View>
-      </View>
-      <FlatList
-        horizontal
-        inverted={isRTL}
-        data={trendingTopics}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={tb.row}
-        renderItem={({ item }) => (
-          <Pressable style={({ pressed }) => [
-            tb.chip,
-            {
-              backgroundColor: isDark
-                ? (item.isHot ? 'rgba(251,113,133,0.08)' : 'rgba(255,255,255,0.04)')
-                : (item.isHot ? 'rgba(214,41,74,0.06)' : 'rgba(0,0,0,0.03)'),
-              borderWidth: 1,
-              borderColor: item.isHot
-                ? (isDark ? 'rgba(251,113,133,0.15)' : 'rgba(214,41,74,0.10)')
-                : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
-            },
-            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
-          ]}>
-            {item.isHot ? <Flame color={colors.rose} size={12} /> : null}
-            <Text style={[tb.text, { color: colors.textSecondary }, item.isHot && { color: colors.rose }]}>
-              {getLocalizedText(item.label, language)}
-            </Text>
-            <View style={[tb.count, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' }]}>
-              <Text style={[tb.countText, { color: colors.textTertiary }]}>{item.posts}</Text>
-            </View>
-          </Pressable>
-        )}
-      />
-    </View>
-  );
-}
-
-const tb = StyleSheet.create({
-  section: { paddingTop: 20, gap: 12 },
-  head: { alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2 },
-  row: { paddingHorizontal: 16, gap: 8, paddingTop: 4 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
-  text: { fontSize: 13, fontWeight: '600' as const },
-  count: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
-  countText: { fontSize: 10, fontWeight: '700' as const },
+  row: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
+  pill: { paddingHorizontal: 16, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  text: { fontSize: 13, fontWeight: '500' as const },
 });
 
 const FeedCard = React.memo(function FeedCard({
@@ -459,17 +249,17 @@ const FeedCard = React.memo(function FeedCard({
   isFirst?: boolean;
 }) {
   const { isRTL } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const heartScale = useRef(new Animated.Value(1)).current;
   const bookmarkScale = useRef(new Animated.Value(1)).current;
   const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideIn = useRef(new Animated.Value(30)).current;
+  const slideIn = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 450, useNativeDriver: true }),
-      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 130 }),
+      Animated.timing(fadeIn, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.spring(slideIn, { toValue: 0, useNativeDriver: true, damping: 20, stiffness: 140 }),
     ]).start();
   }, [fadeIn, slideIn]);
 
@@ -508,18 +298,12 @@ const FeedCard = React.memo(function FeedCard({
       {
         transform: [{ scale: scaleAnim }, { translateY: slideIn }],
         opacity: fadeIn,
-        backgroundColor: isDark ? colors.bgCard : colors.white,
+        backgroundColor: colors.bgCard,
+        borderColor: colors.border,
       },
       isFirst && fc.featuredCard,
+      isFirst && { borderLeftColor: colors.accent, borderLeftWidth: 3 },
     ]}>
-      {isFirst && (
-        <LinearGradient
-          colors={[colors.accent, colors.gradientEnd]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={fc.featuredStripe}
-        />
-      )}
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} onPress={onPress} testID={`feed-${post.id}`}>
         <View style={[fc.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Pressable onPress={() => onAuthorPress(post.authorId)}>
@@ -528,64 +312,61 @@ const FeedCard = React.memo(function FeedCard({
             </View>
           </Pressable>
           <Pressable onPress={() => onAuthorPress(post.authorId)} style={[fc.authorInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <View style={[fc.authorNameRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <Text style={[fc.authorName, { color: colors.text }]}>{post.authorName}</Text>
-              {isFirst && (
-                <View style={[fc.featuredBadge, { backgroundColor: colors.accentLight }]}>
-                  <Sparkles color={colors.accent} size={8} strokeWidth={2.5} />
-                </View>
-              )}
-            </View>
-            <Text style={[fc.authorRole, { color: colors.textTertiary }]} numberOfLines={1}>
+            <Text style={[fc.authorName, { color: colors.text }]}>{post.authorName}</Text>
+            <Text style={[fc.authorRole, { color: colors.textSecondary }]} numberOfLines={1}>
               {post.authorRole ? `${post.authorRole}` : ''}{post.authorCompany ? ` · ${post.authorCompany}` : ''}
             </Text>
           </Pressable>
-          <Text style={[fc.time, { color: colors.textTertiary }]}>{timeAgo}</Text>
+          <Text style={[fc.time, { color: colors.textMuted }]}>{timeAgo}</Text>
         </View>
-
-        {post.topic ? (
-          <View style={[fc.topicRow, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <View style={[fc.topicBadge, { backgroundColor: colors.accentSoft }]}>
-              <Text style={[fc.topicText, { color: colors.accent }]}>{post.topic}</Text>
-            </View>
-          </View>
-        ) : null}
 
         <Text style={[fc.content, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
           {post.content}
         </Text>
 
-        <View style={[fc.actions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <Pressable onPress={handleLike} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`like-${post.id}`}>
-            <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-              <Heart
-                color={post.isLiked ? colors.rose : colors.textTertiary}
-                fill={post.isLiked ? colors.rose : 'transparent'}
-                size={18}
-                strokeWidth={1.8}
-              />
-            </Animated.View>
-            <Text style={[fc.actionText, { color: colors.textTertiary }, post.isLiked && { color: colors.rose }]}>
-              {post.likesCount}
-            </Text>
-          </Pressable>
-          <Pressable onPress={onPress} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`comment-${post.id}`}>
-            <MessageCircle color={colors.textTertiary} size={18} strokeWidth={1.8} />
-            <Text style={[fc.actionText, { color: colors.textTertiary }]}>{post.commentsCount}</Text>
-          </Pressable>
-          <Pressable onPress={handleSave} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`save-${post.id}`}>
-            <Animated.View style={{ transform: [{ scale: bookmarkScale }] }}>
-              <Bookmark
-                color={post.isSaved ? colors.accent : colors.textTertiary}
-                fill={post.isSaved ? colors.accent : 'transparent'}
-                size={18}
-                strokeWidth={1.8}
-              />
-            </Animated.View>
-          </Pressable>
-          <Pressable style={({ pressed }) => [fc.action, pressed && fc.pressed]}>
-            <Share2 color={colors.textTertiary} size={16} strokeWidth={1.8} />
-          </Pressable>
+        {post.topic ? (
+          <View style={[fc.topicRow, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <View style={[fc.topicBadge, { backgroundColor: colors.accentLight }]}>
+              <Text style={[fc.topicText, { color: colors.accent }]}>#{post.topic}</Text>
+            </View>
+          </View>
+        ) : null}
+
+        <View style={[fc.actionsRow, { borderTopColor: colors.border }]}>
+          <View style={[fc.actionsLeft, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Pressable onPress={handleLike} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`like-${post.id}`}>
+              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                <Heart
+                  color={post.isLiked ? colors.error : colors.textMuted}
+                  fill={post.isLiked ? colors.error : 'transparent'}
+                  size={18}
+                  strokeWidth={1.5}
+                />
+              </Animated.View>
+              <Text style={[fc.actionText, { color: colors.textMuted }, post.isLiked && { color: colors.error }]}>
+                {post.likesCount}
+              </Text>
+            </Pressable>
+            <Pressable onPress={onPress} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`comment-${post.id}`}>
+              <MessageCircle color={colors.textMuted} size={18} strokeWidth={1.5} />
+              <Text style={[fc.actionText, { color: colors.textMuted }]}>{post.commentsCount}</Text>
+            </Pressable>
+          </View>
+          <View style={[fc.actionsRight, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Pressable onPress={handleSave} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`save-${post.id}`}>
+              <Animated.View style={{ transform: [{ scale: bookmarkScale }] }}>
+                <Bookmark
+                  color={post.isSaved ? colors.accent : colors.textMuted}
+                  fill={post.isSaved ? colors.accent : 'transparent'}
+                  size={18}
+                  strokeWidth={1.5}
+                />
+              </Animated.View>
+            </Pressable>
+            <Pressable style={({ pressed }) => [fc.action, pressed && fc.pressed]}>
+              <Share2 color={colors.textMuted} size={16} strokeWidth={1.5} />
+            </Pressable>
+          </View>
         </View>
       </Pressable>
     </Animated.View>
@@ -593,37 +374,30 @@ const FeedCard = React.memo(function FeedCard({
 });
 
 const fc = StyleSheet.create({
-  card: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden' },
-  featuredCard: {
-    shadowColor: '#D4A254',
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  featuredStripe: { height: 3 },
+  card: { marginHorizontal: 16, marginTop: 8, borderRadius: 12, borderWidth: 1, overflow: 'hidden' },
+  featuredCard: {},
   header: { alignItems: 'center', gap: 10, padding: 16, paddingBottom: 8 },
-  avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 16, fontWeight: '700' as const },
+  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
   authorInfo: { flex: 1, gap: 2 },
-  authorNameRow: { alignItems: 'center', gap: 6 },
-  authorName: { fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.2 },
-  featuredBadge: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  authorRole: { fontSize: 12, letterSpacing: -0.1 },
-  time: { fontSize: 12, fontWeight: '500' as const },
-  topicRow: { paddingHorizontal: 16, paddingBottom: 6 },
-  topicBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  topicText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
-  content: { paddingHorizontal: 16, paddingBottom: 14, fontSize: 15, lineHeight: 24, letterSpacing: -0.2 },
-  actions: { justifyContent: 'space-around', paddingVertical: 12, paddingHorizontal: 12 },
-  action: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4, paddingHorizontal: 8 },
-  actionText: { fontSize: 13, fontWeight: '600' as const },
+  authorName: { fontSize: 15, fontWeight: '600' as const },
+  authorRole: { fontSize: 13 },
+  time: { fontSize: 13 },
+  content: { paddingHorizontal: 16, paddingBottom: 12, fontSize: 15, lineHeight: 22 },
+  topicRow: { paddingHorizontal: 16, paddingBottom: 12 },
+  topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  topicText: { fontSize: 11, fontWeight: '600' as const },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16, borderTopWidth: 1 },
+  actionsLeft: { gap: 16 },
+  actionsRight: { gap: 16 },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  actionText: { fontSize: 13 },
   pressed: { opacity: 0.6 },
 });
 
 function LoadingSkeleton() {
   return (
-    <View style={{ paddingTop: 8 }}>
+    <View style={{ paddingTop: 4 }}>
       <FeedCardSkeleton />
       <FeedCardSkeleton />
       <FeedCardSkeleton />
@@ -638,10 +412,8 @@ function EmptyFeed() {
 
   return (
     <View style={ef.wrap}>
-      <View style={[ef.iconOuter, { backgroundColor: colors.accentSoft }]}>
-        <View style={[ef.iconWrap, { backgroundColor: colors.accentLight }]}>
-          <MessageCircle color={colors.accent} size={28} strokeWidth={1.5} />
-        </View>
+      <View style={[ef.iconWrap, { backgroundColor: colors.accentLight }]}>
+        <Sparkles color={colors.accent} size={40} strokeWidth={1.5} />
       </View>
       <Text style={[ef.title, { color: colors.text }]}>
         {language === 'ar' ? 'لا توجد منشورات بعد' : 'No posts yet'}
@@ -651,31 +423,23 @@ function EmptyFeed() {
       </Text>
       <Pressable
         onPress={() => router.push('/create-post')}
-        style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }]}
+        style={({ pressed }) => [ef.btn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
       >
-        <LinearGradient
-          colors={[colors.accent, colors.gradientEnd]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={ef.btn}
-        >
-          <Text style={ef.btnText}>
-            {language === 'ar' ? 'أنشئ منشوراً' : 'Create Post'}
-          </Text>
-        </LinearGradient>
+        <Text style={ef.btnText}>
+          {language === 'ar' ? 'أنشئ منشوراً' : 'Create Post'}
+        </Text>
       </Pressable>
     </View>
   );
 }
 
 const ef = StyleSheet.create({
-  wrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 64, paddingHorizontal: 40, gap: 12 },
-  iconOuter: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  iconWrap: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 20, fontWeight: '700' as const, letterSpacing: -0.3 },
-  desc: { fontSize: 14, textAlign: 'center' as const, lineHeight: 21 },
-  btn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 20, alignItems: 'center', marginTop: 14 },
-  btnText: { color: '#FFF', fontSize: 15, fontWeight: '700' as const, letterSpacing: -0.1 },
+  wrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80, paddingHorizontal: 40, gap: 10 },
+  iconWrap: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  title: { fontSize: 17, fontWeight: '600' as const },
+  desc: { fontSize: 13, textAlign: 'center' as const },
+  btn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 16 },
+  btnText: { color: '#FFF', fontSize: 15, fontWeight: '600' as const },
 });
 
 export default function HomeScreen() {
@@ -687,6 +451,7 @@ export default function HomeScreen() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
+  const [activeSectionTab, setActiveSectionTab] = useState(0);
   const [communityCategories, setCommunityCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -732,21 +497,13 @@ export default function HomeScreen() {
   }, [feedQuery.data, activeCategory]);
 
   const likeMutation = useMutation({
-    mutationFn: async (postId: string) => {
-      return trpcClient.posts.toggleLike.mutate({ postId });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-    onError: (err) => {
-      console.log('[HomeScreen] like error', err.message);
-    },
+    mutationFn: async (postId: string) => trpcClient.posts.toggleLike.mutate({ postId }),
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['posts'] }); },
+    onError: (err) => { console.log('[HomeScreen] like error', err.message); },
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (postId: string) => {
-      return trpcClient.posts.toggleSave.mutate({ postId });
-    },
+    mutationFn: async (postId: string) => trpcClient.posts.toggleSave.mutate({ postId }),
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: ['posts'] });
       if (data.saved) {
@@ -754,9 +511,7 @@ export default function HomeScreen() {
         setToastVisible(true);
       }
     },
-    onError: (err) => {
-      console.log('[HomeScreen] save error', err.message);
-    },
+    onError: (err) => { console.log('[HomeScreen] save error', err.message); },
   });
 
   const handleLike = useCallback((postId: string) => {
@@ -783,27 +538,18 @@ export default function HomeScreen() {
     }
   }, [feedQuery]);
 
-  const listHeader = useMemo(() => (
-    <>
-      <AppHeader />
-      <StoriesRow />
-      <CategoryTabs activeCategory={activeCategory} onSelect={setActiveCategory} extraCategories={communityCategories} />
-      <ComposeBar />
-      <ExpertsRow />
-      <TrendingBar />
-      <View style={fd.divider}>
-        <View style={[fd.dividerLine, { backgroundColor: colors.separator }]} />
-        <Text style={[fd.dividerText, { color: colors.textTertiary }]}>
-          {language === 'ar' ? 'آخر المنشورات' : 'Latest Posts'}
-        </Text>
-        <View style={[fd.dividerLine, { backgroundColor: colors.separator }]} />
-      </View>
-    </>
-  ), [activeCategory, communityCategories, language, colors]);
-
   const handleAuthorPress = useCallback((authorId: string) => {
     router.push(`/user/${authorId}`);
   }, [router]);
+
+  const listHeader = useMemo(() => (
+    <>
+      <AppHeader />
+      <SectionTabs activeTab={activeSectionTab} onSelect={setActiveSectionTab} />
+      <ComposeBar />
+      <CategoryTabs activeCategory={activeCategory} onSelect={setActiveCategory} extraCategories={communityCategories} />
+    </>
+  ), [activeCategory, communityCategories, activeSectionTab]);
 
   const renderItem = useCallback(({ item, index }: { item: EnrichedPost; index: number }) => (
     <FeedCard
@@ -863,18 +609,12 @@ export default function HomeScreen() {
           onPress={() => { router.push('/create-post'); void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }}
           style={({ pressed }) => [
             styles.fab,
+            { backgroundColor: colors.accent },
             pressed && { opacity: 0.9, transform: [{ scale: 0.9 }] },
           ]}
           testID="fab-create"
         >
-          <LinearGradient
-            colors={[colors.accent, colors.gradientEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.fabGradient}
-          >
-            <Plus color="#FFF" size={24} strokeWidth={2.5} />
-          </LinearGradient>
+          <Plus color="#FFF" size={24} strokeWidth={2.5} />
         </Pressable>
 
         <Toast visible={toastVisible} message={toastMsg} type="success" onDismiss={() => setToastVisible(false)} />
@@ -882,12 +622,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const fd = StyleSheet.create({
-  divider: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 28, paddingBottom: 4, gap: 12 },
-  dividerLine: { flex: 1, height: 1 },
-  dividerText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const },
-});
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
@@ -897,19 +631,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 90,
     right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    shadowColor: '#D4A254',
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
-  },
-  fabGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
