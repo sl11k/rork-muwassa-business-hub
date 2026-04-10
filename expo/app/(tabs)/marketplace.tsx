@@ -418,7 +418,7 @@ export default function MarketplaceScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
-  listContent: { paddingBottom: 100, flexGrow: 1 },
+  listContent: { paddingBottom: 120, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },

@@ -25,6 +25,45 @@ import {
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../create-context";
 
 export const communitiesRouter = createTRPCRouter({
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(2).max(100),
+        nameAr: z.string().min(2).max(100),
+        description: z.string().min(5).max(500),
+        descriptionAr: z.string().min(5).max(500),
+        privacy: z.enum(["public", "private", "premium"]).default("public"),
+        icon: z.string().default("🏢"),
+        accent: z.string().default("#0D9488"),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      console.log("[Communities] create by", ctx.userId, input.name);
+      const community = createCommunity(ctx.userId, input);
+      return {
+        id: community.id,
+        name: community.name,
+        nameAr: community.nameAr,
+        description: community.description,
+        descriptionAr: community.descriptionAr,
+        privacy: community.privacy,
+        icon: community.icon,
+        accent: community.accent,
+        memberCount: getCommunityMemberCount(community.id),
+        postCount: 0,
+        isMember: true,
+        createdBy: community.createdBy,
+        createdAt: community.createdAt,
+      };
+    }),
+
+  toggleNotifications: protectedProcedure
+    .input(z.object({ communityId: z.string() }))
+    .mutation(({ ctx, input }) => {
+      console.log("[Communities] toggleNotifications", input.communityId, "by", ctx.userId);
+      return { enabled: true };
+    }),
+
   list: publicProcedure
     .input(
       z.object({

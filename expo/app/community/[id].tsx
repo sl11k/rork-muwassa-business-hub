@@ -391,7 +391,22 @@ export default function CommunityDetailScreen() {
     );
   };
 
+  const isPrivateAndNotMember = isPrivate && !community.isMember;
+
   const renderContent = () => {
+    if (isPrivateAndNotMember) {
+      return (
+        <View style={styles.emptyState}>
+          <Lock color={colors.textMuted} size={32} />
+          <Text style={styles.emptyText}>
+            {language === 'ar' ? 'هذا مجتمع خاص' : 'This is a private community'}
+          </Text>
+          <Text style={[styles.emptyText, { fontSize: 13 }]}>
+            {language === 'ar' ? 'انضم للمجتمع لرؤية المحتوى' : 'Join to see content'}
+          </Text>
+        </View>
+      );
+    }
     switch (activeTab) {
       case 0: return renderDiscussions();
       case 2: return renderMembers();

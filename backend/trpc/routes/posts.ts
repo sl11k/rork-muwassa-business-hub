@@ -18,6 +18,14 @@ import {
   getCommentCount,
   getProfile,
   createNotification,
+  followUser,
+  unfollowUser,
+  isFollowing,
+  getFollowingCount,
+  getFollowerCount,
+  getFollowingPosts,
+  getFollowingIds,
+  getFollowerIds,
 } from "@/backend/lib/store";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../create-context";
 
@@ -86,11 +94,16 @@ export const postsRouter = createTRPCRouter({
       z.object({
         content: z.string().min(10).max(2000),
         topic: z.string().min(1),
+        attachments: z.array(z.object({
+          type: z.enum(['image', 'file', 'link']),
+          url: z.string(),
+          name: z.string().optional(),
+        })).optional().default([]),
       })
     )
     .mutation(({ ctx, input }) => {
       console.log("[Posts] create by", ctx.userId, "topic=", input.topic);
-      const post = createPost(ctx.userId, input.content, input.topic);
+      const post = createPost(ctx.userId, input.content, input.topic, input.attachments);
       const authorProfile = getProfile(ctx.userId);
       return {
         ...post,
@@ -104,6 +117,57 @@ export const postsRouter = createTRPCRouter({
         isLiked: false,
         isSaved: false,
       };
+    }),
+
+  followingFeed: protectedProcedure
+    .input(z.object({ cursor: z.number().default(0), limit: z.number().min(1).max(50).default(20) }))
+    .query(({ ctx, input }) => {
+      console.log("[Posts] followingFeed for", ctx.userId);
+      const result = getFollowingPosts(ctx.userId, input.cursor, input.limit);
+      const enriched = result.posts.map((post) => {
+        const authorProfile = getProfile(post.authorId);
+        return {
+          ...post,
+          authorName: authorProfile?.name ?? "Unknown",
+          authorRole: authorProfile?.role ?? "",
+          authorCompany: authorProfile?.company ?? "",
+          authorInitial: (authorProfile?.name ?? "U").charAt(0).toUpperCase(),
+          likesCount: getLikeCount(post.id),
+          commentsCount: getCommentCount(post.id),
+          savesCount: getSaveCount(post.id),
+          isLiked: isLiked(post.id, ctx.userId),
+          isSaved: isSaved(post.id, ctx.userId),
+        };
+      });
+      return { posts: enriched, nextCursor: result.nextCursor };
+    }),
+
+  follow: protectedProcedure
+    .input(z.object({ targetId: z.string() }))
+    .mutation(({ ctx, input }) => {
+      console.log("[Posts] follow", input.targetId, "by", ctx.userId);
+      const ok = followUser(ctx.userId, input.targetId);
+      return { followed: ok, followingCount: getFollowingCount(ctx.userId), followerCount: getFollowerCount(input.targetId) };
+    }),
+
+  unfollow: protectedProcedure
+    .input(z.object({ targetId: z.string() }))
+    .mutation(({ ctx, input }) => {
+      console.log("[Posts] unfollow", input.targetId, "by", ctx.userId);
+      const ok = unfollowUser(ctx.userId, input.targetId);
+      return { unfollowed: ok, followingCount: getFollowingCount(ctx.userId), followerCount: getFollowerCount(input.targetId) };
+    }),
+
+  isFollowing: protectedProcedure
+    .input(z.object({ targetId: z.string() }))
+    .query(({ ctx, input }) => {
+      return { isFollowing: isFollowing(ctx.userId, input.targetId) };
+    }),
+
+  followStats: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ input }) => {
+      return { followingCount: getFollowingCount(input.userId), followerCount: getFollowerCount(input.userId) };
     }),
 
   delete: protectedProcedure
@@ -176,6 +240,34 @@ export const postsRouter = createTRPCRouter({
           authorInitial: (profile?.name ?? "U").charAt(0).toUpperCase(),
         };
       });
+    }),
+
+  userPosts: publicProcedure
+    .input(z.object({ userId: z.string(), cursor: z.number().default(0), limit: z.number().default(20) }))
+    .query(({ input, ctx }) => {
+      console.log("[Posts] userPosts for", input.userId);
+      const all = listPosts(0, 999);
+      const userPosts = all.posts.filter(p => p.authorId === input.userId);
+      const start = input.cursor;
+      const end = Math.min(start + input.limit, userPosts.length);
+      const sliced = userPosts.slice(start, end);
+      const userId = ctx.userId;
+      const enriched = sliced.map((post) => {
+        const authorProfile = getProfile(post.authorId);
+        return {
+          ...post,
+          authorName: authorProfile?.name ?? "Unknown",
+          authorRole: authorProfile?.role ?? "",
+          authorCompany: authorProfile?.company ?? "",
+          authorInitial: (authorProfile?.name ?? "U").charAt(0).toUpperCase(),
+          likesCount: getLikeCount(post.id),
+          commentsCount: getCommentCount(post.id),
+          savesCount: getSaveCount(post.id),
+          isLiked: userId ? isLiked(post.id, userId) : false,
+          isSaved: userId ? isSaved(post.id, userId) : false,
+        };
+      });
+      return { posts: enriched, nextCursor: end < userPosts.length ? end : null };
     }),
 
   addComment: protectedProcedure

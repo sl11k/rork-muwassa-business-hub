@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -20,8 +21,10 @@ import {
   Check,
   GraduationCap,
   MapPin,
+  Trash2,
   UserRound,
 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 import { theme } from '@/constants/theme';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -226,34 +229,133 @@ export default function EditProfileScreen() {
               </View>
             </View>
 
-            <View style={styles.certSection}>
-              <Text style={[styles.skillsTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
-                {language === 'ar' ? 'الشهادات المهنية' : 'Certifications'}
-              </Text>
-              <View style={styles.certCard}>
-                <View style={styles.certIcon}>
-                  <GraduationCap color={colors.gold} size={18} />
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={[styles.certName, { textAlign: isRTL ? 'right' : 'left' }]}>
-                    {language === 'ar' ? 'شهادة الحوكمة المهنية (CGP)' : 'Certified Governance Professional (CGP)'}
-                  </Text>
-                  <Text style={[styles.certIssuer, { textAlign: isRTL ? 'right' : 'left' }]}>
-                    {language === 'ar' ? 'معهد الحوكمة الدولي · 2022' : 'International Governance Institute · 2022'}
-                  </Text>
-                </View>
-              </View>
-              <Pressable style={({ pressed }) => [styles.addCertBtn, pressed && styles.pressed]}>
-                <Text style={styles.addCertText}>
-                  {language === 'ar' ? '+ إضافة شهادة' : '+ Add Certification'}
-                </Text>
-              </Pressable>
-            </View>
+            <CertificatesSection />
 
             <View style={{ height: 60 }} />
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+interface CertItem {
+  id: string;
+  name: string;
+  issuer: string;
+  year: string;
+}
+
+function CertificatesSection() {
+  const { colors } = useTheme();
+  const { isRTL, language } = useLanguage();
+  const styles = useStyles();
+  const [certs, setCerts] = useState<CertItem[]>([
+    {
+      id: '1',
+      name: language === 'ar' ? 'شهادة الحوكمة المهنية (CGP)' : 'Certified Governance Professional (CGP)',
+      issuer: language === 'ar' ? 'معهد الحوكمة الدولي' : 'International Governance Institute',
+      year: '2022',
+    },
+  ]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newIssuer, setNewIssuer] = useState('');
+  const [newYear, setNewYear] = useState('');
+
+  const handleAdd = useCallback(() => {
+    if (!newName.trim() || !newIssuer.trim()) return;
+    setCerts(prev => [...prev, {
+      id: Date.now().toString(),
+      name: newName.trim(),
+      issuer: newIssuer.trim(),
+      year: newYear.trim() || new Date().getFullYear().toString(),
+    }]);
+    setNewName('');
+    setNewIssuer('');
+    setNewYear('');
+    setModalVisible(false);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, [newName, newIssuer, newYear]);
+
+  const handleRemove = useCallback((id: string) => {
+    setCerts(prev => prev.filter(c => c.id !== id));
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
+  return (
+    <View style={styles.certSection}>
+      <Text style={[styles.skillsTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+        {language === 'ar' ? 'الشهادات المهنية' : 'Certifications'}
+      </Text>
+      {certs.map((cert) => (
+        <View key={cert.id} style={[styles.certCard, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={styles.certIcon}>
+            <GraduationCap color={colors.gold ?? '#FBBF24'} size={18} />
+          </View>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={[styles.certName, { textAlign: isRTL ? 'right' : 'left' }]}>{cert.name}</Text>
+            <Text style={[styles.certIssuer, { textAlign: isRTL ? 'right' : 'left' }]}>{cert.issuer} · {cert.year}</Text>
+          </View>
+          <Pressable onPress={() => handleRemove(cert.id)} hitSlop={8}>
+            <Trash2 color={colors.error ?? '#FB7185'} size={16} />
+          </Pressable>
+        </View>
+      ))}
+      <Pressable
+        onPress={() => setModalVisible(true)}
+        style={({ pressed }) => [styles.addCertBtn, pressed && styles.pressed]}
+      >
+        <Text style={styles.addCertText}>
+          {language === 'ar' ? '+ إضافة شهادة' : '+ Add Certification'}
+        </Text>
+      </Pressable>
+
+      <Modal visible={modalVisible} transparent animationType="fade" statusBarTranslucent>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 32 }}>
+          <View style={{ width: '100%', borderRadius: 18, padding: 24, gap: 14, backgroundColor: colors.bgCard }}>
+            <Text style={{ fontSize: 18, fontWeight: '700' as const, color: colors.text, textAlign: 'center' }}>
+              {language === 'ar' ? 'إضافة شهادة مهنية' : 'Add Certification'}
+            </Text>
+            <TextInput
+              value={newName}
+              onChangeText={setNewName}
+              placeholder={language === 'ar' ? 'اسم الشهادة' : 'Certificate name'}
+              placeholderTextColor={colors.textMuted}
+              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: colors.bg, textAlign: isRTL ? 'right' : 'left' }}
+            />
+            <TextInput
+              value={newIssuer}
+              onChangeText={setNewIssuer}
+              placeholder={language === 'ar' ? 'الجهة المانحة' : 'Issuing organization'}
+              placeholderTextColor={colors.textMuted}
+              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: colors.bg, textAlign: isRTL ? 'right' : 'left' }}
+            />
+            <TextInput
+              value={newYear}
+              onChangeText={setNewYear}
+              placeholder={language === 'ar' ? 'السنة (مثال: 2024)' : 'Year (e.g. 2024)'}
+              placeholderTextColor={colors.textMuted}
+              keyboardType="number-pad"
+              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: colors.bg, textAlign: isRTL ? 'right' : 'left' }}
+            />
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
+              <Pressable
+                onPress={() => { setModalVisible(false); setNewName(''); setNewIssuer(''); setNewYear(''); }}
+                style={{ flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, backgroundColor: colors.bgMuted }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '600' as const, color: colors.text }}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleAdd}
+                style={{ flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, backgroundColor: colors.accent }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '700' as const, color: '#FFF' }}>{language === 'ar' ? 'إضافة' : 'Add'}</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

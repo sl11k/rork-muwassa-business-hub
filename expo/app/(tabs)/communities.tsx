@@ -5,6 +5,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,11 +15,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
+  Bookmark,
   Crown,
   Globe,
+  Heart,
   Lock,
+  MessageCircle,
+  Plus,
   Search,
+  ShoppingBag,
+  TrendingUp,
   Users,
+  X,
 } from 'lucide-react-native';
 
 import { PressableScale } from '@/components/PressableScale';
@@ -28,6 +36,14 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 import { trpcClient } from '@/lib/trpc';
+import {
+  getLocalizedText,
+  trendingTopics,
+  expertSuggestions,
+  communities as mockCommunities,
+  services as mockServices,
+  feedPosts,
+} from '@/data/businessHub';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface CommunityItem {
@@ -48,15 +64,30 @@ interface CommunityItem {
 const FILTERS_AR = ['الكل', 'عام', 'خاص', 'مميز'];
 const FILTERS_EN = ['All', 'Public', 'Private', 'Premium'];
 
-function Header({ searchText, onSearchChange }: { searchText: string; onSearchChange: (t: string) => void }) {
+const DISCOVER_TABS_AR = ['الكل', 'مجتمعات', 'خبراء', 'خدمات', 'منشورات'];
+const DISCOVER_TABS_EN = ['All', 'Communities', 'Experts', 'Services', 'Posts'];
+
+function Header({ searchText, onSearchChange, onClear }: { searchText: string; onSearchChange: (t: string) => void; onClear: () => void }) {
   const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   return (
     <View style={styles.headerWrap}>
-      <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-        {language === 'ar' ? 'اكتشف' : 'Discover'}
-      </Text>
+      <View style={[styles.headerTopRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
+          {language === 'ar' ? 'اكتشف' : 'Discover'}
+        </Text>
+        {isAuthenticated && (
+          <Pressable
+            onPress={() => router.push('/create-community' as any)}
+            style={({ pressed }) => [styles.createBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
+          >
+            <Plus color="#FFF" size={16} strokeWidth={2} />
+          </Pressable>
+        )}
+      </View>
       <View style={[
         styles.searchBar,
         {
@@ -70,25 +101,30 @@ function Header({ searchText, onSearchChange }: { searchText: string; onSearchCh
         <TextInput
           value={searchText}
           onChangeText={onSearchChange}
-          placeholder={language === 'ar' ? 'ابحث عن مجتمع...' : 'Search communities...'}
+          placeholder={language === 'ar' ? 'ابحث عن مجتمعات، خبراء، خدمات...' : 'Search communities, experts, services...'}
           placeholderTextColor={colors.textMuted}
           style={[styles.searchInput, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}
         />
+        {searchText.length > 0 && (
+          <Pressable onPress={onClear} hitSlop={8}>
+            <X color={colors.textMuted} size={16} />
+          </Pressable>
+        )}
       </View>
     </View>
   );
 }
 
-function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
+function DiscoverTabs({ active, onSelect }: { active: number; onSelect: (i: number) => void }) {
   const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
-  const filters = language === 'ar' ? FILTERS_AR : FILTERS_EN;
+  const tabs = language === 'ar' ? DISCOVER_TABS_AR : DISCOVER_TABS_EN;
 
   return (
     <FlatList
       horizontal
       inverted={isRTL}
-      data={filters}
+      data={tabs}
       keyExtractor={(item) => item}
       showsHorizontalScrollIndicator={false}
       style={{ flexGrow: 0 }}
@@ -115,66 +151,116 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
   );
 }
 
-function FeaturedSection({ communities, onJoinToggle, joiningId }: { communities: CommunityItem[]; onJoinToggle: (id: string, isMember: boolean) => void; joiningId: string | null }) {
+function TrendingSection() {
   const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
-  const featured = communities.filter(c => c.memberCount > 5);
-
-  if (featured.length === 0) return null;
 
   return (
-    <View style={styles.featuredSection}>
-      <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text, paddingHorizontal: 16 }]}>
-        {language === 'ar' ? 'مميزة' : 'Featured'}
-      </Text>
-      <FlatList
-        horizontal
-        inverted={isRTL}
-        data={featured.slice(0, 5)}
-        keyExtractor={(item) => item.id + '-featured'}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
-        renderItem={({ item }) => {
-          const displayName = language === 'ar' ? item.nameAr : item.name;
-          return (
-            <FeaturedCard item={item} displayName={displayName} onJoinToggle={onJoinToggle} isJoining={joiningId === item.id} />
-          );
-        }}
-      />
+    <View style={styles.section}>
+      <View style={[styles.sectionHeader, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
+        <TrendingUp color={colors.error} size={16} strokeWidth={2} />
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {language === 'ar' ? 'رائج الآن' : 'Trending'}
+        </Text>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
+        {trendingTopics.slice(0, 5).map((topic) => (
+          <View key={topic.id} style={[styles.trendChip, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
+            <Text style={[styles.trendText, { color: colors.textSecondary }]}>{getLocalizedText(topic.label, language)}</Text>
+            {topic.isHot && <View style={[styles.hotDot, { backgroundColor: colors.error }]} />}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
-function FeaturedCard({ item, displayName, onJoinToggle, isJoining }: { item: CommunityItem; displayName: string; onJoinToggle: (id: string, isMember: boolean) => void; isJoining: boolean }) {
-  const router = useRouter();
-  const { language } = useLanguage();
+function ExpertsSection() {
+  const { isRTL, language } = useLanguage();
   const { colors } = useTheme();
+  const router = useRouter();
 
   return (
-    <PressableScale
-      onPress={() => router.push(`/community/${item.id}`)}
-      style={[styles.featuredCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}
-      haptic
-    >
-      <View style={[styles.featuredIcon, { backgroundColor: colors.accentLight }]}>
-        <Text style={{ fontSize: 20 }}>{item.icon}</Text>
-      </View>
-      <Text style={[styles.featuredName, { color: colors.text }]} numberOfLines={1}>{displayName}</Text>
-      <Text style={[styles.featuredMembers, { color: colors.textMuted }]}>{item.memberCount} {language === 'ar' ? 'عضو' : 'members'}</Text>
-      {item.isMember ? (
-        <View style={[styles.memberBadge, { backgroundColor: colors.accentLight }]}>
-          <Text style={[styles.memberBadgeText, { color: colors.accent }]}>{language === 'ar' ? 'عضو' : 'Joined'}</Text>
-        </View>
-      ) : (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left', paddingHorizontal: 16, color: colors.text }]}>
+        {language === 'ar' ? 'خبراء بارزون' : 'Top Experts'}
+      </Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
+        {expertSuggestions.map((expert) => (
+          <Pressable
+            key={expert.id}
+            onPress={() => router.push(`/user/${expert.id}`)}
+            style={({ pressed }) => [styles.expertCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+          >
+            <View style={[styles.expertAvatar, { backgroundColor: expert.avatarColor }]}>
+              <Text style={styles.expertInitial}>{expert.nameInitial}</Text>
+            </View>
+            <Text style={[styles.expertName, { color: colors.text }]} numberOfLines={1}>{expert.name}</Text>
+            <Text style={[styles.expertRole, { color: colors.textMuted }]} numberOfLines={1}>{getLocalizedText(expert.role, language)}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+function ServicesSection() {
+  const { isRTL, language } = useLanguage();
+  const { colors } = useTheme();
+  const router = useRouter();
+
+  return (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left', paddingHorizontal: 16, color: colors.text }]}>
+        {language === 'ar' ? 'خدمات مقترحة' : 'Recommended Services'}
+      </Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
+        {mockServices.map((s) => (
+          <Pressable
+            key={s.id}
+            onPress={() => router.push(`/service/${s.id}`)}
+            style={({ pressed }) => [styles.serviceCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={[styles.serviceTitle, { color: colors.text }]} numberOfLines={2}>{getLocalizedText(s.title, language)}</Text>
+            <Text style={[styles.servicePrice, { color: colors.accent }]}>{getLocalizedText(s.price, language)}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+function PopularPostsSection() {
+  const { isRTL, language } = useLanguage();
+  const { colors } = useTheme();
+  const router = useRouter();
+
+  return (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left', paddingHorizontal: 16, color: colors.text }]}>
+        {language === 'ar' ? 'منشورات شائعة' : 'Popular Posts'}
+      </Text>
+      {feedPosts.slice(0, 3).map((post) => (
         <Pressable
-          onPress={() => onJoinToggle(item.id, item.isMember)}
-          disabled={isJoining}
-          style={({ pressed }) => [styles.joinSmallBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.7 }]}
+          key={post.id}
+          onPress={() => router.push(`/post/${post.id}`)}
+          style={({ pressed }) => [styles.postCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
         >
-          <Text style={styles.joinSmallText}>{language === 'ar' ? 'انضمام' : 'Join'}</Text>
+          <View style={[styles.postTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <View style={[styles.postAvatar, { backgroundColor: post.avatarColor }]}>
+              <Text style={styles.postAvatarText}>{post.authorInitial}</Text>
+            </View>
+            <View style={{ flex: 1, gap: 2, alignItems: isRTL ? 'flex-end' as const : 'flex-start' as const }}>
+              <Text style={[styles.postAuthor, { color: colors.text }]}>{post.author}</Text>
+              <Text style={[styles.postRole, { color: colors.textMuted }]}>{getLocalizedText(post.role, language)}</Text>
+            </View>
+          </View>
+          <Text style={[styles.postContent, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]} numberOfLines={2}>
+            {getLocalizedText(post.content, language)}
+          </Text>
         </Pressable>
-      )}
-    </PressableScale>
+      ))}
+    </View>
   );
 }
 
@@ -220,6 +306,8 @@ const CommunityRow = React.memo(function CommunityRow({
             <Text style={[styles.rowMetaText, { color: colors.textMuted }]}>{item.memberCount} {language === 'ar' ? 'عضو' : 'members'}</Text>
             <Text style={[styles.rowMetaDot, { color: colors.textMuted }]}>·</Text>
             <Text style={[styles.rowMetaText, { color: colors.textMuted }]}>{item.postCount} {language === 'ar' ? 'منشور' : 'posts'}</Text>
+            {item.privacy === 'private' && <Lock color={colors.textMuted} size={11} strokeWidth={1.5} />}
+            {item.privacy === 'premium' && <Crown color={colors.textMuted} size={11} strokeWidth={1.5} />}
           </View>
         </View>
         {item.isMember ? (
@@ -245,16 +333,6 @@ const CommunityRow = React.memo(function CommunityRow({
   );
 });
 
-function LoadingSkeleton() {
-  return (
-    <View>
-      <CommunityCardSkeleton />
-      <CommunityCardSkeleton />
-      <CommunityCardSkeleton />
-    </View>
-  );
-}
-
 export default function CommunitiesScreen() {
   const { language } = useLanguage();
   const { isAuthenticated } = useAuth();
@@ -266,13 +344,15 @@ export default function CommunitiesScreen() {
   const [toastMsg, setToastMsg] = useState('');
   const [joiningId, setJoiningId] = useState<string | null>(null);
 
+  const hasSearch = searchText.trim().length > 0;
+
   const filterMap: Record<number, 'public' | 'private' | 'premium' | undefined> = {
-    0: undefined, 1: 'public', 2: 'private', 3: 'premium',
+    0: undefined, 1: undefined, 2: undefined, 3: undefined, 4: undefined,
   };
 
   const communitiesQuery = useQuery({
-    queryKey: ['communities', 'list', filterMap[activeFilter]],
-    queryFn: () => trpcClient.communities.list.query({ filter: filterMap[activeFilter] }),
+    queryKey: ['communities', 'list'],
+    queryFn: () => trpcClient.communities.list.query({}),
   });
 
   const joinMutation = useMutation({
@@ -311,41 +391,73 @@ export default function CommunitiesScreen() {
 
   const communities = communitiesQuery.data ?? [];
 
+  const filteredCommunities = communities.filter((c: CommunityItem) => {
+    if (hasSearch) {
+      const q = searchText.toLowerCase();
+      return c.name.toLowerCase().includes(q) || c.nameAr.includes(q) || c.description.toLowerCase().includes(q) || c.descriptionAr.includes(q);
+    }
+    return true;
+  });
+
+  const showDiscoverSections = !hasSearch && activeFilter === 0;
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         {communitiesQuery.isLoading ? (
           <>
-            <Header searchText={searchText} onSearchChange={setSearchText} />
-            <FilterTabs active={activeFilter} onSelect={setActiveFilter} />
-            <LoadingSkeleton />
+            <Header searchText={searchText} onSearchChange={setSearchText} onClear={() => setSearchText('')} />
+            <DiscoverTabs active={activeFilter} onSelect={setActiveFilter} />
+            <View>
+              <CommunityCardSkeleton />
+              <CommunityCardSkeleton />
+              <CommunityCardSkeleton />
+            </View>
           </>
         ) : (
           <FlatList
-            data={communities}
+            data={(!hasSearch && (activeFilter === 2 || activeFilter === 3 || activeFilter === 4)) ? [] : filteredCommunities}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <CommunityRow item={item} onJoinToggle={handleJoinToggle} isJoining={joiningId === item.id} />
             )}
             ListHeaderComponent={
               <>
-                <Header searchText={searchText} onSearchChange={setSearchText} />
-                <FilterTabs active={activeFilter} onSelect={setActiveFilter} />
-                <FeaturedSection communities={communities} onJoinToggle={handleJoinToggle} joiningId={joiningId} />
+                <Header searchText={searchText} onSearchChange={setSearchText} onClear={() => setSearchText('')} />
+                <DiscoverTabs active={activeFilter} onSelect={setActiveFilter} />
+                {showDiscoverSections && (
+                  <>
+                    <TrendingSection />
+                    <ExpertsSection />
+                    <ServicesSection />
+                    <PopularPostsSection />
+                    <View style={[styles.communitiesLabel, { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16 }]}>
+                      <Users color={colors.accent} size={16} strokeWidth={2} />
+                      <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                        {language === 'ar' ? 'المجتمعات' : 'Communities'}
+                      </Text>
+                    </View>
+                  </>
+                )}
+                {!hasSearch && activeFilter === 2 && <ExpertsSection />}
+                {!hasSearch && activeFilter === 3 && <ServicesSection />}
+                {!hasSearch && activeFilter === 4 && <PopularPostsSection />}
               </>
             }
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <View style={[styles.emptyIconWrap, { backgroundColor: colors.accentLight }]}>
-                  <Users color={colors.accent} size={24} strokeWidth={1.5} />
+              (activeFilter === 1 || hasSearch) ? (
+                <View style={styles.emptyState}>
+                  <View style={[styles.emptyIconWrap, { backgroundColor: colors.accentLight }]}>
+                    <Users color={colors.accent} size={24} strokeWidth={1.5} />
+                  </View>
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                    {language === 'ar' ? 'لا توجد نتائج' : 'No results found'}
+                  </Text>
+                  <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
+                    {language === 'ar' ? 'جرّب كلمات بحث مختلفة' : 'Try different search terms'}
+                  </Text>
                 </View>
-                <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                  {language === 'ar' ? 'لا توجد مجتمعات' : 'No communities found'}
-                </Text>
-                <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
-                  {language === 'ar' ? 'جرّب تصنيفاً مختلفاً' : 'Try a different filter'}
-                </Text>
-              </View>
+              ) : null
             }
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
@@ -364,24 +476,38 @@ export default function CommunitiesScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
-  listContent: { paddingBottom: 100, flexGrow: 1 },
+  listContent: { paddingBottom: 120, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
+  headerTopRow: { alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
+  createBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
   searchInput: { flex: 1, fontSize: 15, paddingVertical: 0 },
   filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
   filterPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   filterText: { fontSize: 13, fontWeight: '500' as const },
-  featuredSection: { paddingBottom: 16, gap: 10 },
-  featuredTitle: { fontSize: 17, fontWeight: '600' as const },
-  featuredCard: { width: 200, padding: 14, borderRadius: 12, alignItems: 'center', gap: 8 },
-  featuredIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  featuredName: { fontSize: 14, fontWeight: '600' as const, textAlign: 'center' as const },
-  featuredMembers: { fontSize: 12 },
-  memberBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  memberBadgeText: { fontSize: 12, fontWeight: '600' as const },
-  joinSmallBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8 },
-  joinSmallText: { fontSize: 12, fontWeight: '600' as const, color: '#FFF' },
+  section: { paddingTop: 16, paddingBottom: 8, gap: 10 },
+  sectionHeader: { alignItems: 'center', gap: 6 },
+  sectionTitle: { fontSize: 16, fontWeight: '700' as const },
+  trendChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
+  trendText: { fontSize: 13, fontWeight: '500' as const },
+  hotDot: { width: 5, height: 5, borderRadius: 2.5 },
+  expertCard: { width: 120, alignItems: 'center', gap: 6, padding: 14, borderRadius: 12 },
+  expertAvatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  expertInitial: { color: '#FFF', fontSize: 16, fontWeight: '700' as const },
+  expertName: { fontSize: 13, fontWeight: '600' as const, textAlign: 'center' as const },
+  expertRole: { fontSize: 11, textAlign: 'center' as const },
+  serviceCard: { width: 180, padding: 14, borderRadius: 12, gap: 8 },
+  serviceTitle: { fontSize: 13, fontWeight: '600' as const, lineHeight: 19 },
+  servicePrice: { fontSize: 14, fontWeight: '700' as const },
+  postCard: { marginHorizontal: 16, marginTop: 8, padding: 14, borderRadius: 12, gap: 8 },
+  postTop: { alignItems: 'center', gap: 10 },
+  postAvatar: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  postAvatarText: { color: '#FFF', fontSize: 12, fontWeight: '700' as const },
+  postAuthor: { fontSize: 14, fontWeight: '600' as const },
+  postRole: { fontSize: 11 },
+  postContent: { fontSize: 13, lineHeight: 20 },
+  communitiesLabel: { paddingTop: 20, paddingBottom: 4 },
   communityRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
   rowIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   rowContent: { flex: 1, gap: 3 },

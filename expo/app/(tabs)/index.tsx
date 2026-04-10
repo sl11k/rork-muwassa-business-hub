@@ -3,6 +3,8 @@ import {
   ActivityIndicator,
   Animated,
   FlatList,
+  Image,
+  Linking,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -15,16 +17,22 @@ import * as Haptics from 'expo-haptics';
 import {
   Bell,
   Bookmark,
+  BookOpen,
   Heart,
+  Image as ImageIcon,
+  Link2,
+  FileText,
   MessageCircle,
   Pen,
   Plus,
-  Search,
   Share2,
   Sparkles,
   TrendingUp,
+  Users,
+  Shield,
+  Megaphone,
 } from 'lucide-react-native';
-import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { PressableScale } from '@/components/PressableScale';
 import { Toast } from '@/components/Toast';
@@ -67,6 +75,9 @@ const SECTION_TABS_EN = ['For you', 'Following', 'Knowledge'];
 const BASE_CATEGORIES_AR = ['الكل', 'الحوكمة', 'الفرص', 'تحليلات'];
 const BASE_CATEGORIES_EN = ['All', 'Governance', 'Opportunities', 'Insights'];
 
+const KNOWLEDGE_TABS_AR = ['معرفة عامة', 'الحوكمة والامتثال'];
+const KNOWLEDGE_TABS_EN = ['General', 'Governance & Compliance'];
+
 function AppHeader() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
@@ -77,23 +88,14 @@ function AppHeader() {
       <Text style={[hs.logoText, { color: colors.text }]}>
         {language === 'ar' ? 'مُوسع' : 'Muwassa'}
       </Text>
-      <View style={[hs.headerActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <Pressable
-          style={({ pressed }) => [hs.headerIconBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
-          testID="search-btn"
-          onPress={() => router.push('/explore')}
-        >
-          <Search color={colors.textSecondary} size={18} strokeWidth={1.5} />
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [hs.headerIconBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
-          testID="notifications-btn"
-          onPress={() => router.push('/notifications')}
-        >
-          <Bell color={colors.textSecondary} size={18} strokeWidth={1.5} />
-          <View style={[hs.notifDot, { backgroundColor: colors.accent, borderColor: colors.bg }]} />
-        </Pressable>
-      </View>
+      <Pressable
+        style={({ pressed }) => [hs.headerIconBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
+        testID="notifications-btn"
+        onPress={() => router.push('/notifications')}
+      >
+        <Bell color={colors.textSecondary} size={18} strokeWidth={1.5} />
+        <View style={[hs.notifDot, { backgroundColor: colors.accent, borderColor: colors.bg }]} />
+      </Pressable>
     </View>
   );
 }
@@ -101,7 +103,6 @@ function AppHeader() {
 const hs = StyleSheet.create({
   header: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10, height: 48 },
   logoText: { fontSize: 20, fontWeight: '700' as const, letterSpacing: -0.3 },
-  headerActions: { alignItems: 'center', gap: 8 },
   headerIconBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   notifDot: { position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: 3.5, borderWidth: 2 },
 });
@@ -110,16 +111,6 @@ function SectionTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
   const { language } = useLanguage();
   const { colors } = useTheme();
   const tabs = language === 'ar' ? SECTION_TABS_AR : SECTION_TABS_EN;
-  const indicatorAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.spring(indicatorAnim, {
-      toValue: activeTab,
-      useNativeDriver: true,
-      damping: 20,
-      stiffness: 200,
-    }).start();
-  }, [activeTab, indicatorAnim]);
 
   return (
     <View style={[st.container, { borderBottomColor: colors.border }]}>
@@ -245,47 +236,6 @@ const ct = StyleSheet.create({
   text: { fontSize: 13, fontWeight: '500' as const },
 });
 
-function TrendingBar() {
-  const { isRTL, language } = useLanguage();
-  const { colors } = useTheme();
-
-  return (
-    <View style={tb.wrap}>
-      <View style={[tb.header, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
-        <TrendingUp color={colors.accent} size={14} strokeWidth={2} />
-        <Text style={[tb.title, { color: colors.accent }]}>
-          {language === 'ar' ? 'رائج الآن' : 'Trending'}
-        </Text>
-      </View>
-      <FlatList
-        horizontal
-        inverted={isRTL}
-        data={trendingTopics.slice(0, 4)}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}
-        renderItem={({ item }) => (
-          <View style={[tb.chip, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
-            <Text style={[tb.chipText, { color: colors.textSecondary }]}>
-              {getLocalizedText(item.label, language)}
-            </Text>
-            {item.isHot && <View style={[tb.hotDot, { backgroundColor: colors.error }]} />}
-          </View>
-        )}
-      />
-    </View>
-  );
-}
-
-const tb = StyleSheet.create({
-  wrap: { paddingBottom: 10, gap: 6 },
-  header: { alignItems: 'center', gap: 5, marginBottom: 2 },
-  title: { fontSize: 12, fontWeight: '600' as const },
-  chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  chipText: { fontSize: 12, fontWeight: '500' as const },
-  hotDot: { width: 5, height: 5, borderRadius: 2.5 },
-});
-
 const FeedCard = React.memo(function FeedCard({
   post,
   onPress,
@@ -344,6 +294,7 @@ const FeedCard = React.memo(function FeedCard({
 
   const avatarColor = getAvatarColor(post.authorId);
   const timeAgo = formatTimeAgo(post.createdAt);
+  const attachments = post.attachments ?? [];
 
   return (
     <Animated.View style={[
@@ -375,6 +326,33 @@ const FeedCard = React.memo(function FeedCard({
         <Text style={[fc.content, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={4}>
           {post.content}
         </Text>
+
+        {attachments.length > 0 && (
+          <View style={fc.attachmentsWrap}>
+            {attachments.map((att, idx) => (
+              <View key={idx} style={[fc.attachmentItem, { backgroundColor: colors.bgMuted, borderColor: colors.border }]}>
+                {att.type === 'image' && (
+                  <View style={[fc.attachmentRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                    <ImageIcon color={colors.accent} size={14} strokeWidth={1.5} />
+                    <Text style={[fc.attachmentText, { color: colors.textSecondary }]} numberOfLines={1}>{att.name || 'Image'}</Text>
+                  </View>
+                )}
+                {att.type === 'file' && (
+                  <View style={[fc.attachmentRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                    <FileText color={colors.sky ?? colors.accent} size={14} strokeWidth={1.5} />
+                    <Text style={[fc.attachmentText, { color: colors.textSecondary }]} numberOfLines={1}>{att.name || 'File'}</Text>
+                  </View>
+                )}
+                {att.type === 'link' && (
+                  <Pressable onPress={() => { void Linking.openURL(att.url).catch(() => {}); }} style={[fc.attachmentRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                    <Link2 color={colors.accent} size={14} strokeWidth={1.5} />
+                    <Text style={[fc.attachmentText, { color: colors.accent }]} numberOfLines={1}>{att.url}</Text>
+                  </Pressable>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
 
         {post.topic ? (
           <View style={[fc.topicRow, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
@@ -435,6 +413,10 @@ const fc = StyleSheet.create({
   authorRole: { fontSize: 12 },
   time: { fontSize: 12 },
   content: { paddingHorizontal: 14, paddingBottom: 10, fontSize: 14, lineHeight: 21 },
+  attachmentsWrap: { paddingHorizontal: 14, paddingBottom: 8, gap: 6 },
+  attachmentItem: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, borderWidth: 1 },
+  attachmentRow: { alignItems: 'center', gap: 8 },
+  attachmentText: { fontSize: 13, flex: 1 },
   topicRow: { paddingHorizontal: 14, paddingBottom: 10 },
   topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   topicText: { fontSize: 11, fontWeight: '600' as const },
@@ -493,6 +475,196 @@ const ef = StyleSheet.create({
   btnText: { color: '#FFF', fontSize: 15, fontWeight: '600' as const },
 });
 
+function FollowingEmpty() {
+  const { language } = useLanguage();
+  const { colors } = useTheme();
+  const router = useRouter();
+
+  return (
+    <View style={ef.wrap}>
+      <View style={[ef.iconWrap, { backgroundColor: colors.accentLight }]}>
+        <Users color={colors.accent} size={36} strokeWidth={1.5} />
+      </View>
+      <Text style={[ef.title, { color: colors.text }]}>
+        {language === 'ar' ? 'لا توجد منشورات من متابعيك' : 'No posts from people you follow'}
+      </Text>
+      <Text style={[ef.desc, { color: colors.textSecondary }]}>
+        {language === 'ar' ? 'تابع أشخاصاً ومجتمعات لترى منشوراتهم هنا' : 'Follow people and communities to see their posts here'}
+      </Text>
+      <Pressable
+        onPress={() => router.push('/explore')}
+        style={({ pressed }) => [ef.btn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
+      >
+        <Text style={ef.btnText}>
+          {language === 'ar' ? 'اكتشف خبراء' : 'Discover Experts'}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function KnowledgeCenter() {
+  const { isRTL, language } = useLanguage();
+  const { colors } = useTheme();
+  const router = useRouter();
+  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState(0);
+  const knowledgeTabs = language === 'ar' ? KNOWLEDGE_TABS_AR : KNOWLEDGE_TABS_EN;
+
+  const generalItems = [
+    {
+      id: 'update-1',
+      icon: Megaphone,
+      iconColor: colors.accent,
+      title: language === 'ar' ? 'تحديث التطبيق v2.0' : 'App Update v2.0',
+      desc: language === 'ar' ? 'ميزات جديدة: نظام المتابعة، إنشاء المجتمعات، ومرفقات المنشورات' : 'New features: Follow system, community creation, and post attachments',
+      time: language === 'ar' ? 'منذ يوم' : '1d ago',
+      isNew: true,
+    },
+    {
+      id: 'update-2',
+      icon: TrendingUp,
+      iconColor: '#4A9FF5',
+      title: language === 'ar' ? 'أبرز اتجاهات الأعمال 2026' : 'Top Business Trends 2026',
+      desc: language === 'ar' ? 'تحليل شامل لأهم الاتجاهات في عالم الأعمال والتقنية' : 'Comprehensive analysis of key business and tech trends',
+      time: language === 'ar' ? 'منذ 3 أيام' : '3d ago',
+      isNew: false,
+    },
+    {
+      id: 'update-3',
+      icon: Users,
+      iconColor: '#FB7185',
+      title: language === 'ar' ? 'نصائح لبناء شبكة مهنية قوية' : 'Tips for Building a Strong Network',
+      desc: language === 'ar' ? 'كيف تبني علاقات مهنية مستدامة وفعالة' : 'How to build sustainable and effective professional relationships',
+      time: language === 'ar' ? 'منذ أسبوع' : '1w ago',
+      isNew: false,
+    },
+  ];
+
+  const governanceItems = [
+    {
+      id: 'gov-1',
+      icon: Shield,
+      iconColor: '#0D9488',
+      title: language === 'ar' ? 'دليل الامتثال التنظيمي 2026' : 'Regulatory Compliance Guide 2026',
+      desc: language === 'ar' ? 'إطار شامل للامتثال التنظيمي في المملكة العربية السعودية' : 'Comprehensive regulatory compliance framework in Saudi Arabia',
+      time: language === 'ar' ? 'منذ يومين' : '2d ago',
+      isNew: true,
+    },
+    {
+      id: 'gov-2',
+      icon: BookOpen,
+      iconColor: '#B8892A',
+      title: language === 'ar' ? 'تحديثات نظام الشركات الجديد' : 'New Companies Law Updates',
+      desc: language === 'ar' ? 'أهم التعديلات على نظام الشركات وتأثيرها على حوكمة الشركات' : 'Key amendments to the Companies Law and their impact on governance',
+      time: language === 'ar' ? 'منذ 5 أيام' : '5d ago',
+      isNew: false,
+    },
+    {
+      id: 'gov-3',
+      icon: FileText,
+      iconColor: '#7C3AED',
+      title: language === 'ar' ? 'قوالب سياسات مجلس الإدارة' : 'Board Policy Templates',
+      desc: language === 'ar' ? 'قوالب جاهزة لسياسات مجلس الإدارة واللجان التابعة له' : 'Ready-made templates for board and committee policies',
+      time: language === 'ar' ? 'منذ أسبوعين' : '2w ago',
+      isNew: false,
+    },
+  ];
+
+  const items = activeKnowledgeTab === 0 ? generalItems : governanceItems;
+
+  return (
+    <View style={kc.wrap}>
+      <View style={[kc.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row', paddingHorizontal: 16 }]}>
+        <BookOpen color={colors.accent} size={20} strokeWidth={1.5} />
+        <Text style={[kc.headerTitle, { color: colors.text }]}>
+          {language === 'ar' ? 'مركز المعرفة' : 'Knowledge Center'}
+        </Text>
+      </View>
+      <Text style={[kc.headerSub, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary, paddingHorizontal: 16 }]}>
+        {language === 'ar' ? 'تحديثات التطبيق والمعرفة المهنية' : 'App updates and professional knowledge'}
+      </Text>
+
+      <FlatList
+        horizontal
+        inverted={isRTL}
+        data={knowledgeTabs}
+        keyExtractor={(item) => item}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingTop: 10, paddingBottom: 6 }}
+        renderItem={({ item, index }) => (
+          <Pressable
+            onPress={() => { setActiveKnowledgeTab(index); void Haptics.selectionAsync(); }}
+            style={[
+              kc.tabPill,
+              activeKnowledgeTab === index
+                ? { backgroundColor: colors.accent }
+                : { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[kc.tabText, { color: activeKnowledgeTab === index ? '#FFF' : colors.textMuted }]}>{item}</Text>
+          </Pressable>
+        )}
+      />
+
+      {items.map((item) => (
+        <Pressable
+          key={item.id}
+          onPress={() => router.push('/knowledge')}
+          style={({ pressed }) => [kc.card, { backgroundColor: colors.bgCard, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+        >
+          <View style={[kc.cardRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <View style={[kc.cardIcon, { backgroundColor: item.iconColor + '18' }]}>
+              <item.icon color={item.iconColor} size={18} strokeWidth={1.5} />
+            </View>
+            <View style={[kc.cardContent, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+              <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={[kc.cardTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
+                {item.isNew && (
+                  <View style={[kc.newBadge, { backgroundColor: colors.accent }]}>
+                    <Text style={kc.newBadgeText}>{language === 'ar' ? 'جديد' : 'NEW'}</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[kc.cardDesc, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]} numberOfLines={2}>{item.desc}</Text>
+              <Text style={[kc.cardTime, { color: colors.textMuted }]}>{item.time}</Text>
+            </View>
+          </View>
+        </Pressable>
+      ))}
+
+      <Pressable
+        onPress={() => router.push('/knowledge')}
+        style={({ pressed }) => [kc.moreBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+      >
+        <BookOpen color={colors.accent} size={16} strokeWidth={1.5} />
+        <Text style={[kc.moreBtnText, { color: colors.accent }]}>
+          {language === 'ar' ? 'استعراض جميع المقالات' : 'View all articles'}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const kc = StyleSheet.create({
+  wrap: { paddingTop: 16, gap: 8 },
+  headerRow: { alignItems: 'center', gap: 8 },
+  headerTitle: { fontSize: 17, fontWeight: '700' as const },
+  headerSub: { fontSize: 13 },
+  tabPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  tabText: { fontSize: 13, fontWeight: '600' as const },
+  card: { marginHorizontal: 16, marginTop: 6, borderRadius: 12, borderWidth: 1, padding: 14 },
+  cardRow: { gap: 12, alignItems: 'flex-start' },
+  cardIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  cardContent: { flex: 1, gap: 4 },
+  cardTitle: { fontSize: 14, fontWeight: '600' as const },
+  cardDesc: { fontSize: 13, lineHeight: 19 },
+  cardTime: { fontSize: 12 },
+  newBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  newBadgeText: { color: '#FFF', fontSize: 9, fontWeight: '700' as const },
+  moreBtn: { marginHorizontal: 16, marginTop: 8, borderRadius: 12, borderWidth: 1, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  moreBtnText: { fontSize: 14, fontWeight: '600' as const },
+});
+
 export default function HomeScreen() {
   const router = useRouter();
   const { language } = useLanguage();
@@ -528,6 +700,17 @@ export default function HomeScreen() {
     initialPageParam: 0,
   });
 
+  const followingQuery = useInfiniteQuery({
+    queryKey: ['posts', 'following'],
+    queryFn: async ({ pageParam = 0 }) => {
+      console.log('[HomeScreen] fetching following feed cursor=', pageParam);
+      return trpcClient.posts.followingFeed.query({ cursor: pageParam as number, limit: 20 });
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    initialPageParam: 0,
+    enabled: isAuthenticated && activeSectionTab === 1,
+  });
+
   const allPosts = useMemo(() => {
     const raw = feedQuery.data?.pages.flatMap((p) => p.posts) ?? [];
     if (!activeCategory) return raw;
@@ -546,6 +729,10 @@ export default function HomeScreen() {
       return topic.includes(cat) || (post.authorCompany ?? '').toLowerCase().includes(cat);
     });
   }, [feedQuery.data, activeCategory]);
+
+  const followingPosts = useMemo(() => {
+    return followingQuery.data?.pages.flatMap((p) => p.posts) ?? [];
+  }, [followingQuery.data]);
 
   const likeMutation = useMutation({
     mutationFn: async (postId: string) => trpcClient.posts.toggleLike.mutate({ postId }),
@@ -577,31 +764,32 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(() => {
     console.log('[HomeScreen] pull-to-refresh');
-    void feedQuery.refetch().then(() => {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    });
-  }, [feedQuery]);
+    if (activeSectionTab === 1) {
+      void followingQuery.refetch().then(() => {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      });
+    } else {
+      void feedQuery.refetch().then(() => {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      });
+    }
+  }, [feedQuery, followingQuery, activeSectionTab]);
 
   const handleEndReached = useCallback(() => {
-    if (feedQuery.hasNextPage && !feedQuery.isFetchingNextPage) {
-      console.log('[HomeScreen] loading next page');
-      void feedQuery.fetchNextPage();
+    if (activeSectionTab === 1) {
+      if (followingQuery.hasNextPage && !followingQuery.isFetchingNextPage) {
+        void followingQuery.fetchNextPage();
+      }
+    } else {
+      if (feedQuery.hasNextPage && !feedQuery.isFetchingNextPage) {
+        void feedQuery.fetchNextPage();
+      }
     }
-  }, [feedQuery]);
+  }, [feedQuery, followingQuery, activeSectionTab]);
 
   const handleAuthorPress = useCallback((authorId: string) => {
     router.push(`/user/${authorId}`);
   }, [router]);
-
-  const listHeader = useMemo(() => (
-    <>
-      <AppHeader />
-      <SectionTabs activeTab={activeSectionTab} onSelect={setActiveSectionTab} />
-      <ComposeBar />
-      <CategoryTabs activeCategory={activeCategory} onSelect={setActiveCategory} extraCategories={communityCategories} />
-      <TrendingBar />
-    </>
-  ), [activeCategory, communityCategories, activeSectionTab]);
 
   const renderItem = useCallback(({ item, index }: { item: EnrichedPost; index: number }) => (
     <FeedCard
@@ -614,8 +802,26 @@ export default function HomeScreen() {
     />
   ), [router, handleLike, handleSave, handleAuthorPress]);
 
+  const currentPosts = activeSectionTab === 1 ? followingPosts : allPosts;
+  const isLoading = activeSectionTab === 1 ? followingQuery.isLoading : feedQuery.isLoading;
+  const isFetchingNext = activeSectionTab === 1 ? followingQuery.isFetchingNextPage : feedQuery.isFetchingNextPage;
+  const isRefetching = activeSectionTab === 1
+    ? (followingQuery.isRefetching && !followingQuery.isFetchingNextPage)
+    : (feedQuery.isRefetching && !feedQuery.isFetchingNextPage);
+
+  const listHeader = useMemo(() => (
+    <>
+      <AppHeader />
+      <SectionTabs activeTab={activeSectionTab} onSelect={setActiveSectionTab} />
+      {activeSectionTab === 2 ? null : <ComposeBar />}
+      {activeSectionTab === 0 && (
+        <CategoryTabs activeCategory={activeCategory} onSelect={setActiveCategory} extraCategories={communityCategories} />
+      )}
+    </>
+  ), [activeCategory, communityCategories, activeSectionTab]);
+
   const listFooter = useMemo(() => {
-    if (feedQuery.isFetchingNextPage) {
+    if (isFetchingNext) {
       return (
         <View style={{ paddingVertical: 24 }}>
           <ActivityIndicator color={colors.accent} />
@@ -623,23 +829,46 @@ export default function HomeScreen() {
       );
     }
     return null;
-  }, [feedQuery.isFetchingNextPage, colors]);
+  }, [isFetchingNext, colors]);
+
+  if (activeSectionTab === 2) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.bg }]}>
+        <SafeAreaView edges={['top']} style={styles.safeArea}>
+          <FlatList
+            data={[]}
+            keyExtractor={() => 'knowledge'}
+            renderItem={null}
+            ListHeaderComponent={
+              <>
+                <AppHeader />
+                <SectionTabs activeTab={activeSectionTab} onSelect={setActiveSectionTab} />
+                <KnowledgeCenter />
+              </>
+            }
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
-        {feedQuery.isLoading ? (
+        {isLoading ? (
           <>
             <AppHeader />
             <LoadingSkeleton />
           </>
         ) : (
           <FlatList
-            data={allPosts}
+            data={currentPosts}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             ListHeaderComponent={listHeader}
-            ListEmptyComponent={<EmptyFeed />}
+            ListEmptyComponent={activeSectionTab === 1 ? <FollowingEmpty /> : <EmptyFeed />}
             ListFooterComponent={listFooter}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
@@ -648,7 +877,7 @@ export default function HomeScreen() {
             onEndReachedThreshold={0.5}
             refreshControl={
               <RefreshControl
-                refreshing={feedQuery.isRefetching && !feedQuery.isFetchingNextPage}
+                refreshing={isRefetching}
                 onRefresh={handleRefresh}
                 tintColor={colors.accent}
                 colors={[colors.accent]}
@@ -678,10 +907,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
-  listContent: { paddingBottom: 100 },
+  listContent: { paddingBottom: 120 },
   fab: {
     position: 'absolute',
-    bottom: 90,
+    bottom: 100,
     right: 20,
     width: 52,
     height: 52,

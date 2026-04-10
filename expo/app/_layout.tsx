@@ -60,6 +60,11 @@ function RootLayoutNav() {
         <Stack.Screen name="governance" />
         <Stack.Screen name="knowledge" />
         <Stack.Screen name="events" />
+        <Stack.Screen name="create-community" options={{ presentation: 'modal', gestureDirection: 'vertical' }} />
+        <Stack.Screen name="change-password" />
+        <Stack.Screen name="privacy-security" />
+        <Stack.Screen name="help-support" />
+        <Stack.Screen name="about" />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="explore" />
         <Stack.Screen name="saved" />

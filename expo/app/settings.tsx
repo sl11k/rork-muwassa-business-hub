@@ -227,6 +227,11 @@ export default function SettingsScreen() {
       toggleLanguage();
     }
     if (id === 'profile') router.push('/edit-profile');
+    if (id === 'password') router.push('/change-password');
+    if (id === 'privacy') router.push('/privacy-security');
+    if (id === 'help') router.push('/help-support');
+    if (id === 'about') router.push('/about');
+    if (id === 'device') router.push('/about');
     if (id === 'logout') setLogoutModal(true);
     if (id === 'delete') setDeleteModal(true);
   }, [router, toggleLanguage]);

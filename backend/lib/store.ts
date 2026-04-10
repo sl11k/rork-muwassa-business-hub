@@ -141,11 +141,18 @@ export function deleteAllUserSessions(userId: string): void {
   console.log("[Store] deleted all sessions for", userId);
 }
 
+export interface PostAttachment {
+  type: 'image' | 'file' | 'link';
+  url: string;
+  name?: string;
+}
+
 export interface Post {
   id: string;
   authorId: string;
   content: string;
   topic: string;
+  attachments: PostAttachment[];
   createdAt: string;
 }
 
@@ -164,13 +171,14 @@ const likes = new Map<string, Set<string>>();
 const saves = new Map<string, Set<string>>();
 const postOrder: string[] = [];
 
-export function createPost(authorId: string, content: string, topic: string): Post {
+export function createPost(authorId: string, content: string, topic: string, attachments: PostAttachment[] = []): Post {
   const id = generateId();
   const post: Post = {
     id,
     authorId,
     content,
     topic,
+    attachments,
     createdAt: new Date().toISOString(),
   };
   posts.set(id, post);
@@ -478,6 +486,71 @@ function seedCommunities(): void {
 }
 
 seedCommunities();
+
+// ── Follow System ──
+
+const followers = new Map<string, Set<string>>();
+const following = new Map<string, Set<string>>();
+
+export function followUser(followerId: string, targetId: string): boolean {
+  if (followerId === targetId) return false;
+  let fSet = following.get(followerId);
+  if (!fSet) { fSet = new Set(); following.set(followerId, fSet); }
+  if (fSet.has(targetId)) return false;
+  fSet.add(targetId);
+  let tSet = followers.get(targetId);
+  if (!tSet) { tSet = new Set(); followers.set(targetId, tSet); }
+  tSet.add(followerId);
+  console.log("[Store] user", followerId, "followed", targetId);
+  return true;
+}
+
+export function unfollowUser(followerId: string, targetId: string): boolean {
+  const fSet = following.get(followerId);
+  if (!fSet || !fSet.has(targetId)) return false;
+  fSet.delete(targetId);
+  const tSet = followers.get(targetId);
+  if (tSet) tSet.delete(followerId);
+  console.log("[Store] user", followerId, "unfollowed", targetId);
+  return true;
+}
+
+export function isFollowing(followerId: string, targetId: string): boolean {
+  return following.get(followerId)?.has(targetId) ?? false;
+}
+
+export function getFollowingIds(userId: string): string[] {
+  return Array.from(following.get(userId) ?? []);
+}
+
+export function getFollowerIds(userId: string): string[] {
+  return Array.from(followers.get(userId) ?? []);
+}
+
+export function getFollowingCount(userId: string): number {
+  return following.get(userId)?.size ?? 0;
+}
+
+export function getFollowerCount(userId: string): number {
+  return followers.get(userId)?.size ?? 0;
+}
+
+export function getFollowingPosts(userId: string, cursor: number, limit: number): { posts: Post[]; nextCursor: number | null } {
+  const followingIds = getFollowingIds(userId);
+  if (followingIds.length === 0) return { posts: [], nextCursor: null };
+  const allPosts: Post[] = [];
+  for (const pid of postOrder) {
+    const p = posts.get(pid);
+    if (p && followingIds.includes(p.authorId)) {
+      allPosts.push(p);
+    }
+  }
+  const start = cursor;
+  const end = Math.min(start + limit, allPosts.length);
+  const result = allPosts.slice(start, end);
+  const nextCursor = end < allPosts.length ? end : null;
+  return { posts: result, nextCursor };
+}
 
 // ── Messaging ──
 

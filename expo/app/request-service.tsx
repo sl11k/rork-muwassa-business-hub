@@ -19,8 +19,14 @@ import {
   Clock,
   DollarSign,
   FileText,
+  Image as ImageIcon,
+  Link2,
   Send,
+  Trash2,
+  Plus,
 } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { theme } from '@/constants/theme';
@@ -44,6 +50,29 @@ export default function RequestServiceScreen() {
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [attachments, setAttachments] = useState<Array<{ type: string; name: string; uri: string }>>([]);
+
+  const handlePickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+      if (!result.canceled && result.assets?.[0]) {
+        setAttachments(prev => [...prev, { type: 'image', name: result.assets[0].fileName || 'image.jpg', uri: result.assets[0].uri }]);
+      }
+    } catch (err) { console.log('[RequestService] image picker error', err); }
+  };
+
+  const handlePickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
+      if (!result.canceled && result.assets?.[0]) {
+        setAttachments(prev => [...prev, { type: 'file', name: result.assets[0].name || 'file', uri: result.assets[0].uri }]);
+      }
+    } catch (err) { console.log('[RequestService] file picker error', err); }
+  };
+
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const serviceQuery = useQuery({
     queryKey: ['marketplace', 'byId', serviceId],
@@ -198,6 +227,40 @@ export default function RequestServiceScreen() {
                 placeholderTextColor={colors.textMuted}
                 testID="request-timeline"
               />
+            </View>
+
+            <View style={styles.formSection}>
+              <View style={[styles.fieldHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                <FileText color={colors.textSecondary} size={16} />
+                <Text style={[styles.fieldLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+                  {language === 'ar' ? 'مرفقات (اختياري)' : 'Attachments (optional)'}
+                </Text>
+              </View>
+              <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', gap: 10, marginBottom: 8 }}>
+                <Pressable
+                  onPress={handlePickImage}
+                  style={({ pressed }) => [styles.attachBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.7 }]}
+                >
+                  <ImageIcon color={colors.accent} size={16} strokeWidth={1.5} />
+                  <Text style={[styles.attachBtnText, { color: colors.accent }]}>{language === 'ar' ? 'صورة' : 'Image'}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handlePickFile}
+                  style={({ pressed }) => [styles.attachBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.7 }]}
+                >
+                  <FileText color={colors.textSecondary} size={16} strokeWidth={1.5} />
+                  <Text style={[styles.attachBtnText, { color: colors.textSecondary }]}>{language === 'ar' ? 'ملف' : 'File'}</Text>
+                </Pressable>
+              </View>
+              {attachments.map((att, idx) => (
+                <View key={idx} style={[styles.attachItem, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: colors.bgMuted, borderColor: colors.border }]}>
+                  {att.type === 'image' ? <ImageIcon color={colors.accent} size={14} /> : <FileText color={colors.textSecondary} size={14} />}
+                  <Text style={[styles.attachItemText, { color: colors.text }]} numberOfLines={1}>{att.name}</Text>
+                  <Pressable onPress={() => handleRemoveAttachment(idx)} hitSlop={8}>
+                    <Trash2 color={colors.error ?? '#FB7185'} size={14} />
+                  </Pressable>
+                </View>
+              ))}
             </View>
 
             <Pressable
@@ -365,5 +428,30 @@ const createStyles = (c: any) => StyleSheet.create({
     color: c.white,
     fontSize: 16,
     fontWeight: '700' as const,
+  },
+  attachBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  attachBtnText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  attachItem: {
+    alignItems: 'center' as const,
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 6,
+  },
+  attachItemText: {
+    flex: 1,
+    fontSize: 13,
   },
 });

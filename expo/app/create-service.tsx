@@ -28,6 +28,14 @@ const CATEGORIES = [
   { en: 'Consulting', ar: 'استشارات' },
   { en: 'Cybersecurity', ar: 'أمن سيبراني' },
   { en: 'Marketing', ar: 'تسويق' },
+  { en: 'Finance', ar: 'مالية' },
+  { en: 'Technology', ar: 'تقنية' },
+  { en: 'Legal', ar: 'قانوني' },
+  { en: 'HR', ar: 'موارد بشرية' },
+  { en: 'Training', ar: 'تدريب' },
+  { en: 'Design', ar: 'تصميم' },
+  { en: 'Operations', ar: 'عمليات' },
+  { en: 'Other', ar: 'أخرى' },
 ];
 
 export default function CreateServiceScreen() {
@@ -53,6 +61,10 @@ export default function CreateServiceScreen() {
   const [features, setFeatures] = useState<Array<{ en: string; ar: string }>>([]);
   const [newFeatureEn, setNewFeatureEn] = useState('');
   const [newFeatureAr, setNewFeatureAr] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [requirementsAr, setRequirementsAr] = useState('');
+  const [targetAudience, setTargetAudience] = useState('');
+  const [targetAudienceAr, setTargetAudienceAr] = useState('');
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -406,6 +418,54 @@ export default function CreateServiceScreen() {
                 </Text>
               )}
             </Pressable>
+
+            <Text style={[styles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {language === 'ar' ? 'المتطلبات (إنجليزي) - اختياري' : 'Requirements (English) - optional'}
+            </Text>
+            <TextInput
+              style={[styles.input, styles.textArea, { textAlign: isRTL ? 'right' : 'left' }]}
+              value={requirements}
+              onChangeText={setRequirements}
+              placeholder={language === 'ar' ? 'ما يحتاجه العميل قبل البدء...' : 'What the client needs before starting...'}
+              placeholderTextColor={colors.textMuted}
+              multiline
+              textAlignVertical="top"
+            />
+
+            <Text style={[styles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {language === 'ar' ? 'المتطلبات (عربي) - اختياري' : 'Requirements (Arabic) - optional'}
+            </Text>
+            <TextInput
+              style={[styles.input, styles.textArea, { textAlign: 'right' }]}
+              value={requirementsAr}
+              onChangeText={setRequirementsAr}
+              placeholder="ما يحتاجه العميل قبل البدء..."
+              placeholderTextColor={colors.textMuted}
+              multiline
+              textAlignVertical="top"
+            />
+
+            <Text style={[styles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {language === 'ar' ? 'الجمهور المستهدف (إنجليزي) - اختياري' : 'Target Audience (English) - optional'}
+            </Text>
+            <TextInput
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+              value={targetAudience}
+              onChangeText={setTargetAudience}
+              placeholder={language === 'ar' ? 'مثال: الشركات الناشئة، المؤسسات الكبرى' : 'e.g. Startups, Large enterprises'}
+              placeholderTextColor={colors.textMuted}
+            />
+
+            <Text style={[styles.sectionLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {language === 'ar' ? 'الجمهور المستهدف (عربي) - اختياري' : 'Target Audience (Arabic) - optional'}
+            </Text>
+            <TextInput
+              style={[styles.input, { textAlign: 'right' }]}
+              value={targetAudienceAr}
+              onChangeText={setTargetAudienceAr}
+              placeholder="الشركات الناشئة، المؤسسات الكبرى"
+              placeholderTextColor={colors.textMuted}
+            />
 
             <View style={{ height: 40 }} />
           </ScrollView>

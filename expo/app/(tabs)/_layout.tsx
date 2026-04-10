@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router';
-import {
-  Compass,
-  Home,
-  MessageSquare,
-  ShoppingBag,
-  User,
-} from 'lucide-react-native';
 import React from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
+import {
+  House,
+  Search,
+  Send,
+  Store,
+  CircleUserRound,
+} from 'lucide-react-native';
 
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -31,25 +31,45 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: colors.tabBarBg,
-          borderTopWidth: 1,
-          borderTopColor: colors.tabBarBorder,
+          backgroundColor: colors.tabBarBg + 'E6',
+          borderTopWidth: 0,
           position: 'absolute' as const,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-          ...(Platform.OS === 'web' ? { height: 72 } : {}),
+          bottom: 20,
+          left: 16,
+          right: 16,
+          borderRadius: 28,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.15,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: -4 },
+          borderWidth: 1,
+          borderColor: colors.border + '40',
+          ...(Platform.OS === 'web' ? { height: 64 } : { height: 64 }),
+          paddingBottom: Platform.OS === 'ios' ? 0 : 0,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '500' as const,
+          fontSize: 10,
+          fontWeight: '600' as const,
           marginTop: -2,
+          marginBottom: Platform.OS === 'ios' ? 6 : 8,
         },
         tabBarItemStyle: {
-          paddingTop: 6,
+          paddingTop: 8,
         },
+        tabBarBackground: () => (
+          Platform.OS === 'web' ? null : (
+            <View style={[StyleSheet.absoluteFill, { 
+              backgroundColor: colors.tabBarBg + 'CC',
+              borderRadius: 28,
+              overflow: 'hidden',
+            }]}>
+              <View style={[StyleSheet.absoluteFill, { 
+                backgroundColor: colors.bg === '#0C0C0E' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+              }]} />
+            </View>
+          )
+        ),
       }}
     >
       <Tabs.Screen
@@ -57,7 +77,7 @@ export default function TabLayout() {
         options={{
           title: tabLabels.home,
           tabBarIcon: ({ color, focused }) => (
-            <Home
+            <House
               color={color}
               size={22}
               strokeWidth={focused ? 2.2 : 1.5}
@@ -71,11 +91,10 @@ export default function TabLayout() {
         options={{
           title: tabLabels.communities,
           tabBarIcon: ({ color, focused }) => (
-            <Compass
+            <Search
               color={color}
               size={22}
               strokeWidth={focused ? 2.2 : 1.5}
-              fill={focused ? color : 'transparent'}
             />
           ),
         }}
@@ -86,9 +105,9 @@ export default function TabLayout() {
           title: tabLabels.messages,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              <MessageSquare
+              <Send
                 color={color}
-                size={22}
+                size={20}
                 strokeWidth={focused ? 2.2 : 1.5}
                 fill={focused ? color : 'transparent'}
               />
@@ -102,11 +121,10 @@ export default function TabLayout() {
         options={{
           title: tabLabels.marketplace,
           tabBarIcon: ({ color, focused }) => (
-            <ShoppingBag
+            <Store
               color={color}
               size={22}
               strokeWidth={focused ? 2.2 : 1.5}
-              fill={focused ? color : 'transparent'}
             />
           ),
         }}
@@ -116,11 +134,10 @@ export default function TabLayout() {
         options={{
           title: tabLabels.more,
           tabBarIcon: ({ color, focused }) => (
-            <User
+            <CircleUserRound
               color={color}
               size={22}
               strokeWidth={focused ? 2.2 : 1.5}
-              fill={focused ? color : 'transparent'}
             />
           ),
         }}
@@ -138,7 +155,7 @@ const s = StyleSheet.create({
   unreadDot: {
     position: 'absolute',
     top: -2,
-    right: -4,
+    right: -6,
     width: 6,
     height: 6,
     borderRadius: 3,
