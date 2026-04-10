@@ -160,8 +160,9 @@ const styles = StyleSheet.create({
     marginBottom: 44,
   },
   appName: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '700' as const,
+    letterSpacing: -0.5,
   },
   appSub: {
     fontSize: 15,
@@ -182,9 +183,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   featureIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -201,8 +202,8 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '100%',
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

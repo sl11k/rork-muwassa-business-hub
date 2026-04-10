@@ -29,8 +29,8 @@ const FILTER_TABS_AR = ['الكل', 'غير مقروء'];
 const FILTER_TABS_EN = ['All', 'Unread'];
 
 const AVATAR_COLORS = [
-  '#0D9488', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE',
-  '#F472B6', '#2DD4BF', '#38BDF8', '#A78BFA', '#FBBF24',
+  '#0F8B8D', '#1D4ED8', '#EF4444', '#6366F1', '#0891B2',
+  '#EC4899', '#14B8A6', '#2563EB', '#7C3AED', '#F59E0B',
 ];
 
 function getAvatarColor(id: string): string {
@@ -362,16 +362,16 @@ const styles = StyleSheet.create({
   listContent: { paddingBottom: 120, flexGrow: 1 },
   headerWrap: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14, gap: 12 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.3 },
-  newMsgBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 12 },
+  headerTitle: { fontSize: 24, fontWeight: '700' as const, letterSpacing: -0.5 },
+  newMsgBtn: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, height: 44, borderRadius: 14 },
   searchText: { flex: 1, fontSize: 15 },
   filterRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 14, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  filterPill: { paddingHorizontal: 16, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   filterText: { fontSize: 13, fontWeight: '500' as const },
   chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 12 },
   avatarWrap: { position: 'relative' as const },
-  avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFF', fontSize: 18, fontWeight: '700' as const },
   onlineDot: {
     position: 'absolute' as const,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   chatTime: { fontSize: 12 },
   previewRow: { alignItems: 'center', gap: 8 },
   chatPreview: { flex: 1, fontSize: 13, lineHeight: 18 },
-  unreadBadge: { minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
+  unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
   unreadText: { color: '#FFF', fontSize: 11, fontWeight: '700' as const },
   separator: { height: 1, marginLeft: 78 },
 });

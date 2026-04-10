@@ -13,19 +13,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
-  BookOpen,
-  Bookmark,
-  Calendar,
-  ChevronRight,
-  ClipboardList,
   Grid3X3,
   Heart,
   LogOut,
   MessageCircle,
   Settings,
-  Shield,
   Tag,
-  UserRound,
+  UserCircle2,
 } from 'lucide-react-native';
 
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -62,7 +56,7 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
   const { profile, isAuthenticated, user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const displayName = profile?.name || (language === 'ar' ? 'زائر' : 'Guest');
   const displayRole = profile?.role || (language === 'ar' ? 'مستخدم جديد' : 'New member');
@@ -90,9 +84,13 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           {isAuthenticated && (
             <Pressable
               onPress={() => router.push('/settings')}
-              style={({ pressed }) => [ph.settingsBtn, { backgroundColor: colors.bgCard }, pressed && { opacity: 0.7 }]}
+              style={({ pressed }) => [
+                ph.settingsBtn,
+                { backgroundColor: isDark ? colors.bgCard : colors.bgMuted },
+                pressed && { opacity: 0.7 },
+              ]}
             >
-              <Settings color={colors.textSecondary} size={18} strokeWidth={1.5} />
+              <Settings color={colors.textSecondary} size={18} strokeWidth={1.8} />
             </Pressable>
           )}
         </View>
@@ -103,7 +101,7 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           {isAuthenticated ? (
             <Text style={ph.avatarText}>{nameInitial}</Text>
           ) : (
-            <UserRound color="#FFF" size={28} strokeWidth={1.5} />
+            <UserCircle2 color="#FFF" size={28} strokeWidth={1.5} />
           )}
         </View>
         <Text style={[ph.name, { color: colors.text }]}>{displayName}</Text>
@@ -113,7 +111,19 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
         ) : null}
       </View>
 
-      <View style={[ph.statsCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
+      <View style={[
+        ph.statsCard,
+        {
+          backgroundColor: isDark ? colors.bgCard : colors.white,
+          borderWidth: 1,
+          borderColor: colors.border,
+          shadowColor: colors.cardShadow,
+          shadowOpacity: 1,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 2,
+        },
+      ]}>
         <View style={ph.statItem}>
           <Text style={[ph.statValue, { color: colors.text }]}>{stats?.postsCount ?? 0}</Text>
           <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
@@ -132,7 +142,11 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
         <View style={[ph.btnRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Pressable
             onPress={() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/edit-profile'); }}
-            style={({ pressed }) => [ph.editBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              ph.editBtn,
+              { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary },
+              pressed && { opacity: 0.8 },
+            ]}
             testID="edit-profile-btn"
           >
             <Text style={[ph.editBtnText, { color: colors.text }]}>
@@ -141,7 +155,11 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           </Pressable>
           <Pressable
             onPress={handleShare}
-            style={({ pressed }) => [ph.editBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              ph.editBtn,
+              { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary },
+              pressed && { opacity: 0.8 },
+            ]}
           >
             <Text style={[ph.editBtnText, { color: colors.text }]}>
               {language === 'ar' ? 'مشاركة البروفايل' : 'Share Profile'}
@@ -166,23 +184,23 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
 const ph = StyleSheet.create({
   section: { gap: 12, paddingBottom: 8 },
   topRow: { alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12 },
-  screenTitle: { fontSize: 17, fontWeight: '600' as const },
+  screenTitle: { fontSize: 18, fontWeight: '700' as const, letterSpacing: -0.3 },
   topActions: { alignItems: 'center', gap: 8 },
-  settingsBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  settingsBtn: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   profileArea: { alignItems: 'center', gap: 6, paddingVertical: 8 },
-  avatar: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 76, height: 76, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 28, fontWeight: '700' as const, color: '#FFF' },
   name: { fontSize: 20, fontWeight: '700' as const },
   role: { fontSize: 14 },
   link: { fontSize: 13 },
-  statsCard: { flexDirection: 'row', marginHorizontal: 16, borderRadius: 12, padding: 16 },
+  statsCard: { flexDirection: 'row', marginHorizontal: 16, borderRadius: 14, padding: 16 },
   statItem: { flex: 1, alignItems: 'center', gap: 4 },
   statValue: { fontSize: 20, fontWeight: '700' as const },
   statLabel: { fontSize: 12 },
   btnRow: { gap: 8, paddingHorizontal: 16 },
-  editBtn: { flex: 1, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  editBtnText: { fontSize: 13, fontWeight: '500' as const },
-  signInBtn: { marginHorizontal: 16, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  editBtn: { flex: 1, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  editBtnText: { fontSize: 13, fontWeight: '600' as const },
+  signInBtn: { marginHorizontal: 16, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   signInBtnText: { fontSize: 15, fontWeight: '600' as const, color: '#FFF' },
 });
 
@@ -202,7 +220,7 @@ function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
             onPress={() => { onSelect(index); void Haptics.selectionAsync(); }}
             style={({ pressed }) => [styles.profileTabItem, pressed && { opacity: 0.6 }]}
           >
-            <Icon color={activeTab === index ? colors.text : colors.textMuted} size={18} strokeWidth={1.5} />
+            <Icon color={activeTab === index ? colors.text : colors.textMuted} size={18} strokeWidth={1.8} />
             <Text style={[styles.tabText, { color: activeTab === index ? colors.text : colors.textMuted }]}>{item}</Text>
             {activeTab === index && <View style={[styles.tabIndicator, { backgroundColor: colors.accent }]} />}
           </Pressable>
@@ -215,7 +233,7 @@ function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
 function MyPostsList({ userId }: { userId: string }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [posts, setPosts] = useState<EnrichedPost[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -252,7 +270,16 @@ function MyPostsList({ userId }: { userId: string }) {
           onPress={() => router.push(`/post/${post.id}`)}
           style={({ pressed }) => [
             styles.postCard,
-            { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+            {
+              backgroundColor: isDark ? colors.bgCard : colors.white,
+              borderWidth: 1,
+              borderColor: colors.border,
+              shadowColor: colors.cardShadow,
+              shadowOpacity: 1,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 2 },
+              elevation: 2,
+            },
             pressed && { opacity: 0.7 },
           ]}
         >
@@ -266,11 +293,11 @@ function MyPostsList({ userId }: { userId: string }) {
           ) : null}
           <View style={[styles.postMeta, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <Heart color={colors.textMuted} size={12} strokeWidth={1.5} />
+              <Heart color={colors.textMuted} size={12} strokeWidth={1.8} />
               <Text style={[styles.postMetaText, { color: colors.textSecondary }]}>{post.likesCount}</Text>
             </View>
             <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 4 }}>
-              <MessageCircle color={colors.textMuted} size={12} strokeWidth={1.5} />
+              <MessageCircle color={colors.textMuted} size={12} strokeWidth={1.8} />
               <Text style={[styles.postMetaText, { color: colors.textSecondary }]}>{post.commentsCount}</Text>
             </View>
             <Text style={[styles.postMetaTime, { color: colors.textMuted }]}>{formatTimeAgo(post.createdAt)}</Text>
@@ -306,45 +333,6 @@ function ServicesTab() {
   );
 }
 
-function QuickLinks() {
-  const router = useRouter();
-  const { isRTL, language } = useLanguage();
-  const { colors } = useTheme();
-
-  const links = [
-    { icon: Shield, label: language === 'ar' ? 'الحوكمة والامتثال' : 'Governance', color: colors.accent, route: '/governance' as const },
-    { icon: BookOpen, label: language === 'ar' ? 'مركز المعرفة' : 'Knowledge Hub', color: colors.cyan, route: '/knowledge' as const },
-    { icon: Calendar, label: language === 'ar' ? 'الفعاليات' : 'Events', color: colors.teal, route: '/events' as const },
-    { icon: Bookmark, label: language === 'ar' ? 'المحفوظات' : 'Saved', color: colors.indigo, route: '/saved' as const },
-    { icon: ClipboardList, label: language === 'ar' ? 'طلبات الخدمات' : 'Requests', color: colors.rose, route: '/my-requests' as const },
-  ];
-
-  return (
-    <View style={[styles.linksCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
-      {links.map((link, index) => (
-        <React.Fragment key={index}>
-          <Pressable
-            onPress={() => router.push(link.route)}
-            style={({ pressed }) => [
-              styles.linkItem,
-              { flexDirection: isRTL ? 'row-reverse' : 'row' },
-              pressed && { opacity: 0.7 },
-            ]}
-            testID={`profile-link-${index}`}
-          >
-            <View style={[styles.linkIcon, { backgroundColor: link.color + '14' }]}>
-              <link.icon color={link.color} size={18} strokeWidth={1.5} />
-            </View>
-            <Text style={[styles.linkLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>{link.label}</Text>
-            <ChevronRight color={colors.textMuted} size={16} strokeWidth={1.5} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
-          </Pressable>
-          {index < links.length - 1 ? <View style={[styles.linkDivider, { backgroundColor: colors.border }]} /> : null}
-        </React.Fragment>
-      ))}
-    </View>
-  );
-}
-
 function LogoutButton() {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
@@ -368,7 +356,7 @@ function LogoutButton() {
         pressed && { opacity: 0.7 },
       ]}
     >
-      <LogOut color={colors.destructive} size={16} strokeWidth={1.5} />
+      <LogOut color={colors.destructive} size={16} strokeWidth={1.8} />
       <Text style={[styles.logoutText, { color: colors.destructive }]}>
         {language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
       </Text>
@@ -429,7 +417,6 @@ export default function MoreScreen() {
             </>
           )}
 
-          <QuickLinks />
           <LogoutButton />
 
           <Text style={[styles.versionText, { color: colors.textMuted }]}>مُوسع v1.0.0</Text>
@@ -442,31 +429,26 @@ export default function MoreScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
-  scrollContent: { paddingBottom: 100 },
+  scrollContent: { paddingBottom: 120 },
   tabsContainer: { flexDirection: 'row', borderBottomWidth: 1, marginTop: 8 },
   profileTabItem: { flex: 1, alignItems: 'center', paddingVertical: 12, gap: 4, position: 'relative' as const },
   tabText: { fontSize: 12, fontWeight: '500' as const },
   tabIndicator: { position: 'absolute', bottom: -1, width: '60%', height: 2, borderRadius: 1 },
   tabContent: { minHeight: 100, paddingBottom: 16 },
-  tabListContent: { paddingHorizontal: 16, gap: 8, paddingTop: 8 },
+  tabListContent: { paddingHorizontal: 16, gap: 10, paddingTop: 10 },
   emptyTab: { alignItems: 'center', paddingVertical: 44, gap: 10 },
-  emptyTabIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  emptyTabIcon: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   emptyTabText: { fontSize: 13 },
-  viewRequestsBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginTop: 8 },
+  viewRequestsBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, marginTop: 8 },
   viewRequestsBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' as const },
-  postCard: { padding: 16, borderRadius: 12, gap: 8 },
+  postCard: { padding: 16, borderRadius: 14, gap: 8 },
   postContent: { fontSize: 15, lineHeight: 22 },
-  topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  topicBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   topicText: { fontSize: 11, fontWeight: '600' as const },
   postMeta: { gap: 14, alignItems: 'center', paddingTop: 4 },
   postMetaText: { fontSize: 12 },
   postMetaTime: { fontSize: 12 },
-  linksCard: { marginHorizontal: 16, marginTop: 14, borderRadius: 12, overflow: 'hidden' },
-  linkItem: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
-  linkDivider: { height: 1, marginLeft: 64 },
-  linkIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  linkLabel: { fontSize: 15, fontWeight: '500' as const },
-  logoutBtn: { alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 12 },
+  logoutBtn: { alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 16, marginTop: 16 },
   logoutText: { fontSize: 15, fontWeight: '500' as const },
   versionText: { fontSize: 12, textAlign: 'center' as const, marginTop: 16 },
 });

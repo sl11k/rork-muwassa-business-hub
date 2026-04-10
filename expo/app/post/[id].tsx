@@ -4,7 +4,9 @@ import {
   Alert,
   Animated,
   FlatList,
+  Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -18,7 +20,11 @@ import {
   ArrowLeft,
   ArrowRight,
   Bookmark,
+  ExternalLink,
+  FileText,
   Heart,
+  Image as ImageIcon,
+  Link2,
   MessageCircle,
   Send,
   Share2,
@@ -31,9 +37,9 @@ import { useTheme } from '@/providers/ThemeProvider';
 import { trpcClient } from '@/lib/trpc';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
-import type { EnrichedComment } from '@/types/post';
+import type { EnrichedComment, PostAttachment } from '@/types/post';
 
-const AVATAR_COLORS = ['#1A6B4A', '#B8892A', '#2E7AD6', '#C94458', '#7C3AED', '#059669', '#D44B63', '#3B82F6'];
+const AVATAR_COLORS = ['#0F8B8D', '#1D4ED8', '#14B8A6', '#EF4444', '#6366F1', '#12B76A', '#EC4899', '#3B82F6'];
 
 function getAvatarColor(id: string): string {
   let hash = 0;
@@ -93,6 +99,51 @@ function CommentItem({ comment }: { comment: EnrichedComment }) {
           </View>
         </View>
       </View>
+    </View>
+  );
+}
+
+function renderAttachments(attachments: PostAttachment[], colors: any, isRTL: boolean, c: any) {
+  if (!attachments || attachments.length === 0) return null;
+  const images = attachments.filter(a => a.type === 'image');
+  const files = attachments.filter(a => a.type === 'file');
+  const links = attachments.filter(a => a.type === 'link');
+
+  return (
+    <View style={{ gap: 8, paddingTop: 4 }}>
+      {images.length > 0 && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, borderRadius: 12, overflow: 'hidden' }}>
+          {images.slice(0, 4).map((att, idx) => (
+            <View key={`img-${idx}`} style={[
+              { overflow: 'hidden', backgroundColor: c.bgMuted },
+              images.length === 1 ? { width: '100%', height: 220, borderRadius: 12 } : { width: '48%', height: 150 },
+            ]}>
+              <Image source={{ uri: att.url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            </View>
+          ))}
+        </View>
+      )}
+      {files.map((att, idx) => (
+        <View key={`file-${idx}`} style={[
+          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgMuted },
+        ]}>
+          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.accentBlueLight || c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+            <FileText color={c.accentBlue || c.accent} size={16} strokeWidth={1.8} />
+          </View>
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: c.text }} numberOfLines={1}>{att.name || 'File'}</Text>
+        </View>
+      ))}
+      {links.map((att, idx) => (
+        <Pressable key={`link-${idx}`} onPress={() => { void Linking.openURL(att.url).catch(() => {}); }} style={[
+          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgMuted },
+        ]}>
+          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+            <Link2 color={c.accent} size={16} strokeWidth={1.8} />
+          </View>
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: c.accent }} numberOfLines={1}>{att.name || att.url}</Text>
+          <ExternalLink color={c.textMuted} size={12} strokeWidth={1.5} />
+        </Pressable>
+      ))}
     </View>
   );
 }
@@ -263,6 +314,8 @@ export default function PostDetailScreen() {
       <Text style={[styles.postContent, { textAlign: isRTL ? 'right' : 'left' }]}>
         {post.content}
       </Text>
+
+      {renderAttachments(post.attachments ?? [], colors, isRTL, c)}
 
       <View style={styles.divider} />
 

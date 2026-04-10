@@ -2,8 +2,8 @@ import React, { useMemo, useState, useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
-  Linking,
   Modal,
   Platform,
   Pressable,
@@ -24,10 +24,10 @@ import {
   Link2,
   Trash2,
   X,
+  ExternalLink,
 } from 'lucide-react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { theme } from '@/constants/theme';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
@@ -38,8 +38,7 @@ const TOPICS_AR = ['ريادة الأعمال', 'استراتيجية النمو
 const TOPICS_EN = ['Entrepreneurship', 'Growth Strategy', 'Governance & Compliance', 'Marketing', 'Finance', 'Technology', 'Leadership', 'Investment', 'Operations'];
 
 export default function CreatePostScreen() {
-  const { colors } = useTheme();
-  const styles = useStyles();
+  const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { isRTL, language } = useLanguage();
@@ -56,11 +55,16 @@ export default function CreatePostScreen() {
   const createMutation = useMutation({
     mutationFn: async () => {
       const topic = selectedTopic !== null ? topics[selectedTopic] : '';
-      console.log('[CreatePost] submitting:', { content: content.trim(), topic, attachments: attachments.length });
+      const serializedAttachments = attachments.map(att => ({
+        type: att.type,
+        url: att.url,
+        name: att.name || '',
+      }));
+      console.log('[CreatePost] submitting:', { content: content.trim(), topic, attachments: serializedAttachments });
       return trpcClient.posts.create.mutate({
         content: content.trim(),
         topic,
-        attachments,
+        attachments: serializedAttachments,
       });
     },
     onSuccess: () => {
@@ -95,6 +99,7 @@ export default function CreatePostScreen() {
       });
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
+        console.log('[CreatePost] image picked:', asset.uri);
         setAttachments((prev) => [...prev, {
           type: 'image' as const,
           url: asset.uri,
@@ -115,6 +120,7 @@ export default function CreatePostScreen() {
       });
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
+        console.log('[CreatePost] file picked:', asset.name, asset.uri);
         setAttachments((prev) => [...prev, {
           type: 'file' as const,
           url: asset.uri,
@@ -133,6 +139,7 @@ export default function CreatePostScreen() {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://' + url;
     }
+    console.log('[CreatePost] link added:', url);
     setAttachments((prev) => [...prev, {
       type: 'link' as const,
       url,
@@ -148,26 +155,34 @@ export default function CreatePostScreen() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }, []);
 
+  const imageAttachments = attachments.filter(a => a.type === 'image');
+  const fileAttachments = attachments.filter(a => a.type === 'file');
+  const linkAttachments = attachments.filter(a => a.type === 'link');
+
   return (
-    <View style={styles.screen}>
-      <SafeAreaView edges={['top']} style={styles.safe}>
-        <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <Pressable onPress={() => router.back()} style={styles.closeBtn} testID="create-post-close">
-            <X color={colors.text} size={20} />
+    <View style={[s.screen, { backgroundColor: isDark ? colors.bgCard : colors.bg }]}>
+      <SafeAreaView edges={['top']} style={s.safe}>
+        <View style={[s.header, { flexDirection: isRTL ? 'row-reverse' : 'row', borderBottomColor: colors.border }]}>
+          <Pressable onPress={() => router.back()} style={[s.closeBtn, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }]} testID="create-post-close">
+            <X color={colors.text} size={20} strokeWidth={1.8} />
           </Pressable>
-          <Text style={styles.headerTitle}>
+          <Text style={[s.headerTitle, { color: colors.text }]}>
             {language === 'ar' ? 'منشور جديد' : 'New Post'}
           </Text>
           <Pressable
             onPress={handlePost}
             disabled={!canPost || createMutation.isPending}
-            style={[styles.publishBtn, (!canPost || createMutation.isPending) && styles.publishBtnDisabled]}
+            style={[
+              s.publishBtn,
+              { backgroundColor: canPost ? colors.accent : (isDark ? colors.bgMuted : colors.bgSecondary) },
+              createMutation.isPending && { opacity: 0.7 },
+            ]}
             testID="create-post-publish"
           >
             {createMutation.isPending ? (
               <ActivityIndicator color={colors.white} size="small" />
             ) : (
-              <Text style={[styles.publishText, !canPost && styles.publishTextDisabled]}>
+              <Text style={[s.publishText, { color: canPost ? '#FFF' : colors.textMuted }]}>
                 {language === 'ar' ? 'نشر' : 'Publish'}
               </Text>
             )}
@@ -178,16 +193,16 @@ export default function CreatePostScreen() {
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <View style={[styles.authorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{(profile?.name ?? 'U').charAt(0).toUpperCase()}</Text>
+          <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={[s.authorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <View style={[s.avatar, { backgroundColor: colors.accent }]}>
+                <Text style={s.avatarText}>{(profile?.name ?? 'U').charAt(0).toUpperCase()}</Text>
               </View>
-              <View style={[styles.authorInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-                <Text style={styles.authorName}>
+              <View style={[s.authorInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+                <Text style={[s.authorName, { color: colors.text }]}>
                   {profile?.name || (language === 'ar' ? 'مستخدم' : 'User')}
                 </Text>
-                <Text style={styles.authorRole}>
+                <Text style={[s.authorRole, { color: colors.textMuted }]}>
                   {profile?.role || (language === 'ar' ? 'عضو' : 'Member')}
                 </Text>
               </View>
@@ -198,91 +213,143 @@ export default function CreatePostScreen() {
               onChangeText={setContent}
               placeholder={language === 'ar' ? 'شارك رأيك، تحليلاً، أو سؤالاً مهنياً...' : 'Share an insight, analysis, or professional question...'}
               placeholderTextColor={colors.textMuted}
-              style={[styles.contentInput, { textAlign: isRTL ? 'right' : 'left' }]}
+              style={[s.contentInput, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}
               multiline
               autoFocus
               testID="create-post-input"
             />
 
-            <View style={styles.topicSection}>
-              <Text style={[styles.topicLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+            <View style={s.topicSection}>
+              <Text style={[s.sectionLabel, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                 {language === 'ar' ? 'اختر موضوع المنشور' : 'Choose a topic'}
               </Text>
-              <View style={styles.topicGrid}>
+              <View style={s.topicGrid}>
                 {topics.map((topic, index) => (
                   <Pressable
                     key={topic}
-                    onPress={() => setSelectedTopic(selectedTopic === index ? null : index)}
-                    style={[styles.topicPill, selectedTopic === index && styles.topicPillActive]}
+                    onPress={() => { setSelectedTopic(selectedTopic === index ? null : index); void Haptics.selectionAsync(); }}
+                    style={[
+                      s.topicPill,
+                      {
+                        backgroundColor: selectedTopic === index ? colors.accent : (isDark ? colors.bgMuted : colors.bgSecondary),
+                      },
+                    ]}
                   >
-                    <Text style={[styles.topicText, selectedTopic === index && styles.topicTextActive]}>{topic}</Text>
+                    <Text style={[
+                      s.topicText,
+                      { color: selectedTopic === index ? '#FFF' : colors.textSecondary },
+                    ]}>{topic}</Text>
                   </Pressable>
                 ))}
               </View>
             </View>
 
-            <View style={styles.attachSection}>
-              <Text style={[styles.topicLabel, { textAlign: isRTL ? 'right' : 'left' }]}>
+            <View style={s.attachSection}>
+              <Text style={[s.sectionLabel, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
                 {language === 'ar' ? 'إضافة مرفقات' : 'Add attachments'}
               </Text>
-              <View style={[styles.attachBtns, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <View style={[s.attachBtns, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                 <Pressable
                   onPress={handlePickImage}
-                  style={({ pressed }) => [styles.attachBtn, { backgroundColor: colors.accentLight }, pressed && { opacity: 0.7 }]}
+                  style={({ pressed }) => [s.attachBtn, { backgroundColor: colors.accentLight }, pressed && { opacity: 0.7 }]}
                 >
-                  <ImageIcon color={colors.accent} size={18} strokeWidth={1.5} />
-                  <Text style={[styles.attachBtnText, { color: colors.accent }]}>
+                  <ImageIcon color={colors.accent} size={18} strokeWidth={1.8} />
+                  <Text style={[s.attachBtnText, { color: colors.accent }]}>
                     {language === 'ar' ? 'صورة' : 'Image'}
                   </Text>
                 </Pressable>
                 <Pressable
                   onPress={handlePickFile}
-                  style={({ pressed }) => [styles.attachBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.7 }]}
+                  style={({ pressed }) => [s.attachBtn, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }, pressed && { opacity: 0.7 }]}
                 >
-                  <FileText color={colors.textSecondary} size={18} strokeWidth={1.5} />
-                  <Text style={[styles.attachBtnText, { color: colors.textSecondary }]}>
+                  <FileText color={colors.textSecondary} size={18} strokeWidth={1.8} />
+                  <Text style={[s.attachBtnText, { color: colors.textSecondary }]}>
                     {language === 'ar' ? 'ملف' : 'File'}
                   </Text>
                 </Pressable>
                 <Pressable
                   onPress={() => setLinkModalVisible(true)}
-                  style={({ pressed }) => [styles.attachBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.7 }]}
+                  style={({ pressed }) => [s.attachBtn, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }, pressed && { opacity: 0.7 }]}
                 >
-                  <Link2 color={colors.textSecondary} size={18} strokeWidth={1.5} />
-                  <Text style={[styles.attachBtnText, { color: colors.textSecondary }]}>
+                  <Link2 color={colors.textSecondary} size={18} strokeWidth={1.8} />
+                  <Text style={[s.attachBtnText, { color: colors.textSecondary }]}>
                     {language === 'ar' ? 'رابط' : 'Link'}
                   </Text>
                 </Pressable>
               </View>
 
-              {attachments.length > 0 && (
-                <View style={styles.attachList}>
-                  {attachments.map((att, idx) => (
-                    <View key={idx} style={[styles.attachItem, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: colors.bgMuted, borderColor: colors.border }]}>
-                      {att.type === 'image' && <ImageIcon color={colors.accent} size={16} strokeWidth={1.5} />}
-                      {att.type === 'file' && <FileText color={colors.sky ?? colors.accent} size={16} strokeWidth={1.5} />}
-                      {att.type === 'link' && <Link2 color={colors.accent} size={16} strokeWidth={1.5} />}
-                      <Text style={[styles.attachItemText, { color: colors.text }]} numberOfLines={1}>{att.name || att.url}</Text>
-                      <Pressable onPress={() => handleRemoveAttachment(idx)} hitSlop={8}>
-                        <Trash2 color={colors.error} size={14} strokeWidth={1.5} />
-                      </Pressable>
-                    </View>
-                  ))}
+              {imageAttachments.length > 0 && (
+                <View style={s.imagePreviewGrid}>
+                  {imageAttachments.map((att, idx) => {
+                    const globalIdx = attachments.indexOf(att);
+                    return (
+                      <View key={`img-preview-${idx}`} style={[s.imagePreviewWrap, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }]}>
+                        <Image source={{ uri: att.url }} style={s.imagePreview} resizeMode="cover" />
+                        <Pressable
+                          onPress={() => handleRemoveAttachment(globalIdx)}
+                          style={s.imageRemoveBtn}
+                          hitSlop={8}
+                        >
+                          <X color="#FFF" size={12} strokeWidth={2.5} />
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {fileAttachments.length > 0 && (
+                <View style={s.attachList}>
+                  {fileAttachments.map((att, idx) => {
+                    const globalIdx = attachments.indexOf(att);
+                    return (
+                      <View key={`file-${idx}`} style={[s.attachItem, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary, borderColor: colors.border }]}>
+                        <View style={[s.attachIconWrap, { backgroundColor: colors.accentBlueLight }]}>
+                          <FileText color={colors.accentBlue} size={14} strokeWidth={1.8} />
+                        </View>
+                        <Text style={[s.attachItemText, { color: colors.text }]} numberOfLines={1}>{att.name || 'File'}</Text>
+                        <Pressable onPress={() => handleRemoveAttachment(globalIdx)} hitSlop={8}>
+                          <Trash2 color={colors.error} size={14} strokeWidth={1.8} />
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {linkAttachments.length > 0 && (
+                <View style={s.attachList}>
+                  {linkAttachments.map((att, idx) => {
+                    const globalIdx = attachments.indexOf(att);
+                    return (
+                      <View key={`link-${idx}`} style={[s.attachItem, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary, borderColor: colors.border }]}>
+                        <View style={[s.attachIconWrap, { backgroundColor: colors.accentLight }]}>
+                          <Link2 color={colors.accent} size={14} strokeWidth={1.8} />
+                        </View>
+                        <Text style={[s.attachItemText, { color: colors.accent }]} numberOfLines={1}>{att.url}</Text>
+                        <Pressable onPress={() => handleRemoveAttachment(globalIdx)} hitSlop={8}>
+                          <Trash2 color={colors.error} size={14} strokeWidth={1.8} />
+                        </Pressable>
+                      </View>
+                    );
+                  })}
                 </View>
               )}
             </View>
           </ScrollView>
 
-          <View style={[styles.toolbar, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={{ flex: 1 }} />
-            <Text style={styles.charCount}>{content.length}</Text>
+          <View style={[s.toolbar, { flexDirection: isRTL ? 'row-reverse' : 'row', borderTopColor: colors.border }]}>
+            <Text style={[s.attachCount, { color: colors.textMuted }]}>
+              {attachments.length > 0 ? `${attachments.length} ${language === 'ar' ? 'مرفق' : 'attachment(s)'}` : ''}
+            </Text>
+            <Text style={[s.charCount, { color: colors.textMuted }]}>{content.length}</Text>
           </View>
         </KeyboardAvoidingView>
 
         <Modal visible={linkModalVisible} transparent animationType="fade" statusBarTranslucent>
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContainer, { backgroundColor: colors.bgCard }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
+          <View style={s.modalOverlay}>
+            <View style={[s.modalContainer, { backgroundColor: isDark ? colors.bgCard : colors.white }]}>
+              <Text style={[s.modalTitle, { color: colors.text }]}>
                 {language === 'ar' ? 'إضافة رابط' : 'Add Link'}
               </Text>
               <TextInput
@@ -290,23 +357,23 @@ export default function CreatePostScreen() {
                 onChangeText={setLinkUrl}
                 placeholder="https://example.com"
                 placeholderTextColor={colors.textMuted}
-                style={[styles.modalInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.bg }]}
+                style={[s.modalInput, { color: colors.text, borderColor: colors.border, backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }]}
                 autoCapitalize="none"
                 keyboardType="url"
                 autoFocus
               />
-              <View style={styles.modalActions}>
+              <View style={s.modalActions}>
                 <Pressable
                   onPress={() => { setLinkModalVisible(false); setLinkUrl(''); }}
-                  style={[styles.modalCancelBtn, { backgroundColor: colors.bgMuted }]}
+                  style={[s.modalCancelBtn, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary }]}
                 >
-                  <Text style={[styles.modalCancelText, { color: colors.text }]}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Text>
+                  <Text style={[s.modalCancelText, { color: colors.text }]}>{language === 'ar' ? 'إلغاء' : 'Cancel'}</Text>
                 </Pressable>
                 <Pressable
                   onPress={handleAddLink}
-                  style={[styles.modalConfirmBtn, { backgroundColor: colors.accent }]}
+                  style={[s.modalConfirmBtn, { backgroundColor: colors.accent }]}
                 >
-                  <Text style={styles.modalConfirmText}>{language === 'ar' ? 'إضافة' : 'Add'}</Text>
+                  <Text style={s.modalConfirmText}>{language === 'ar' ? 'إضافة' : 'Add'}</Text>
                 </Pressable>
               </View>
             </View>
@@ -317,13 +384,8 @@ export default function CreatePostScreen() {
   );
 }
 
-function useStyles() {
-  const { colors } = useTheme();
-  return useMemo(() => createStyles(colors), [colors]);
-}
-
-const createStyles = (c: any) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: c.bgCard },
+const s = StyleSheet.create({
+  screen: { flex: 1 },
   safe: { flex: 1 },
   header: {
     alignItems: 'center',
@@ -331,52 +393,56 @@ const createStyles = (c: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: c.divider,
   },
   closeBtn: {
-    width: 38, height: 38, borderRadius: 19, backgroundColor: c.bgMuted, alignItems: 'center', justifyContent: 'center',
+    width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center',
   },
-  headerTitle: { fontSize: 16, fontWeight: '700' as const, color: c.text },
+  headerTitle: { fontSize: 16, fontWeight: '700' as const },
   publishBtn: {
-    paddingHorizontal: 20, paddingVertical: 9, borderRadius: theme.radius.full, backgroundColor: c.accent, minWidth: 70, alignItems: 'center',
+    paddingHorizontal: 22, paddingVertical: 10, borderRadius: 12, minWidth: 72, alignItems: 'center',
   },
-  publishBtnDisabled: { backgroundColor: c.bgMuted },
-  publishText: { color: c.white, fontSize: 14, fontWeight: '700' as const },
-  publishTextDisabled: { color: c.textMuted },
+  publishText: { fontSize: 14, fontWeight: '700' as const },
   scrollContent: { padding: 20, gap: 20 },
   authorRow: { alignItems: 'center', gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: c.white, fontSize: 16, fontWeight: '700' as const },
+  avatar: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 16, fontWeight: '700' as const },
   authorInfo: { gap: 2 },
-  authorName: { fontSize: 15, fontWeight: '700' as const, color: c.text },
-  authorRole: { fontSize: 12, color: c.textMuted },
-  contentInput: { fontSize: 17, lineHeight: 28, color: c.text, minHeight: 120, textAlignVertical: 'top' as const },
+  authorName: { fontSize: 15, fontWeight: '700' as const },
+  authorRole: { fontSize: 12 },
+  contentInput: { fontSize: 17, lineHeight: 28, minHeight: 120, textAlignVertical: 'top' as const },
   topicSection: { gap: 10 },
-  topicLabel: { fontSize: 14, fontWeight: '600' as const, color: c.textSecondary },
+  sectionLabel: { fontSize: 14, fontWeight: '600' as const },
   topicGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  topicPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: theme.radius.full, backgroundColor: c.bgMuted },
-  topicPillActive: { backgroundColor: c.accent },
-  topicText: { fontSize: 13, fontWeight: '600' as const, color: c.textSecondary },
-  topicTextActive: { color: c.white },
+  topicPill: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 12 },
+  topicText: { fontSize: 13, fontWeight: '600' as const },
   attachSection: { gap: 12 },
   attachBtns: { gap: 10 },
   attachBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
   },
   attachBtnText: { fontSize: 13, fontWeight: '600' as const },
+  imagePreviewGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  imagePreviewWrap: { width: 100, height: 100, borderRadius: 12, overflow: 'hidden', position: 'relative' as const },
+  imagePreview: { width: '100%', height: '100%' },
+  imageRemoveBtn: {
+    position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: 11,
+    backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center',
+  },
   attachList: { gap: 8 },
   attachItem: {
-    alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1,
+    alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12, borderWidth: 1,
   },
-  attachItemText: { flex: 1, fontSize: 13 },
+  attachIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  attachItemText: { flex: 1, fontSize: 13, fontWeight: '500' as const },
   toolbar: {
-    alignItems: 'center', gap: 4, paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: c.divider,
+    alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1,
   },
-  charCount: { fontSize: 13, color: c.textMuted, fontWeight: '500' as const },
+  attachCount: { fontSize: 12, fontWeight: '500' as const },
+  charCount: { fontSize: 13, fontWeight: '500' as const },
   modalOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 32 },
   modalContainer: { width: '100%', borderRadius: 18, padding: 24, gap: 16 },
-  modalTitle: { fontSize: 18, fontWeight: '700' as const, textAlign: 'center' },
-  modalInput: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
+  modalTitle: { fontSize: 18, fontWeight: '700' as const, textAlign: 'center' as const },
+  modalInput: { borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15 },
   modalActions: { flexDirection: 'row', gap: 10 },
   modalCancelBtn: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12 },
   modalCancelText: { fontSize: 15, fontWeight: '600' as const },
