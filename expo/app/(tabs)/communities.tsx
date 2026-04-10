@@ -70,15 +70,6 @@ function Header() {
 
   return (
     <Animated.View style={[styles.headerWrap, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-      <LinearGradient
-        colors={isDark
-          ? ['rgba(0,201,167,0.06)', 'transparent']
-          : ['rgba(0,168,143,0.04)', 'transparent']
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
       <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
         {language === 'ar' ? 'المجتمعات' : 'Communities'}
       </Text>
@@ -90,15 +81,14 @@ function Header() {
         {
           flexDirection: isRTL ? 'row-reverse' : 'row',
           backgroundColor: isDark ? colors.bgCard : colors.white,
+          borderWidth: 1,
+          borderColor: isDark ? colors.border : colors.separator,
         },
         pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
       ]}>
-        <LinearGradient
-          colors={[colors.accent, colors.gradientEnd]}
-          style={styles.searchIconWrap}
-        >
-          <Search color="#FFF" size={14} strokeWidth={2.2} />
-        </LinearGradient>
+        <View style={[styles.searchIconWrap, { backgroundColor: colors.accent }]}>
+          <Search color="#1C1C1E" size={14} strokeWidth={2.2} />
+        </View>
         <Text style={[styles.searchText, { textAlign: isRTL ? 'right' : 'left', color: colors.textTertiary }]}>
           {language === 'ar' ? 'ابحث عن مجتمع...' : 'Search communities...'}
         </Text>
@@ -129,23 +119,20 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
           }}
           style={({ pressed }) => [
             styles.filterPill,
-            { backgroundColor: isDark ? colors.bgCard : colors.white },
-            active === index && styles.filterPillActive,
+            {
+              backgroundColor: active === index
+                ? colors.accent
+                : (isDark ? colors.bgCard : colors.white),
+              borderWidth: active === index ? 0 : 1,
+              borderColor: isDark ? colors.border : colors.separator,
+            },
             pressed && { transform: [{ scale: 0.94 }] },
           ]}
         >
-          {active === index ? (
-            <LinearGradient
-              colors={[colors.accent, colors.gradientEnd]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
-            />
-          ) : null}
           <Text style={[
             styles.filterText,
-            { color: colors.textSecondary },
-            active === index && { color: '#FFF', fontWeight: '700' as const },
+            { color: active === index ? '#1C1C1E' : colors.textSecondary },
+            active === index && { fontWeight: '700' as const },
           ]}>{item}</Text>
         </Pressable>
       )}
@@ -166,9 +153,9 @@ function FeaturedCommunityBanner() {
         style={styles.featuredGradient}
       >
         <View style={styles.featuredContent}>
-          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-            <Sparkles color="#FFF" size={12} strokeWidth={2.2} />
-            <Text style={styles.featuredBadgeText}>{language === 'ar' ? 'جديد' : 'New'}</Text>
+          <View style={[styles.featuredBadge, { backgroundColor: 'rgba(0,0,0,0.15)' }]}>
+            <Sparkles color="#1C1C1E" size={12} strokeWidth={2.2} />
+            <Text style={[styles.featuredBadgeText, { color: '#1C1C1E' }]}>{language === 'ar' ? 'جديد' : 'New'}</Text>
           </View>
           <Text style={[styles.featuredTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
             {language === 'ar' ? 'مجتمعات جديدة هذا الأسبوع' : 'New communities this week'}
@@ -184,7 +171,7 @@ function FeaturedCommunityBanner() {
 
 function MemberAvatarStack({ count }: { count: number }) {
   const { colors, isDark } = useTheme();
-  const avatarColors = ['#00C9A7', '#FFB547', '#818CF8', '#FB7185'];
+  const avatarColors = ['#E8A838', '#4A9FF5', '#818CF8', '#FB7185'];
   return (
     <View style={styles.avatarStack}>
       {avatarColors.slice(0, Math.min(3, count)).map((c, i) => (
@@ -233,14 +220,19 @@ const CommunityCard = React.memo(function CommunityCard({
         onPress={() => router.push(`/community/${item.id}`)}
         style={[
           styles.card,
-          { backgroundColor: isDark ? colors.bgCard : colors.white },
+          {
+            backgroundColor: isDark ? colors.bgCard : colors.white,
+            borderWidth: 1,
+            borderColor: isDark ? colors.border : colors.separator,
+          },
         ]}
         haptic
         testID={`community-${item.id}`}
       >
-        <View style={[styles.cardBody]}>
+        <View style={[styles.cardAccentBar, { backgroundColor: item.accent }]} />
+        <View style={styles.cardBody}>
           <View style={[styles.cardTop, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <View style={[styles.cardIcon, { backgroundColor: item.accent + '20' }]}>
+            <View style={[styles.cardIcon, { backgroundColor: item.accent + '18' }]}>
               <Text style={styles.cardEmoji}>{item.icon}</Text>
             </View>
             <View style={[styles.cardInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
@@ -288,17 +280,12 @@ const CommunityCard = React.memo(function CommunityCard({
               >
                 {isJoining ? (
                   <View style={[styles.joinBtn, { backgroundColor: colors.accent }]}>
-                    <ActivityIndicator size="small" color="#FFF" />
+                    <ActivityIndicator size="small" color="#1C1C1E" />
                   </View>
                 ) : (
-                  <LinearGradient
-                    colors={[colors.accent, colors.gradientEnd]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.joinBtn}
-                  >
+                  <View style={[styles.joinBtn, { backgroundColor: colors.accent }]}>
                     <Text style={styles.joinText}>{language === 'ar' ? 'انضم' : 'Join'}</Text>
-                  </LinearGradient>
+                  </View>
                 )}
               </Pressable>
             )}
@@ -415,14 +402,9 @@ export default function CommunitiesScreen() {
             }
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <LinearGradient
-                  colors={[colors.accentSoft, colors.accentSoft2]}
-                  style={styles.emptyIconOuter}
-                >
-                  <View style={[styles.emptyIconWrap, { backgroundColor: colors.accentLight }]}>
-                    <Users color={colors.accent} size={24} strokeWidth={1.5} />
-                  </View>
-                </LinearGradient>
+                <View style={[styles.emptyIconWrap, { backgroundColor: colors.accentLight }]}>
+                  <Users color={colors.accent} size={24} strokeWidth={1.5} />
+                </View>
                 <Text style={[styles.emptyTitle, { color: colors.text }]}>
                   {language === 'ar' ? 'لا توجد مجتمعات' : 'No communities found'}
                 </Text>
@@ -449,59 +431,52 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
-  headerWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16, gap: 10, overflow: 'hidden' },
-  headerTitle: { fontSize: 36, fontWeight: '800' as const, letterSpacing: -1.5 },
+  headerWrap: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16, gap: 10 },
+  headerTitle: { fontSize: 32, fontWeight: '800' as const, letterSpacing: -1 },
   headerSubtitle: { fontSize: 14, fontWeight: '500' as const, letterSpacing: 0.1, marginBottom: 4 },
-  searchBar: {
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    borderRadius: 20,
-  },
-  searchIconWrap: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
+  searchIconWrap: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
   filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 14 },
-  filterPill: { paddingHorizontal: 22, paddingVertical: 10, borderRadius: 20, overflow: 'hidden' },
-  filterPillActive: {},
+  filterPill: { paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20 },
   filterText: { fontSize: 13, fontWeight: '600' as const },
-  featuredBanner: { marginHorizontal: 16, marginBottom: 8, borderRadius: 22, overflow: 'hidden' },
-  featuredGradient: { borderRadius: 22 },
-  featuredContent: { padding: 22, gap: 8 },
+  featuredBanner: { marginHorizontal: 16, marginBottom: 8, borderRadius: 18, overflow: 'hidden' },
+  featuredGradient: { borderRadius: 18 },
+  featuredContent: { padding: 20, gap: 8 },
   featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
-  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2, color: '#FFF' },
-  featuredTitle: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.4, color: '#FFF' },
-  featuredDesc: { fontSize: 14, lineHeight: 21, color: 'rgba(255,255,255,0.8)' },
-  card: { marginHorizontal: 16, marginTop: 12, borderRadius: 22, overflow: 'hidden' },
-  cardBody: { padding: 18, gap: 16 },
-  cardTop: { gap: 14, alignItems: 'flex-start' },
-  cardIcon: { width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  cardEmoji: { fontSize: 26 },
-  cardInfo: { flex: 1, gap: 5 },
-  cardName: { fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.3 },
-  cardDesc: { fontSize: 13, lineHeight: 20 },
+  featuredBadgeText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.2 },
+  featuredTitle: { fontSize: 19, fontWeight: '800' as const, letterSpacing: -0.4, color: '#1C1C1E' },
+  featuredDesc: { fontSize: 13, lineHeight: 20, color: 'rgba(28,28,30,0.7)' },
+  card: { marginHorizontal: 16, marginTop: 12, borderRadius: 18, overflow: 'hidden' },
+  cardAccentBar: { height: 3 },
+  cardBody: { padding: 16, gap: 14 },
+  cardTop: { gap: 12, alignItems: 'flex-start' },
+  cardIcon: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  cardEmoji: { fontSize: 24 },
+  cardInfo: { flex: 1, gap: 4 },
+  cardName: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.3 },
+  cardDesc: { fontSize: 13, lineHeight: 19 },
   cardBottom: { alignItems: 'center', justifyContent: 'space-between' },
   statRow: { alignItems: 'center', gap: 10 },
   avatarStack: { flexDirection: 'row', alignItems: 'center' },
-  stackAvatar: { width: 24, height: 24, borderRadius: 12, borderWidth: 2.5 },
+  stackAvatar: { width: 22, height: 22, borderRadius: 11, borderWidth: 2.5 },
   stackCount: { fontSize: 13, fontWeight: '700' as const, marginLeft: 6 },
-  privacyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  privacyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   privacyText: { fontSize: 11, fontWeight: '700' as const },
-  joinBtn: { paddingHorizontal: 26, paddingVertical: 11, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  joinText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
-  joinedBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 16 },
+  joinBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  joinText: { color: '#1C1C1E', fontSize: 14, fontWeight: '700' as const },
+  joinedBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 18, paddingVertical: 9, borderRadius: 14 },
   joinedText: { fontSize: 13, fontWeight: '600' as const },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, gap: 10, minHeight: 200 },
-  emptyIconOuter: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyIconWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  emptyIconWrap: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   emptyTitle: { fontSize: 19, fontWeight: '700' as const, letterSpacing: -0.3 },
   emptyDesc: { fontSize: 14 },
 });

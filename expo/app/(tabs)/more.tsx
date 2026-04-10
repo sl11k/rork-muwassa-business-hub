@@ -95,54 +95,44 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
   const repLabel = language === 'ar' ? REPUTATION_LEVELS[repLevel].labelAr : REPUTATION_LEVELS[repLevel].labelEn;
 
   return (
-    <Animated.View style={[styles.profileSection, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+    <Animated.View style={[ph.section, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <LinearGradient
         colors={isDark
-          ? ['rgba(0,201,167,0.1)', 'rgba(129,140,248,0.05)', 'transparent']
-          : ['rgba(0,168,143,0.06)', 'rgba(99,102,241,0.03)', 'transparent']
+          ? ['rgba(232,168,56,0.08)', 'rgba(232,168,56,0.02)', 'transparent']
+          : ['rgba(196,142,44,0.05)', 'rgba(196,142,44,0.01)', 'transparent']
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.profileGradient}
+        style={ph.gradient}
       />
 
-      <View style={styles.profileTopBar}>
-        <View style={[styles.profileRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={['#00C9A7', '#00E5C3']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.avatarGradientRing}
-            >
-              <View style={[styles.avatarInner, { backgroundColor: isDark ? colors.bg : colors.bgCard }]}>
-                <LinearGradient
-                  colors={['#00C9A7', '#00E5C3']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.avatarLarge}
-                >
+      <View style={ph.topBar}>
+        <View style={[ph.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={ph.avatarContainer}>
+            <View style={[ph.avatarRing, { borderColor: colors.accent }]}>
+              <View style={[ph.avatarInner, { backgroundColor: isDark ? colors.bg : colors.bgCard }]}>
+                <View style={[ph.avatarLarge, { backgroundColor: colors.accent }]}>
                   {isAuthenticated ? (
-                    <Text style={styles.avatarLargeText}>{nameInitial}</Text>
+                    <Text style={ph.avatarLargeText}>{nameInitial}</Text>
                   ) : (
-                    <UserRound color="#FFF" size={30} strokeWidth={1.8} />
+                    <UserRound color="#1C1C1E" size={28} strokeWidth={1.8} />
                   )}
-                </LinearGradient>
+                </View>
               </View>
-            </LinearGradient>
+            </View>
             {isAuthenticated && (
-              <View style={[styles.onlineIndicator, { backgroundColor: '#00C9A7', borderColor: isDark ? colors.bg : colors.bgCard }]} />
+              <View style={[ph.onlineIndicator, { backgroundColor: '#34D399', borderColor: isDark ? colors.bg : colors.bgCard }]} />
             )}
           </View>
-          <View style={[styles.profileInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <Text style={[styles.profileName, { color: colors.text }]}>{displayName}</Text>
-            <Text style={[styles.profileRole, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
+          <View style={[ph.info, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Text style={[ph.name, { color: colors.text }]}>{displayName}</Text>
+            <Text style={[ph.role, { textAlign: isRTL ? 'right' : 'left', color: colors.textSecondary }]}>
               {displayRole}
             </Text>
             {isAuthenticated ? (
-              <View style={[styles.repBadge, { backgroundColor: colors.orangeLight }]}>
-                <Text style={styles.repEmoji}>{REPUTATION_LEVELS[repLevel].emoji}</Text>
-                <Text style={[styles.repText, { color: colors.orange }]}>{repLabel}</Text>
+              <View style={[ph.repBadge, { backgroundColor: colors.accentLight }]}>
+                <Text style={ph.repEmoji}>{REPUTATION_LEVELS[repLevel].emoji}</Text>
+                <Text style={[ph.repText, { color: colors.accent }]}>{repLabel}</Text>
               </View>
             ) : null}
           </View>
@@ -151,23 +141,22 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
       </View>
 
       <View style={[
-        styles.themeToggleRow,
-        { backgroundColor: isDark ? colors.bgCard : colors.white },
+        ph.themeRow,
+        {
+          backgroundColor: isDark ? colors.bgCard : colors.white,
+          borderWidth: 1,
+          borderColor: isDark ? colors.border : colors.separator,
+        },
       ]}>
-        <View style={[styles.themeToggleInner, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <LinearGradient
-            colors={isDark ? ['#818CF8', '#A5B4FC'] : ['#FFB547', '#FFD080']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.themeIconWrap}
-          >
+        <View style={[ph.themeInner, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[ph.themeIconWrap, { backgroundColor: isDark ? 'rgba(129,140,248,0.15)' : 'rgba(232,168,56,0.15)' }]}>
             {isDark ? (
-              <Moon color="#FFF" size={16} strokeWidth={1.8} />
+              <Moon color={colors.indigo} size={16} strokeWidth={1.8} />
             ) : (
-              <Sun color="#FFF" size={16} strokeWidth={1.8} />
+              <Sun color={colors.accent} size={16} strokeWidth={1.8} />
             )}
-          </LinearGradient>
-          <Text style={[styles.themeToggleLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
+          </View>
+          <Text style={[ph.themeLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
             {language === 'ar' ? (isDark ? 'الوضع الداكن' : 'الوضع الفاتح') : (isDark ? 'Dark Mode' : 'Light Mode')}
           </Text>
           <Switch
@@ -176,29 +165,33 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               toggleTheme();
             }}
-            trackColor={{ false: colors.bgMuted, true: 'rgba(0,201,167,0.3)' }}
-            thumbColor={isDark ? '#00C9A7' : colors.textMuted}
+            trackColor={{ false: colors.bgMuted, true: 'rgba(232,168,56,0.3)' }}
+            thumbColor={isDark ? colors.accent : colors.textMuted}
           />
         </View>
       </View>
 
       <View style={[
-        styles.statsCard,
-        { backgroundColor: isDark ? colors.bgCard : colors.white },
+        ph.statsCard,
+        {
+          backgroundColor: isDark ? colors.bgCard : colors.white,
+          borderWidth: 1,
+          borderColor: isDark ? colors.border : colors.separator,
+        },
       ]}>
-        <Pressable onPress={() => onStatPress(0)} style={({ pressed }) => [styles.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[styles.statValue, { color: colors.accent }]}>{stats?.postsCount ?? 0}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
+        <Pressable onPress={() => onStatPress(0)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
+          <Text style={[ph.statValue, { color: colors.accent }]}>{stats?.postsCount ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
         </Pressable>
-        <View style={[styles.statDivider, { backgroundColor: isDark ? colors.border : colors.separator }]} />
-        <Pressable onPress={() => onStatPress(1)} style={({ pressed }) => [styles.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[styles.statValue, { color: colors.rose }]}>{stats?.receivedLikes ?? 0}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'إعجابات' : 'Likes'}</Text>
+        <View style={[ph.statDivider, { backgroundColor: isDark ? colors.border : colors.separator }]} />
+        <Pressable onPress={() => onStatPress(1)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
+          <Text style={[ph.statValue, { color: colors.rose }]}>{stats?.receivedLikes ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'إعجابات' : 'Likes'}</Text>
         </Pressable>
-        <View style={[styles.statDivider, { backgroundColor: isDark ? colors.border : colors.separator }]} />
-        <Pressable onPress={() => onStatPress(2)} style={({ pressed }) => [styles.statItem, pressed && { opacity: 0.6 }]}>
-          <Text style={[styles.statValue, { color: '#818CF8' }]}>{stats?.communitiesJoined ?? 0}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'مجتمعات' : 'Groups'}</Text>
+        <View style={[ph.statDivider, { backgroundColor: isDark ? colors.border : colors.separator }]} />
+        <Pressable onPress={() => onStatPress(2)} style={({ pressed }) => [ph.statItem, pressed && { opacity: 0.6 }]}>
+          <Text style={[ph.statValue, { color: colors.indigo }]}>{stats?.communitiesJoined ?? 0}</Text>
+          <Text style={[ph.statLabel, { color: colors.textSecondary }]}>{language === 'ar' ? 'مجتمعات' : 'Groups'}</Text>
         </Pressable>
       </View>
 
@@ -209,13 +202,17 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
             router.push('/edit-profile');
           }}
           style={({ pressed }) => [
-            styles.editBtn,
-            { backgroundColor: isDark ? colors.bgCard : colors.white },
+            ph.editBtn,
+            {
+              backgroundColor: isDark ? colors.bgCard : colors.white,
+              borderWidth: 1,
+              borderColor: isDark ? colors.border : colors.separator,
+            },
             pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
           ]}
           testID="edit-profile-btn"
         >
-          <Text style={[styles.editBtnText, { color: colors.accent }]}>
+          <Text style={[ph.editBtnText, { color: colors.accent }]}>
             {language === 'ar' ? 'تعديل الملف الشخصي' : 'Edit Profile'}
           </Text>
         </Pressable>
@@ -230,21 +227,48 @@ function ProfileHeader({ stats, onStatPress }: { stats: UserStats | null; onStat
           ]}
           testID="profile-login-btn"
         >
-          <LinearGradient
-            colors={['#00C9A7', '#00E5C3']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.signInBtn}
-          >
-            <Text style={styles.signInBtnText}>
+          <View style={[ph.signInBtn, { backgroundColor: colors.accent }]}>
+            <Text style={ph.signInBtnText}>
               {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
             </Text>
-          </LinearGradient>
+          </View>
         </Pressable>
       )}
     </Animated.View>
   );
 }
+
+const ph = StyleSheet.create({
+  section: { paddingBottom: 14, gap: 12, overflow: 'hidden' },
+  gradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 200 },
+  topBar: { paddingHorizontal: 20, paddingTop: 16 },
+  row: { alignItems: 'center', gap: 14 },
+  avatarContainer: { position: 'relative' as const },
+  avatarRing: { width: 78, height: 78, borderRadius: 39, borderWidth: 2.5, alignItems: 'center', justifyContent: 'center' },
+  avatarInner: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center' },
+  avatarLarge: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  avatarLargeText: { fontSize: 25, fontWeight: '800' as const, color: '#1C1C1E' },
+  onlineIndicator: { position: 'absolute', bottom: 4, right: 4, width: 14, height: 14, borderRadius: 7, borderWidth: 3 },
+  info: { flex: 1, gap: 3 },
+  name: { fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.5 },
+  role: { fontSize: 14, letterSpacing: -0.1 },
+  repBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginTop: 4 },
+  repEmoji: { fontSize: 12 },
+  repText: { fontSize: 12, fontWeight: '700' as const },
+  themeRow: { marginHorizontal: 20, borderRadius: 16, overflow: 'hidden' },
+  themeInner: { alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  themeIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  themeLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
+  statsCard: { flexDirection: 'row', marginHorizontal: 20, borderRadius: 16, overflow: 'hidden' },
+  statItem: { flex: 1, alignItems: 'center', paddingVertical: 20, gap: 4 },
+  statDivider: { width: 1, marginVertical: 14 },
+  statValue: { fontSize: 24, fontWeight: '800' as const, letterSpacing: -0.3 },
+  statLabel: { fontSize: 12, fontWeight: '600' as const, letterSpacing: 0.1 },
+  editBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 13, borderRadius: 16 },
+  editBtnText: { fontSize: 15, fontWeight: '600' as const, letterSpacing: -0.2 },
+  signInBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 14, borderRadius: 16 },
+  signInBtnText: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2, color: '#1C1C1E' },
+});
 
 function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i: number) => void }) {
   const { language } = useLanguage();
@@ -309,7 +333,11 @@ function MyPostsList({ userId }: { userId: string }) {
           onPress={() => router.push(`/post/${post.id}`)}
           style={({ pressed }) => [
             styles.postCard,
-            { backgroundColor: isDark ? colors.bgCard : colors.white },
+            {
+              backgroundColor: isDark ? colors.bgCard : colors.white,
+              borderWidth: 1,
+              borderColor: isDark ? colors.border : colors.separator,
+            },
             pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
           ]}
         >
@@ -378,7 +406,11 @@ function MyLikesList({ userId }: { userId: string }) {
           onPress={() => router.push(`/post/${post.id}`)}
           style={({ pressed }) => [
             styles.postCard,
-            { backgroundColor: isDark ? colors.bgCard : colors.white },
+            {
+              backgroundColor: isDark ? colors.bgCard : colors.white,
+              borderWidth: 1,
+              borderColor: isDark ? colors.border : colors.separator,
+            },
             pressed && { opacity: 0.7, transform: [{ scale: 0.99 }] },
           ]}
         >
@@ -459,7 +491,7 @@ function MyCommunitiesList({ userId }: { userId: string }) {
             pressed && { opacity: 0.7, backgroundColor: isDark ? colors.bgElevated : colors.bgMuted },
           ]}
         >
-          <View style={[styles.communityIcon, { backgroundColor: c.accent + '20' }]}>
+          <View style={[styles.communityIcon, { backgroundColor: c.accent + '18' }]}>
             <Text style={styles.communityEmoji}>{c.icon}</Text>
           </View>
           <View style={[styles.communityInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
@@ -494,17 +526,16 @@ function ReputationCard({ stats }: { stats: UserStats | null }) {
   return (
     <View style={[
       styles.repCard,
-      { backgroundColor: isDark ? colors.bgCard : colors.white },
+      {
+        backgroundColor: isDark ? colors.bgCard : colors.white,
+        borderWidth: 1,
+        borderColor: isDark ? colors.border : colors.separator,
+      },
     ]}>
       <View style={[styles.repCardHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <LinearGradient
-          colors={['#FFB547', '#FFD080']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.repCardIconWrap}
-        >
-          <TrendingUp color="#FFF" size={15} strokeWidth={2.2} />
-        </LinearGradient>
+        <View style={[styles.repCardIconWrap, { backgroundColor: colors.accentLight }]}>
+          <TrendingUp color={colors.accent} size={15} strokeWidth={2.2} />
+        </View>
         <Text style={[styles.repCardTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
           {language === 'ar' ? 'نظام السمعة' : 'Reputation'}
         </Text>
@@ -517,12 +548,7 @@ function ReputationCard({ stats }: { stats: UserStats | null }) {
       </View>
       <View style={[styles.progressTrack, { backgroundColor: isDark ? colors.bgElevated : colors.bgMuted }]}>
         <Animated.View style={[styles.progressFill, { width: progressWidth as any }]}>
-          <LinearGradient
-            colors={['#00C9A7', '#00E5C3']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.progressGradient}
-          />
+          <View style={[styles.progressBar, { backgroundColor: colors.accent }]} />
         </Animated.View>
       </View>
       <View style={[styles.repLevels, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -554,17 +580,21 @@ function QuickLinks() {
   const { colors, isDark } = useTheme();
 
   const links = [
-    { icon: Shield, label: language === 'ar' ? 'الحوكمة والامتثال' : 'Governance', gradColors: ['#FFB547', '#FFD080'] as [string, string], route: '/governance' as const },
-    { icon: BookOpen, label: language === 'ar' ? 'مركز المعرفة' : 'Knowledge Hub', gradColors: ['#22D3EE', '#67E8F9'] as [string, string], route: '/knowledge' as const },
-    { icon: Calendar, label: language === 'ar' ? 'الفعاليات' : 'Events', gradColors: ['#00C9A7', '#00E5C3'] as [string, string], route: '/events' as const },
-    { icon: Bookmark, label: language === 'ar' ? 'المحفوظات' : 'Saved', gradColors: ['#818CF8', '#A5B4FC'] as [string, string], route: '/saved' as const },
-    { icon: ClipboardList, label: language === 'ar' ? 'طلبات الخدمات' : 'Requests', gradColors: ['#FB7185', '#FDA4AF'] as [string, string], route: '/my-requests' as const },
+    { icon: Shield, label: language === 'ar' ? 'الحوكمة والامتثال' : 'Governance', color: '#E8A838', route: '/governance' as const },
+    { icon: BookOpen, label: language === 'ar' ? 'مركز المعرفة' : 'Knowledge Hub', color: '#22D3EE', route: '/knowledge' as const },
+    { icon: Calendar, label: language === 'ar' ? 'الفعاليات' : 'Events', color: '#34D399', route: '/events' as const },
+    { icon: Bookmark, label: language === 'ar' ? 'المحفوظات' : 'Saved', color: '#818CF8', route: '/saved' as const },
+    { icon: ClipboardList, label: language === 'ar' ? 'طلبات الخدمات' : 'Requests', color: '#FB7185', route: '/my-requests' as const },
   ];
 
   return (
     <View style={[
       styles.linksCard,
-      { backgroundColor: isDark ? colors.bgCard : colors.white },
+      {
+        backgroundColor: isDark ? colors.bgCard : colors.white,
+        borderWidth: 1,
+        borderColor: isDark ? colors.border : colors.separator,
+      },
     ]}>
       <Text style={[styles.linksTitle, { color: colors.textTertiary }]}>{language === 'ar' ? 'الوصول السريع' : 'QUICK ACCESS'}</Text>
       {links.map((link, index) => (
@@ -578,14 +608,9 @@ function QuickLinks() {
             ]}
             testID={`profile-link-${index}`}
           >
-            <LinearGradient
-              colors={link.gradColors}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.linkIcon}
-            >
-              <link.icon color="#FFF" size={17} strokeWidth={1.8} />
-            </LinearGradient>
+            <View style={[styles.linkIcon, { backgroundColor: link.color + '18' }]}>
+              <link.icon color={link.color} size={17} strokeWidth={1.8} />
+            </View>
             <Text style={[styles.linkLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>{link.label}</Text>
             <ChevronRight color={colors.textTertiary} size={15} strokeWidth={1.8} style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined} />
           </Pressable>
@@ -611,7 +636,11 @@ function MenuLinks() {
   return (
     <View style={[
       styles.menuCard,
-      { backgroundColor: isDark ? colors.bgCard : colors.white },
+      {
+        backgroundColor: isDark ? colors.bgCard : colors.white,
+        borderWidth: 1,
+        borderColor: isDark ? colors.border : colors.separator,
+      },
     ]}>
       {isAuthenticated ? (
         <>
@@ -728,7 +757,7 @@ export default function MoreScreen() {
               <MenuLinks />
             </>
           )}
-          <Text style={[styles.versionText, { color: colors.textTertiary }]}>Business Hub v1.0.0</Text>
+          <Text style={[styles.versionText, { color: colors.textTertiary }]}>مُوسع v1.0.0</Text>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -739,44 +768,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
-  profileSection: { paddingBottom: 16, gap: 14, overflow: 'hidden' },
-  profileGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 220 },
-  profileTopBar: { paddingHorizontal: 20, paddingTop: 16 },
-  profileRow: { alignItems: 'center', gap: 14 },
-  avatarContainer: { position: 'relative' },
-  avatarGradientRing: { width: 82, height: 82, borderRadius: 41, alignItems: 'center', justifyContent: 'center' },
-  avatarInner: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center' },
-  avatarLarge: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center' },
-  avatarLargeText: { fontSize: 27, fontWeight: '800' as const, color: '#FFF' },
-  onlineIndicator: { position: 'absolute', bottom: 4, right: 4, width: 16, height: 16, borderRadius: 8, borderWidth: 3 },
-  profileInfo: { flex: 1, gap: 4 },
-  profileName: { fontSize: 24, fontWeight: '800' as const, letterSpacing: -0.5 },
-  profileRole: { fontSize: 14, letterSpacing: -0.1 },
-  repBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-    marginTop: 4,
-  },
-  repEmoji: { fontSize: 12 },
-  repText: { fontSize: 12, fontWeight: '700' as const },
-  themeToggleRow: { marginHorizontal: 20, borderRadius: 20, overflow: 'hidden' },
-  themeToggleInner: { alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
-  themeIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  themeToggleLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  statsCard: { flexDirection: 'row', marginHorizontal: 20, borderRadius: 20, overflow: 'hidden' },
-  statItem: { flex: 1, alignItems: 'center', paddingVertical: 22, gap: 4 },
-  statDivider: { width: 1, marginVertical: 16 },
-  statValue: { fontSize: 26, fontWeight: '800' as const, letterSpacing: -0.3 },
-  statLabel: { fontSize: 12, fontWeight: '600' as const, letterSpacing: 0.1 },
-  editBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 14, borderRadius: 20 },
-  editBtnText: { fontSize: 15, fontWeight: '600' as const, letterSpacing: -0.2 },
-  signInBtn: { alignItems: 'center', marginHorizontal: 20, paddingVertical: 16, borderRadius: 20 },
-  signInBtnText: { fontSize: 16, fontWeight: '700' as const, letterSpacing: -0.2, color: '#FFF' },
   tabSection: { marginTop: 4 },
   tabsContainer: { flexDirection: 'row', borderBottomWidth: 1 },
   profileTabItem: { flex: 1, alignItems: 'center', paddingVertical: 14, borderBottomWidth: 2.5, borderBottomColor: 'transparent' },
@@ -786,11 +777,11 @@ const styles = StyleSheet.create({
   tabContent: { minHeight: 100, paddingBottom: 16 },
   tabListContent: { paddingHorizontal: 20, gap: 10, paddingTop: 4 },
   emptyTab: { alignItems: 'center', paddingVertical: 44, gap: 10 },
-  emptyTabIcon: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  emptyTabIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
   emptyTabText: { fontSize: 14, fontWeight: '500' as const },
-  postCard: { padding: 16, borderRadius: 18, gap: 8 },
+  postCard: { padding: 14, borderRadius: 16, gap: 8 },
   postContent: { fontSize: 14, lineHeight: 22, letterSpacing: -0.2 },
-  topicBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
+  topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   topicText: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.1 },
   postMeta: { gap: 14, alignItems: 'center', paddingTop: 4 },
   postMetaText: { fontSize: 12, fontWeight: '600' as const },
@@ -799,36 +790,36 @@ const styles = StyleSheet.create({
   postAuthorName: { fontSize: 14, fontWeight: '700' as const },
   communityListContent: { paddingTop: 4 },
   communityRow: { alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14 },
-  communityIcon: { width: 50, height: 50, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  communityIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   communityEmoji: { fontSize: 22 },
   communityInfo: { flex: 1, gap: 3 },
   communityName: { fontSize: 15, fontWeight: '600' as const, letterSpacing: -0.2 },
   communityMembers: { fontSize: 12, fontWeight: '500' as const },
-  repCard: { marginHorizontal: 20, marginTop: 4, padding: 20, borderRadius: 22, gap: 14 },
+  repCard: { marginHorizontal: 20, marginTop: 4, padding: 18, borderRadius: 18, gap: 12 },
   repCardHeader: { alignItems: 'center', gap: 10 },
-  repCardIconWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
-  repCardTitle: { flex: 1, fontSize: 18, fontWeight: '700' as const, letterSpacing: -0.3 },
+  repCardIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  repCardTitle: { flex: 1, fontSize: 17, fontWeight: '700' as const, letterSpacing: -0.3 },
   repProgressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   repProgressLabel: { fontSize: 13, fontWeight: '500' as const },
   repProgressPct: { fontSize: 13, fontWeight: '700' as const },
-  progressTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4, overflow: 'hidden' },
-  progressGradient: { flex: 1 },
-  repLevels: { justifyContent: 'space-between', paddingHorizontal: 4, paddingTop: 6 },
-  repLevelItem: { alignItems: 'center', gap: 5 },
-  repLevel: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', opacity: 0.35 },
-  repLevelEmoji: { fontSize: 18 },
+  progressTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 3, overflow: 'hidden' },
+  progressBar: { flex: 1, borderRadius: 3 },
+  repLevels: { justifyContent: 'space-between', paddingHorizontal: 4, paddingTop: 4 },
+  repLevelItem: { alignItems: 'center', gap: 4 },
+  repLevel: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', opacity: 0.35 },
+  repLevelEmoji: { fontSize: 17 },
   repLevelLabel: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.1 },
-  linksCard: { marginHorizontal: 20, marginTop: 16, borderRadius: 22, overflow: 'hidden' },
-  linksTitle: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 6 },
-  linkItem: { alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
-  linkDivider: { height: 1, marginLeft: 66 },
-  linkIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  linksCard: { marginHorizontal: 20, marginTop: 14, borderRadius: 18, overflow: 'hidden' },
+  linksTitle: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 4 },
+  linkItem: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 12 },
+  linkDivider: { height: 1, marginLeft: 62 },
+  linkIcon: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   linkLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  menuCard: { marginHorizontal: 20, marginTop: 16, borderRadius: 22, overflow: 'hidden' },
-  menuItem: { alignItems: 'center', gap: 14, paddingHorizontal: 18, paddingVertical: 14 },
-  menuIconWrap: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  menuDivider: { height: 1, marginLeft: 66 },
+  menuCard: { marginHorizontal: 20, marginTop: 14, borderRadius: 18, overflow: 'hidden' },
+  menuItem: { alignItems: 'center', gap: 14, paddingHorizontal: 16, paddingVertical: 12 },
+  menuIconWrap: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  menuDivider: { height: 1, marginLeft: 62 },
   menuLabel: { fontSize: 15, fontWeight: '500' as const, letterSpacing: -0.2 },
-  versionText: { fontSize: 12, fontWeight: '500' as const, textAlign: 'center' as const, marginTop: 28 },
+  versionText: { fontSize: 12, fontWeight: '500' as const, textAlign: 'center' as const, marginTop: 24 },
 });

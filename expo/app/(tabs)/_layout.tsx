@@ -9,7 +9,6 @@ import {
 import React from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -26,38 +25,44 @@ export default function TabLayout() {
     more: language === 'ar' ? 'حسابي' : 'Profile',
   };
 
+  const activeColor = colors.accent;
+  const inactiveColor = isDark ? '#555560' : '#AEAEB2';
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarActiveTintColor: activeColor,
+        tabBarInactiveTintColor: inactiveColor,
         tabBarStyle: {
           backgroundColor: 'transparent',
           borderTopWidth: 0,
           position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           elevation: 0,
-          ...(Platform.OS === 'web' ? { height: 72 } : {}),
+          ...(Platform.OS === 'web' ? { height: 70 } : {}),
         },
         tabBarBackground: () => (
           Platform.OS === 'web' ? (
             <View style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? 'rgba(10,14,26,0.96)' : 'rgba(255,255,255,0.96)',
-                borderTopWidth: 0.5,
-                borderTopColor: isDark ? 'rgba(0,201,167,0.1)' : 'rgba(0,0,0,0.05)',
+                backgroundColor: isDark ? 'rgba(9,9,11,0.97)' : 'rgba(255,255,255,0.97)',
+                borderTopWidth: StyleSheet.hairlineWidth,
+                borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
               },
             ]} />
           ) : (
             <BlurView
-              intensity={95}
+              intensity={100}
               tint={isDark ? 'dark' : 'light'}
               style={[
                 StyleSheet.absoluteFill,
                 {
-                  borderTopWidth: 0.5,
-                  borderTopColor: isDark ? 'rgba(0,201,167,0.1)' : 'rgba(0,0,0,0.05)',
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                 },
               ]}
             />
@@ -66,11 +71,11 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600' as const,
-          letterSpacing: 0.3,
-          marginTop: -2,
+          letterSpacing: 0.2,
+          marginTop: -1,
         },
         tabBarItemStyle: {
-          paddingTop: 8,
+          paddingTop: 6,
         },
       }}
     >
@@ -80,15 +85,8 @@ export default function TabLayout() {
           title: tabLabels.home,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && (
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.activeDot}
-                />
-              )}
-              <Home color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
+              <Home color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
             </View>
           ),
         }}
@@ -99,15 +97,8 @@ export default function TabLayout() {
           title: tabLabels.communities,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && (
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.activeDot}
-                />
-              )}
-              <Compass color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
+              <Compass color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
             </View>
           ),
         }}
@@ -118,15 +109,8 @@ export default function TabLayout() {
           title: tabLabels.messages,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && (
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.activeDot}
-                />
-              )}
-              <MessageSquare color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
+              <MessageSquare color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
             </View>
           ),
         }}
@@ -137,15 +121,8 @@ export default function TabLayout() {
           title: tabLabels.marketplace,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && (
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.activeDot}
-                />
-              )}
-              <ShoppingBag color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
+              <ShoppingBag color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
             </View>
           ),
         }}
@@ -156,15 +133,8 @@ export default function TabLayout() {
           title: tabLabels.more,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && (
-                <LinearGradient
-                  colors={[colors.accent, colors.gradientEnd]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.activeDot}
-                />
-              )}
-              <User color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              {focused && <View style={[s.activeDot, { backgroundColor: activeColor }]} />}
+              <User color={color} size={21} strokeWidth={focused ? 2.2 : 1.6} />
             </View>
           ),
         }}
@@ -177,14 +147,14 @@ const s = StyleSheet.create({
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 48,
-    height: 32,
+    width: 44,
+    height: 30,
   },
   activeDot: {
     position: 'absolute',
-    top: -4,
-    width: 24,
-    height: 3,
-    borderRadius: 2,
+    top: -3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
 });

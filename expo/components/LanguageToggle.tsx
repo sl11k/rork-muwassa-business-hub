@@ -7,7 +7,7 @@ import { useTheme } from '@/providers/ThemeProvider';
 
 export function LanguageToggle() {
   const { language, toggleLanguage } = useLanguage();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <Pressable
@@ -15,13 +15,16 @@ export function LanguageToggle() {
       onPress={toggleLanguage}
       style={({ pressed }) => [
         styles.btn,
-        { backgroundColor: colors.accentLight, borderColor: colors.accentSoft },
+        {
+          backgroundColor: isDark ? colors.bgCard : colors.bgMuted,
+          borderColor: isDark ? colors.border : colors.separator,
+        },
         pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] },
       ]}
       testID="language-toggle"
     >
-      <Globe color={colors.accent} size={13} strokeWidth={1.8} />
-      <Text style={[styles.label, { color: colors.accent }]}>{language === 'ar' ? 'EN' : 'عربي'}</Text>
+      <Globe color={colors.textSecondary} size={13} strokeWidth={1.8} />
+      <Text style={[styles.label, { color: colors.textSecondary }]}>{language === 'ar' ? 'EN' : 'عربي'}</Text>
     </Pressable>
   );
 }
@@ -31,14 +34,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 22,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     borderWidth: 1,
   },
   label: {
     fontSize: 12,
-    fontWeight: '700' as const,
+    fontWeight: '600' as const,
     letterSpacing: 0.3,
   },
 });

@@ -30,7 +30,7 @@ const FILTER_TABS_AR = ['الكل', 'غير مقروء'];
 const FILTER_TABS_EN = ['All', 'Unread'];
 
 const AVATAR_COLORS = [
-  '#00C9A7', '#FFB547', '#FB7185', '#818CF8', '#22D3EE',
+  '#E8A838', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE',
   '#F472B6', '#34D399', '#38BDF8', '#A78BFA', '#FBBF24',
 ];
 
@@ -93,15 +93,6 @@ function Header() {
 
   return (
     <View style={styles.headerWrap}>
-      <LinearGradient
-        colors={isDark
-          ? ['rgba(129,140,248,0.06)', 'transparent']
-          : ['rgba(99,102,241,0.04)', 'transparent']
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
       <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={[styles.headerTitle, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
           {language === 'ar' ? 'الرسائل' : 'Messages'}
@@ -111,14 +102,9 @@ function Header() {
           style={({ pressed }) => [pressed && { opacity: 0.85, transform: [{ scale: 0.92 }] }]}
           testID="new-message-btn"
         >
-          <LinearGradient
-            colors={['#818CF8', '#A5B4FC']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.newMsgBtn}
-          >
-            <SquarePen color="#FFF" size={17} strokeWidth={2} />
-          </LinearGradient>
+          <View style={[styles.newMsgBtn, { backgroundColor: colors.accent }]}>
+            <SquarePen color="#1C1C1E" size={17} strokeWidth={2} />
+          </View>
         </Pressable>
       </View>
       <Pressable style={({ pressed }) => [
@@ -126,6 +112,8 @@ function Header() {
         {
           flexDirection: isRTL ? 'row-reverse' : 'row',
           backgroundColor: isDark ? colors.bgCard : colors.bgMuted,
+          borderWidth: 1,
+          borderColor: isDark ? colors.border : colors.separator,
         },
         pressed && { opacity: 0.7 },
       ]}>
@@ -160,22 +148,19 @@ function FilterTabs({ active, onSelect }: { active: number; onSelect: (i: number
           }}
           style={[
             styles.filterPill,
-            { backgroundColor: isDark ? colors.bgCard : colors.white },
-            active === index && styles.filterPillActive,
+            {
+              backgroundColor: active === index
+                ? colors.accent
+                : (isDark ? colors.bgCard : colors.white),
+              borderWidth: active === index ? 0 : 1,
+              borderColor: isDark ? colors.border : colors.separator,
+            },
           ]}
         >
-          {active === index ? (
-            <LinearGradient
-              colors={['#818CF8', '#A5B4FC']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
-            />
-          ) : null}
           <Text style={[
             styles.filterText,
-            { color: colors.textSecondary },
-            active === index && { color: '#FFF', fontWeight: '700' as const },
+            { color: active === index ? '#1C1C1E' : colors.textSecondary },
+            active === index && { fontWeight: '700' as const },
           ]}>{item}</Text>
         </Pressable>
       )}
@@ -216,17 +201,12 @@ const ConversationRow = React.memo(function ConversationRow({
             <Text style={{ fontSize: 22 }}>{item.communityIcon ?? '👥'}</Text>
           </View>
         ) : (
-          <LinearGradient
-            colors={[avatarColor, avatarColor + 'BB']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.avatar}
-          >
+          <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
             <Text style={styles.avatarText}>{initial}</Text>
-          </LinearGradient>
+          </View>
         )}
         {!isCommunity ? (
-          <View style={[styles.onlineDot, { backgroundColor: '#00C9A7', borderColor: isDark ? colors.bg : colors.bgCard }]} />
+          <View style={[styles.onlineDot, { backgroundColor: '#34D399', borderColor: isDark ? colors.bg : colors.bgCard }]} />
         ) : null}
       </View>
 
@@ -240,7 +220,7 @@ const ConversationRow = React.memo(function ConversationRow({
               </View>
             ) : null}
           </View>
-          <Text style={[styles.chatTime, { color: colors.textTertiary }, hasUnread && { color: '#818CF8', fontWeight: '700' as const }]}>{time}</Text>
+          <Text style={[styles.chatTime, { color: colors.textTertiary }, hasUnread && { color: colors.accent, fontWeight: '700' as const }]}>{time}</Text>
         </View>
         <View style={[styles.previewRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text
@@ -250,12 +230,9 @@ const ConversationRow = React.memo(function ConversationRow({
             {preview}
           </Text>
           {hasUnread ? (
-            <LinearGradient
-              colors={['#818CF8', '#A5B4FC']}
-              style={styles.unreadBadge}
-            >
+            <View style={[styles.unreadBadge, { backgroundColor: colors.accent }]}>
               <Text style={styles.unreadText}>{item.unreadCount}</Text>
-            </LinearGradient>
+            </View>
           ) : null}
         </View>
       </View>
@@ -395,27 +372,26 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   safeArea: { flex: 1 },
   listContent: { paddingBottom: 100, flexGrow: 1 },
-  headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14, overflow: 'hidden' },
+  headerWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 14, gap: 14 },
   headerRow: { alignItems: 'center', justifyContent: 'space-between' },
-  headerTitle: { fontSize: 36, fontWeight: '800' as const, letterSpacing: -1.5 },
-  newMsgBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 13, borderRadius: 20 },
+  headerTitle: { fontSize: 32, fontWeight: '800' as const, letterSpacing: -1 },
+  newMsgBtn: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+  searchBar: { alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
   searchText: { flex: 1, fontSize: 14, letterSpacing: -0.2 },
   filterRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 12 },
-  filterPill: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, overflow: 'hidden' },
-  filterPillActive: {},
+  filterPill: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20 },
   filterText: { fontSize: 13, fontWeight: '600' as const },
   chatRow: { alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14 },
   avatarWrap: { position: 'relative' as const },
-  avatar: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#FFF', fontSize: 19, fontWeight: '700' as const },
+  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 18, fontWeight: '700' as const },
   onlineDot: {
     position: 'absolute' as const,
     bottom: 1,
     right: 1,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
     borderWidth: 2.5,
   },
   chatInfo: { flex: 1, gap: 5 },
@@ -426,8 +402,8 @@ const styles = StyleSheet.create({
   previewRow: { alignItems: 'center', gap: 8 },
   chatPreview: { flex: 1, fontSize: 14, lineHeight: 20 },
   unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  unreadText: { color: '#FFF', fontSize: 11, fontWeight: '700' as const },
-  separator: { height: 1, marginLeft: 88, marginRight: 20 },
-  communityBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  unreadText: { color: '#1C1C1E', fontSize: 11, fontWeight: '700' as const },
+  separator: { height: 1, marginLeft: 86, marginRight: 20 },
+  communityBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
   communityBadgeText: { fontSize: 10, fontWeight: '700' as const, letterSpacing: 0.2 },
 });
