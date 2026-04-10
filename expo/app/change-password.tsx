@@ -1,3 +1,4 @@
+// Muwassa Business Hub — change-password screen
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   Alert,

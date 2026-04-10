@@ -28,7 +28,7 @@ export function Toast({ visible, message, type = 'success', onDismiss, duration 
       case 'error':
         return { icon: CircleAlert, stripeColor: colors.error, iconColor: colors.error };
       case 'info':
-        return { icon: Info, stripeColor: colors.cyan, iconColor: colors.cyan };
+        return { icon: Info, stripeColor: colors.info, iconColor: colors.info };
     }
   };
 

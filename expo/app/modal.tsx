@@ -1,4 +1,4 @@
-// template
+// Muwassa Business Hub — modal screen
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -45,12 +45,12 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: '#FCFCFD',
     borderRadius: 20,
     padding: 24,
     margin: 20,
@@ -65,18 +65,18 @@ const styles = StyleSheet.create({
   description: {
     textAlign: "center",
     marginBottom: 24,
-    color: "#666",
+    color: '#475467',
     lineHeight: 20,
   },
   closeButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#0F8B8D',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 10,
     minWidth: 100,
   },
   closeButtonText: {
-    color: "white",
+    color: '#FFFFFF',
     fontWeight: "600",
     textAlign: "center",
   },

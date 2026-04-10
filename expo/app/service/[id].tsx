@@ -1,3 +1,4 @@
+// Muwassa Business Hub — id screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -29,15 +30,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { trpcClient } from '@/lib/trpc';
 import { Toast } from '@/components/Toast';
 
-const AVATAR_COLORS = ['#1A6B4A', '#2E7AD6', '#C94458', '#B8892A', '#7C3AED', '#16A34A'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 export default function ServiceDetailScreen() {
   const { colors } = useTheme();
@@ -193,8 +186,8 @@ export default function ServiceDetailScreen() {
             </View>
             <View style={styles.metricCard}>
               <View style={[styles.metricValueRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                <Clock color={colors.sky} size={16} />
-                <Text style={[styles.metricValue, { color: colors.sky }]}>{delivery}</Text>
+                <Clock color={colors.secondary} size={16} />
+                <Text style={[styles.metricValue, { color: colors.secondary }]}>{delivery}</Text>
               </View>
               <Text style={styles.metricLabel}>{language === 'ar' ? 'التسليم' : 'Delivery'}</Text>
             </View>
@@ -238,7 +231,7 @@ export default function ServiceDetailScreen() {
               service.reviews.slice(0, 3).map((review: { id: string; reviewerInitial: string; reviewerName: string; rating: number; comment: string }) => (
                 <View key={review.id} style={styles.sampleReview}>
                   <View style={[styles.sampleReviewHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                    <View style={[styles.reviewerAvatar, { backgroundColor: colors.sky }]}>
+                    <View style={[styles.reviewerAvatar, { backgroundColor: colors.secondary }]}>
                       <Text style={styles.reviewerInitial}>{review.reviewerInitial}</Text>
                     </View>
                     <View style={[styles.reviewerInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>

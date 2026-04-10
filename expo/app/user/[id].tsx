@@ -1,3 +1,4 @@
+// Muwassa Business Hub — id screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -35,7 +36,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import type { EnrichedPost } from '@/types/post';
 
-const AVATAR_COLORS = ['#1A6B4A', '#B8892A', '#2E7AD6', '#C94458', '#7C3AED', '#059669'];
+import { getAvatarColor as _getAvatarColorTheme } from '@/constants/theme';
 const REPUTATION_LEVELS = [
   { emoji: '🌱', labelAr: 'مساهم', labelEn: 'Contributor' },
   { emoji: '⭐', labelAr: 'متخصص', labelEn: 'Specialist' },
@@ -44,11 +45,7 @@ const REPUTATION_LEVELS = [
 ];
 
 function getAvatarColor(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  return _getAvatarColorTheme(str);
 }
 
 function formatTimeAgo(dateStr: string): string {

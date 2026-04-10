@@ -1,3 +1,4 @@
+// Muwassa Business Hub — settings screen
 import React, { useCallback, useState } from 'react';
 import {
   Modal,
@@ -87,7 +88,7 @@ function ConfirmModal({
               onPress={onConfirm}
               style={({ pressed }) => [
                 modalStyles.confirmBtn,
-                danger ? { backgroundColor: colors.rose } : { backgroundColor: colors.accent },
+                danger ? { backgroundColor: colors.error } : { backgroundColor: colors.accent },
                 pressed && { opacity: 0.8 },
               ]}
             >
@@ -124,7 +125,7 @@ export default function SettingsScreen() {
       id: 'push',
       label: language === 'ar' ? 'الإشعارات الفورية' : 'Push Notifications',
       icon: Bell,
-      color: colors.sky,
+      color: colors.secondary,
       value: pushNotifs,
     },
     {
@@ -164,7 +165,7 @@ export default function SettingsScreen() {
       id: 'password',
       label: language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password',
       icon: Lock,
-      color: colors.sky,
+      color: colors.secondary,
     },
     {
       id: 'privacy',
@@ -179,7 +180,7 @@ export default function SettingsScreen() {
       id: 'language',
       label: language === 'ar' ? 'اللغة' : 'Language',
       icon: Globe,
-      color: colors.sky,
+      color: colors.secondary,
       value: language === 'ar' ? 'العربية' : 'English',
     },
     {
@@ -192,13 +193,13 @@ export default function SettingsScreen() {
       id: 'help',
       label: language === 'ar' ? 'المساعدة والدعم' : 'Help & Support',
       icon: HelpCircle,
-      color: '#059669',
+      color: colors.success,
     },
     {
       id: 'about',
       label: language === 'ar' ? 'عن التطبيق' : 'About',
       icon: Info,
-      color: colors.indigo,
+      color: colors.secondary,
       value: 'v1.0.0',
     },
   ];
@@ -208,14 +209,14 @@ export default function SettingsScreen() {
       id: 'logout',
       label: language === 'ar' ? 'تسجيل الخروج' : 'Sign Out',
       icon: LogOut,
-      color: colors.rose,
+      color: colors.error,
       danger: true,
     },
     {
       id: 'delete',
       label: language === 'ar' ? 'حذف الحساب' : 'Delete Account',
       icon: Trash2,
-      color: colors.rose,
+      color: colors.error,
       danger: true,
     },
   ];
@@ -246,7 +247,7 @@ export default function SettingsScreen() {
       <View style={[styles.linkIcon, { backgroundColor: item.color + '15' }]}>
         <item.icon color={item.color} size={18} />
       </View>
-      <Text style={[styles.linkLabel, item.danger && { color: colors.rose }, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: item.danger ? colors.rose : colors.text }]}>
+      <Text style={[styles.linkLabel, item.danger && { color: colors.error }, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: item.danger ? colors.error : colors.text }]}>
         {item.label}
       </Text>
       {item.value ? (
@@ -317,7 +318,7 @@ export default function SettingsScreen() {
             {generalLinks.map(renderLinkItem)}
           </View>
 
-          <View style={[styles.card, styles.dangerCard, { backgroundColor: colors.bgCard, borderColor: 'rgba(224,68,122,0.2)' }]}>
+          <View style={[styles.card, styles.dangerCard, { backgroundColor: colors.bgCard, borderColor: colors.errorLight }]}>
             {dangerLinks.map(renderLinkItem)}
           </View>
 

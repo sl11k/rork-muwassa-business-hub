@@ -1,3 +1,4 @@
+// Muwassa Business Hub — my-requests screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -29,24 +30,18 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { trpcClient } from '@/lib/trpc';
 
-const AVATAR_COLORS = ['#1A6B4A', '#2E7AD6', '#C94458', '#B8892A', '#7C3AED', '#16A34A'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 type TabKey = 'sent' | 'received';
 
-const STATUS_CONFIG: Record<string, { color: string; bgColor: string; labelAr: string; labelEn: string }> = {
-  pending: { color: theme.colors.gold, bgColor: theme.colors.goldLight, labelAr: 'قيد الانتظار', labelEn: 'Pending' },
-  accepted: { color: theme.colors.accent, bgColor: theme.colors.accentLight, labelAr: 'مقبول', labelEn: 'Accepted' },
-  rejected: { color: theme.colors.rose, bgColor: theme.colors.roseLight, labelAr: 'مرفوض', labelEn: 'Rejected' },
-  completed: { color: theme.colors.sky, bgColor: theme.colors.skyLight, labelAr: 'مكتمل', labelEn: 'Completed' },
-};
+function getStatusConfig(colors: any): Record<string, { color: string; bgColor: string; labelAr: string; labelEn: string }> {
+  return {
+    pending: { color: colors.gold, bgColor: colors.goldLight, labelAr: 'قيد الانتظار', labelEn: 'Pending' },
+    accepted: { color: colors.accent, bgColor: colors.accentLight, labelAr: 'مقبول', labelEn: 'Accepted' },
+    rejected: { color: colors.error, bgColor: colors.errorLight, labelAr: 'مرفوض', labelEn: 'Rejected' },
+    completed: { color: colors.secondary, bgColor: colors.secondaryLight, labelAr: 'مكتمل', labelEn: 'Completed' },
+  };
+}
 
 function formatTimeAgo(dateStr: string, language: string): string {
   const now = Date.now();
@@ -117,6 +112,8 @@ const SentRequestCard = React.memo(function SentRequestCard({
   onRate: (requestId: string, serviceId: string) => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
+  const STATUS_CONFIG = getStatusConfig(colors);
   const statusCfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.pending;
   const title = language === 'ar' ? item.serviceTitleAr : item.serviceTitle;
   const time = formatTimeAgo(item.createdAt, language);
@@ -206,6 +203,7 @@ const IncomingRequestCard = React.memo(function IncomingRequestCard({
 }) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const STATUS_CONFIG = getStatusConfig(colors);
   const statusCfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.pending;
   const title = language === 'ar' ? item.serviceTitleAr : item.serviceTitle;
   const time = formatTimeAgo(item.createdAt, language);
@@ -275,7 +273,7 @@ const IncomingRequestCard = React.memo(function IncomingRequestCard({
             style={[styles.actionBtn, styles.actionBtnReject]}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <X color={colors.rose} size={14} />
+              <X color={colors.error} size={14} />
               <Text style={styles.actionBtnRejectText}>
                 {language === 'ar' ? 'رفض' : 'Reject'}
               </Text>

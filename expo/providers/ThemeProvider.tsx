@@ -18,8 +18,10 @@ export interface ThemeColors {
   accentLight: string;
   accentSoft: string;
   accentSoft2: string;
-  accentBlue: string;
-  accentBlueLight: string;
+  accentHover: string;
+  secondary: string;
+  secondaryLight: string;
+  secondaryHover: string;
   text: string;
   textPrimary: string;
   textSecondary: string;
@@ -52,28 +54,10 @@ export interface ThemeColors {
   inputBg: string;
   inputBorder: string;
   inputFocusBorder: string;
-  teal: string;
-  tealLight: string;
-  orange: string;
-  orangeLight: string;
-  indigo: string;
-  indigoLight: string;
-  pink: string;
-  pinkLight: string;
-  cyan: string;
-  cyanLight: string;
-  yellow: string;
-  yellowLight: string;
-  rose: string;
-  roseLight: string;
-  sky: string;
-  skyLight: string;
   gold: string;
   goldLight: string;
   navy: string;
   navyLight: string;
-  mint: string;
-  mintLight: string;
   glass: string;
   glassLight: string;
   separatorLight: string;
@@ -84,6 +68,9 @@ export interface ThemeColors {
   gradientEnd: string;
   info: string;
   infoLight: string;
+  iconInactive: string;
+  iconActive: string;
+  iconActiveSecondary: string;
 }
 
 const darkColors: ThemeColors = {
@@ -94,11 +81,13 @@ const darkColors: ThemeColors = {
   bgGrouped: '#000000',
   bgElevated: '#1F2937',
   accent: '#2DD4BF',
-  accentLight: 'rgba(45,212,191,0.12)',
-  accentSoft: 'rgba(45,212,191,0.08)',
-  accentSoft2: 'rgba(45,212,191,0.04)',
-  accentBlue: '#3B82F6',
-  accentBlueLight: 'rgba(59,130,246,0.12)',
+  accentLight: 'rgba(45,212,191,0.15)',
+  accentSoft: 'rgba(45,212,191,0.10)',
+  accentSoft2: 'rgba(45,212,191,0.05)',
+  accentHover: '#14B8A6',
+  secondary: '#3B82F6',
+  secondaryLight: 'rgba(59,130,246,0.15)',
+  secondaryHover: '#2563EB',
   text: '#F8FAFC',
   textPrimary: '#F8FAFC',
   textSecondary: '#CBD5E1',
@@ -114,11 +103,11 @@ const darkColors: ThemeColors = {
   skeleton: '#111827',
   skeletonHighlight: '#1F2937',
   success: '#22C55E',
-  successLight: 'rgba(34,197,94,0.12)',
+  successLight: 'rgba(34,197,94,0.15)',
   warning: '#F59E0B',
-  warningLight: 'rgba(245,158,11,0.12)',
+  warningLight: 'rgba(245,158,11,0.15)',
   error: '#F87171',
-  errorLight: 'rgba(248,113,113,0.12)',
+  errorLight: 'rgba(248,113,113,0.15)',
   destructive: '#F87171',
   fill: '#1F2937',
   secondaryFill: '#161B22',
@@ -131,28 +120,10 @@ const darkColors: ThemeColors = {
   inputBg: '#111827',
   inputBorder: 'rgba(255,255,255,0.08)',
   inputFocusBorder: '#2DD4BF',
-  teal: '#2DD4BF',
-  tealLight: 'rgba(45,212,191,0.12)',
-  orange: '#F59E0B',
-  orangeLight: 'rgba(245,158,11,0.12)',
-  indigo: '#818CF8',
-  indigoLight: 'rgba(129,140,248,0.12)',
-  pink: '#F472B6',
-  pinkLight: 'rgba(244,114,182,0.12)',
-  cyan: '#5EEAD4',
-  cyanLight: 'rgba(94,234,212,0.12)',
-  yellow: '#F59E0B',
-  yellowLight: 'rgba(245,158,11,0.12)',
-  rose: '#F87171',
-  roseLight: 'rgba(248,113,113,0.12)',
-  sky: '#60A5FA',
-  skyLight: 'rgba(96,165,250,0.12)',
   gold: '#D6B97A',
-  goldLight: 'rgba(214,185,122,0.12)',
-  navy: '#0F172A',
+  goldLight: 'rgba(214,185,122,0.15)',
+  navy: '#CBD5E1',
   navyLight: '#1E293B',
-  mint: '#2DD4BF',
-  mintLight: 'rgba(45,212,191,0.12)',
   glass: 'rgba(0,0,0,0.88)',
   glassLight: 'rgba(15,23,42,0.72)',
   separatorLight: '#111827',
@@ -160,9 +131,12 @@ const darkColors: ThemeColors = {
   textOnDark: '#F8FAFC',
   textOnDarkMuted: '#94A3B8',
   gradientStart: '#2DD4BF',
-  gradientEnd: '#0F8B8D',
+  gradientEnd: '#14B8A6',
   info: '#60A5FA',
-  infoLight: 'rgba(96,165,250,0.12)',
+  infoLight: 'rgba(96,165,250,0.15)',
+  iconInactive: '#64748B',
+  iconActive: '#2DD4BF',
+  iconActiveSecondary: '#60A5FA',
 };
 
 const lightColors: ThemeColors = {
@@ -176,8 +150,10 @@ const lightColors: ThemeColors = {
   accentLight: 'rgba(15,139,141,0.10)',
   accentSoft: 'rgba(15,139,141,0.06)',
   accentSoft2: 'rgba(15,139,141,0.03)',
-  accentBlue: '#1D4ED8',
-  accentBlueLight: 'rgba(29,78,216,0.10)',
+  accentHover: '#0C6F70',
+  secondary: '#1D4ED8',
+  secondaryLight: 'rgba(29,78,216,0.10)',
+  secondaryHover: '#1E40AF',
   text: '#101828',
   textPrimary: '#101828',
   textSecondary: '#475467',
@@ -210,28 +186,10 @@ const lightColors: ThemeColors = {
   inputBg: '#FCFCFD',
   inputBorder: '#E7EAF0',
   inputFocusBorder: '#0F8B8D',
-  teal: '#0F8B8D',
-  tealLight: 'rgba(15,139,141,0.10)',
-  orange: '#F59E0B',
-  orangeLight: 'rgba(245,158,11,0.10)',
-  indigo: '#6366F1',
-  indigoLight: 'rgba(99,102,241,0.10)',
-  pink: '#EC4899',
-  pinkLight: 'rgba(236,72,153,0.10)',
-  cyan: '#14B8A6',
-  cyanLight: 'rgba(20,184,166,0.10)',
-  yellow: '#F59E0B',
-  yellowLight: 'rgba(245,158,11,0.10)',
-  rose: '#EF4444',
-  roseLight: 'rgba(239,68,68,0.10)',
-  sky: '#2563EB',
-  skyLight: 'rgba(37,99,235,0.10)',
   gold: '#C8A96B',
   goldLight: 'rgba(200,169,107,0.10)',
   navy: '#0F172A',
   navyLight: '#F1F4F8',
-  mint: '#0F8B8D',
-  mintLight: 'rgba(15,139,141,0.10)',
   glass: 'rgba(255,255,255,0.92)',
   glassLight: 'rgba(255,255,255,0.78)',
   separatorLight: '#F1F4F8',
@@ -242,6 +200,9 @@ const lightColors: ThemeColors = {
   gradientEnd: '#14B8A6',
   info: '#2563EB',
   infoLight: 'rgba(37,99,235,0.10)',
+  iconInactive: '#98A2B3',
+  iconActive: '#0F8B8D',
+  iconActiveSecondary: '#1D4ED8',
 };
 
 function getSystemTheme(): 'dark' | 'light' {

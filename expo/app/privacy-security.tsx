@@ -1,3 +1,4 @@
+// Muwassa Business Hub — privacy-security screen
 import React, { useState } from 'react';
 import {
   Pressable,

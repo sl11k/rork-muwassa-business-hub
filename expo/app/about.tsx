@@ -1,3 +1,4 @@
+// Muwassa Business Hub — about screen
 import React from 'react';
 import {
   Linking,
@@ -30,8 +31,8 @@ export default function AboutScreen() {
 
   const links = [
     { id: 'terms', label: language === 'ar' ? 'شروط الاستخدام' : 'Terms of Service', icon: FileText, color: colors.accent },
-    { id: 'privacy', label: language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy', icon: Shield, color: '#4A9FF5' },
-    { id: 'website', label: language === 'ar' ? 'الموقع الإلكتروني' : 'Website', icon: Globe, color: '#22D3EE' },
+    { id: 'privacy', label: language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy', icon: Shield, color: colors.secondary },
+    { id: 'website', label: language === 'ar' ? 'الموقع الإلكتروني' : 'Website', icon: Globe, color: colors.info },
   ];
 
   const handlePress = (id: string) => {

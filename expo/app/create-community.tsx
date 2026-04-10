@@ -1,3 +1,4 @@
+// Muwassa Business Hub — create-community screen
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   ActivityIndicator,
@@ -31,7 +32,7 @@ import { trpcClient } from '@/lib/trpc';
 import { Toast } from '@/components/Toast';
 
 const ICONS = ['🏢', '📊', '💡', '🚀', '⚖️', '💰', '🎯', '📈', '🤝', '🔒', '💻', '🌍'];
-const ACCENT_COLORS = ['#0D9488', '#4A9FF5', '#FB7185', '#818CF8', '#22D3EE', '#F472B6', '#FBBF24', '#16A34A', '#7C3AED', '#B8892A'];
+const ACCENT_COLORS = ['#0F8B8D', '#1D4ED8', '#12B76A', '#C8A96B', '#0C6F70', '#1E40AF', '#14B8A6', '#2563EB', '#EF4444', '#F59E0B'];
 
 type PrivacyType = 'public' | 'private' | 'premium';
 

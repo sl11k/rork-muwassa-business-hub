@@ -1,3 +1,4 @@
+// Muwassa Business Hub — welcome screen
 import React, { useCallback, useRef } from 'react';
 import {
   Animated,
@@ -65,13 +66,13 @@ export default function WelcomeScreen() {
   const features = language === 'ar'
     ? [
         { icon: Users, title: 'مجتمعات مهنية', color: colors.accent, textColor: colors.textSecondary },
-        { icon: TrendingUp, title: 'سوق الخدمات', color: colors.orange, textColor: colors.textSecondary },
-        { icon: Shield, title: 'مركز الحوكمة', color: colors.teal, textColor: colors.textSecondary },
+        { icon: TrendingUp, title: 'سوق الخدمات', color: colors.warning, textColor: colors.textSecondary },
+        { icon: Shield, title: 'مركز الحوكمة', color: colors.accent, textColor: colors.textSecondary },
       ]
     : [
         { icon: Users, title: 'Professional communities', color: colors.accent, textColor: colors.textSecondary },
-        { icon: TrendingUp, title: 'Services marketplace', color: colors.orange, textColor: colors.textSecondary },
-        { icon: Shield, title: 'Governance hub', color: colors.teal, textColor: colors.textSecondary },
+        { icon: TrendingUp, title: 'Services marketplace', color: colors.warning, textColor: colors.textSecondary },
+        { icon: Shield, title: 'Governance hub', color: colors.accent, textColor: colors.textSecondary },
       ];
 
   return (

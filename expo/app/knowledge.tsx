@@ -1,3 +1,4 @@
+// Muwassa Business Hub — knowledge screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   FlatList,
@@ -121,8 +122,8 @@ const ResourceCard = React.memo(function ResourceCard({ item }: { item: Resource
 
   const typeColor = item.type.en === 'Template' ? colors.gold
     : item.type.en === 'Guide' ? colors.accent
-    : item.type.en === 'Framework' ? colors.sky
-    : colors.rose;
+    : item.type.en === 'Framework' ? colors.secondary
+    : colors.info;
 
   return (
     <Pressable style={({ pressed }) => [styles.card, pressed && styles.pressed]} testID={`resource-${item.id}`}>

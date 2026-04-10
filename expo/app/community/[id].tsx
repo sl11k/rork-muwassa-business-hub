@@ -1,3 +1,4 @@
+// Muwassa Business Hub — id screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -78,15 +79,7 @@ interface PostItem {
   commentsCount: number;
 }
 
-const AVATAR_COLORS = ['#1B6B4A', '#C4942A', '#3B82F6', '#D44B63', '#7C3AED', '#0891B2'];
-
-function getAvatarColor(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 function timeAgo(dateStr: string, language: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -250,7 +243,7 @@ export default function CommunityDetailScreen() {
               <Text style={styles.metaText}>{community.postCount} {language === 'ar' ? 'منشور' : 'posts'}</Text>
             </View>
             <View style={[styles.privacyBadge, isPremium ? styles.premiumBadge : isPrivate ? styles.privateBadge : styles.publicBadge]}>
-              {isPremium ? <Crown color={colors.gold} size={11} /> : isPrivate ? <Lock color={colors.sky} size={11} /> : null}
+              {isPremium ? <Crown color={colors.gold} size={11} /> : isPrivate ? <Lock color={colors.secondary} size={11} /> : null}
               <Text style={[styles.privacyText, isPremium ? styles.premiumText : isPrivate ? styles.privateText : styles.publicText]}>
                 {privacyLabel}
               </Text>

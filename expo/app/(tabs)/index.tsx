@@ -1,3 +1,4 @@
+// Muwassa Business Hub — index screen
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -48,15 +49,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 import type { EnrichedPost } from '@/types/post';
 
-const AVATAR_COLORS = ['#0F8B8D', '#1D4ED8', '#14B8A6', '#EF4444', '#6366F1', '#EC4899', '#0891B2', '#F59E0B'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 function formatTimeAgo(dateStr: string): string {
   const now = Date.now();
@@ -369,8 +362,8 @@ const FeedCard = React.memo(function FeedCard({
             {fileAttachments.map((att, idx) => (
               <View key={`file-${idx}`} style={[fc.attachmentItem, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary, borderColor: colors.border }]}>
                 <View style={[fc.attachmentRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                  <View style={[fc.fileIconWrap, { backgroundColor: colors.accentBlueLight }]}>
-                    <FileText color={colors.accentBlue} size={14} strokeWidth={1.8} />
+                  <View style={[fc.fileIconWrap, { backgroundColor: colors.secondaryLight }]}>
+                    <FileText color={colors.secondary} size={14} strokeWidth={1.8} />
                   </View>
                   <Text style={[fc.attachmentText, { color: colors.text }]} numberOfLines={1}>{att.name || 'File'}</Text>
                 </View>
@@ -579,7 +572,7 @@ function KnowledgeCenter() {
     {
       id: 'update-2',
       icon: TrendingUp,
-      iconColor: colors.accentBlue,
+      iconColor: colors.secondary,
       title: language === 'ar' ? 'أبرز اتجاهات الأعمال 2026' : 'Top Business Trends 2026',
       desc: language === 'ar' ? 'تحليل شامل لأهم الاتجاهات في عالم الأعمال والتقنية' : 'Comprehensive analysis of key business and tech trends',
       time: language === 'ar' ? 'منذ 3 أيام' : '3d ago',
@@ -588,7 +581,7 @@ function KnowledgeCenter() {
     {
       id: 'update-3',
       icon: Users,
-      iconColor: '#EC4899',
+      iconColor: colors.accent,
       title: language === 'ar' ? 'نصائح لبناء شبكة مهنية قوية' : 'Tips for Building a Strong Network',
       desc: language === 'ar' ? 'كيف تبني علاقات مهنية مستدامة وفعالة' : 'How to build sustainable and effective professional relationships',
       time: language === 'ar' ? 'منذ أسبوع' : '1w ago',
@@ -618,7 +611,7 @@ function KnowledgeCenter() {
     {
       id: 'gov-3',
       icon: FileText,
-      iconColor: colors.accentBlue,
+      iconColor: colors.secondary,
       title: language === 'ar' ? 'قوالب سياسات مجلس الإدارة' : 'Board Policy Templates',
       desc: language === 'ar' ? 'قوالب جاهزة لسياسات مجلس الإدارة واللجان التابعة له' : 'Ready-made templates for board and committee policies',
       time: language === 'ar' ? 'منذ أسبوعين' : '2w ago',

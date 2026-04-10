@@ -1,3 +1,4 @@
+// Muwassa Business Hub — messages screen
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
@@ -28,18 +29,7 @@ import { trpcClient } from '@/lib/trpc';
 const FILTER_TABS_AR = ['الكل', 'غير مقروء'];
 const FILTER_TABS_EN = ['All', 'Unread'];
 
-const AVATAR_COLORS = [
-  '#0F8B8D', '#1D4ED8', '#EF4444', '#6366F1', '#0891B2',
-  '#EC4899', '#14B8A6', '#2563EB', '#7C3AED', '#F59E0B',
-];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 function getInitial(name: string): string {
   return (name.charAt(0) || '?').toUpperCase();
@@ -171,7 +161,7 @@ const ConversationRow = React.memo(function ConversationRow({
   const isCommunity = !!item.communityId;
   const name = isCommunity ? (item.communityName ?? 'Community') : item.otherUser.name;
   const initial = isCommunity ? '' : getInitial(name);
-  const avatarColor = isCommunity ? '#818CF8' : getAvatarColor(item.otherUser.id);
+  const avatarColor = isCommunity ? colors.secondary : getAvatarColor(item.otherUser.id);
   const time = item.lastMessage ? formatTime(item.lastMessage.createdAt) : formatTime(item.updatedAt);
   const preview = item.lastMessage
     ? (item.lastMessage.senderId === currentUserId ? 'You: ' : '') + item.lastMessage.content
@@ -190,7 +180,7 @@ const ConversationRow = React.memo(function ConversationRow({
     >
       <View style={styles.avatarWrap}>
         {isCommunity ? (
-          <View style={[styles.avatar, { backgroundColor: 'rgba(129,140,248,0.12)' }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.secondaryLight }]}>
             <Text style={{ fontSize: 22 }}>{item.communityIcon ?? '👥'}</Text>
           </View>
         ) : (

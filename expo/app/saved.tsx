@@ -1,3 +1,4 @@
+// Muwassa Business Hub — saved screen
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -26,15 +27,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import type { EnrichedPost } from '@/types/post';
 
-const AVATAR_COLORS = ['#1A6B4A', '#B8892A', '#2E7AD6', '#C94458', '#7C3AED', '#059669', '#D44B63', '#3B82F6'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 function formatTimeAgo(dateStr: string): string {
   const now = Date.now();
@@ -92,9 +85,9 @@ export default function SavedScreen() {
         </View>
 
         <View style={[styles.cardInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
-          <View style={[styles.typeBadge, { backgroundColor: colors.sky + '15' }]}>
-            <MessageCircle color={colors.sky} size={11} />
-            <Text style={[styles.typeText, { color: colors.sky }]}>
+          <View style={[styles.typeBadge, { backgroundColor: colors.secondary + '15' }]}>
+            <MessageCircle color={colors.secondary} size={11} />
+            <Text style={[styles.typeText, { color: colors.secondary }]}>
               {language === 'ar' ? 'منشور' : 'Post'}
             </Text>
           </View>

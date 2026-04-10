@@ -1,3 +1,4 @@
+// Muwassa Business Hub — id screen
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -39,15 +40,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import type { EnrichedComment, PostAttachment } from '@/types/post';
 
-const AVATAR_COLORS = ['#0F8B8D', '#1D4ED8', '#14B8A6', '#EF4444', '#6366F1', '#12B76A', '#EC4899', '#3B82F6'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 function formatTimeAgo(dateStr: string): string {
   const now = Date.now();
@@ -334,9 +327,9 @@ export default function PostDetailScreen() {
       <View style={[styles.actionsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable onPress={handleLike} style={[styles.actionBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} testID="post-like">
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <Heart color={post.isLiked ? colors.rose : colors.textMuted} fill={post.isLiked ? colors.rose : 'transparent'} size={20} />
+            <Heart color={post.isLiked ? colors.error : colors.textMuted} fill={post.isLiked ? colors.error : 'transparent'} size={20} />
           </Animated.View>
-          <Text style={[styles.actionText, post.isLiked && { color: colors.rose }]}>
+          <Text style={[styles.actionText, post.isLiked && { color: colors.error }]}>
             {language === 'ar' ? 'إعجاب' : 'Like'}
           </Text>
         </Pressable>

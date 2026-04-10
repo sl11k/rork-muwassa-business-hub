@@ -1,3 +1,4 @@
+// Muwassa Business Hub — help-support screen
 import React from 'react';
 import {
   Linking,
@@ -40,21 +41,21 @@ export default function HelpSupportScreen() {
       label: language === 'ar' ? 'تواصل معنا' : 'Contact Us',
       desc: language === 'ar' ? 'أرسل لنا رسالة وسنرد في أقرب وقت' : 'Send us a message and we will respond ASAP',
       icon: Mail,
-      color: '#4A9FF5',
+      color: colors.secondary,
     },
     {
       id: 'feedback',
       label: language === 'ar' ? 'إرسال ملاحظات' : 'Send Feedback',
       desc: language === 'ar' ? 'ساعدنا في تحسين التطبيق' : 'Help us improve the app',
       icon: MessageSquare,
-      color: '#FB7185',
+      color: colors.error,
     },
     {
       id: 'live',
       label: language === 'ar' ? 'الدعم المباشر' : 'Live Support',
       desc: language === 'ar' ? 'تحدث مع فريق الدعم مباشرة' : 'Chat with our support team directly',
       icon: HeadphonesIcon,
-      color: '#22D3EE',
+      color: colors.info,
     },
   ];
 

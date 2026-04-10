@@ -1,3 +1,4 @@
+// Muwassa Business Hub — _layout screen
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -97,7 +98,7 @@ function ThemedRoot() {
 
 export default function RootLayout() {
   useEffect(() => {
-    console.log('[RootLayout] ready v3');
+    console.log('[RootLayout] ready v4 — Muwassa');
     void SplashScreen.hideAsync();
   }, []);
 

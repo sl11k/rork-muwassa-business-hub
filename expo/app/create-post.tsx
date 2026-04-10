@@ -1,3 +1,4 @@
+// Muwassa Business Hub — create-post screen
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   ActivityIndicator,
@@ -304,8 +305,8 @@ export default function CreatePostScreen() {
                     const globalIdx = attachments.indexOf(att);
                     return (
                       <View key={`file-${idx}`} style={[s.attachItem, { flexDirection: isRTL ? 'row-reverse' : 'row', backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary, borderColor: colors.border }]}>
-                        <View style={[s.attachIconWrap, { backgroundColor: colors.accentBlueLight }]}>
-                          <FileText color={colors.accentBlue} size={14} strokeWidth={1.8} />
+                        <View style={[s.attachIconWrap, { backgroundColor: colors.secondaryLight }]}>
+                          <FileText color={colors.secondary} size={14} strokeWidth={1.8} />
                         </View>
                         <Text style={[s.attachItemText, { color: colors.text }]} numberOfLines={1}>{att.name || 'File'}</Text>
                         <Pressable onPress={() => handleRemoveAttachment(globalIdx)} hitSlop={8}>

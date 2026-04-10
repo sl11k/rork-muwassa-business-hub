@@ -1,3 +1,4 @@
+// Muwassa Business Hub — marketplace screen
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -32,15 +33,7 @@ const CATS_AR = ['الكل', 'حوكمة', 'استشارات', 'أمن سيبر�
 const CATS_EN = ['All', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 const CAT_KEYS_EN = ['', 'Governance', 'Consulting', 'Cybersecurity', 'Marketing'];
 
-const AVATAR_COLORS = ['#0F8B8D', '#1D4ED8', '#EF4444', '#6366F1', '#0891B2', '#EC4899'];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 interface ServiceItem {
   id: string;
@@ -180,7 +173,7 @@ function FeaturedSection({ services }: { services: ServiceItem[] }) {
               <View style={[styles.featBottom, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                 <Text style={[styles.featPrice, { color: colors.accent }]}>{price}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                  <Star color={colors.yellow} fill={colors.yellow} size={12} />
+                  <Star color={colors.warning} fill={colors.warning} size={12} />
                   <Text style={[styles.featRating, { color: colors.text }]}>4.8</Text>
                 </View>
               </View>
@@ -279,8 +272,8 @@ const ServiceCard = React.memo(function ServiceCard({
             </View>
           </View>
           <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
-            <View style={[styles.ratingWrap, { backgroundColor: colors.yellowLight }]}>
-              <Star color={colors.yellow} fill={colors.yellow} size={10} />
+            <View style={[styles.ratingWrap, { backgroundColor: colors.warningLight }]}>
+              <Star color={colors.warning} fill={colors.warning} size={10} />
               <Text style={[styles.ratingText, { color: colors.text }]}>4.8</Text>
             </View>
             {isRequested ? (

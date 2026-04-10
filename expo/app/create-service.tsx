@@ -1,3 +1,4 @@
+// Muwassa Business Hub — create-service screen
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -375,7 +376,7 @@ export default function CreateServiceScreen() {
                   {language === 'ar' ? f.ar : f.en}
                 </Text>
                 <Pressable onPress={() => handleRemoveFeature(idx)} hitSlop={8}>
-                  <Trash2 color={colors.rose} size={16} />
+                  <Trash2 color={colors.error} size={16} />
                 </Pressable>
               </View>
             ))}

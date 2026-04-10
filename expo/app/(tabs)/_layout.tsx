@@ -1,3 +1,4 @@
+// Muwassa Business Hub — _layout screen
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
@@ -30,7 +31,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: isDark ? '#64748B' : '#98A2B3',
+        tabBarInactiveTintColor: colors.iconInactive,
         tabBarStyle: {
           position: 'absolute' as const,
           bottom: Platform.OS === 'web' ? 12 : 24,
@@ -40,13 +41,13 @@ export default function TabLayout() {
           height: 68,
           borderTopWidth: 0,
           elevation: 0,
-          shadowColor: isDark ? '#000' : '#0F172A',
+          shadowColor: isDark ? '#000000' : '#0F172A',
           shadowOpacity: isDark ? 0.4 : 0.12,
           shadowRadius: 24,
           shadowOffset: { width: 0, height: 8 },
           backgroundColor: 'transparent',
           borderWidth: 1,
-          borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)',
+          borderColor: colors.tabBarBorder,
           overflow: 'hidden' as const,
         },
         tabBarLabelStyle: {
@@ -62,7 +63,7 @@ export default function TabLayout() {
         tabBarBackground: () => (
           Platform.OS === 'web' ? (
             <View style={[StyleSheet.absoluteFill, {
-              backgroundColor: isDark ? 'rgba(10,10,10,0.82)' : 'rgba(255,255,255,0.82)',
+              backgroundColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.85)',
               borderRadius: 32,
               overflow: 'hidden',
             }]}>
@@ -78,7 +79,7 @@ export default function TabLayout() {
                 style={StyleSheet.absoluteFill}
               />
               <View style={[StyleSheet.absoluteFill, {
-                backgroundColor: isDark ? 'rgba(10,10,10,0.55)' : 'rgba(255,255,255,0.55)',
+                backgroundColor: isDark ? colors.tabBarBg : colors.tabBarGlass,
               }]} />
             </View>
           )

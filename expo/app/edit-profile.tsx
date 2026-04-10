@@ -1,3 +1,4 @@
+// Muwassa Business Hub — edit-profile screen
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   KeyboardAvoidingView,
@@ -291,14 +292,14 @@ function CertificatesSection() {
       {certs.map((cert) => (
         <View key={cert.id} style={[styles.certCard, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <View style={styles.certIcon}>
-            <GraduationCap color={colors.gold ?? '#FBBF24'} size={18} />
+            <GraduationCap color={colors.gold} size={18} />
           </View>
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={[styles.certName, { textAlign: isRTL ? 'right' : 'left' }]}>{cert.name}</Text>
             <Text style={[styles.certIssuer, { textAlign: isRTL ? 'right' : 'left' }]}>{cert.issuer} · {cert.year}</Text>
           </View>
           <Pressable onPress={() => handleRemove(cert.id)} hitSlop={8}>
-            <Trash2 color={colors.error ?? '#FB7185'} size={16} />
+            <Trash2 color={colors.error} size={16} />
           </Pressable>
         </View>
       ))}

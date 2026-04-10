@@ -1,3 +1,4 @@
+// Muwassa Business Hub — new-conversation screen
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -32,18 +33,7 @@ interface UserItem {
   initial: string;
 }
 
-const AVATAR_COLORS = [
-  '#1A6B4A', '#2E7AD6', '#C94458', '#B8892A', '#16A34A',
-  '#7C3AED', '#0D9488', '#DC2626', '#EA580C', '#4F46E5',
-];
-
-function getAvatarColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
+import { getAvatarColor } from '@/constants/theme';
 
 export default function NewConversationScreen() {
   const { colors } = useTheme();

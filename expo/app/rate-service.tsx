@@ -1,3 +1,4 @@
+// Muwassa Business Hub — rate-service screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,

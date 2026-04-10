@@ -1,3 +1,4 @@
+// Muwassa Business Hub — governance screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   FlatList,
@@ -70,12 +71,12 @@ function QuickStats() {
     ? [
         { value: '204', label: 'مورد', color: colors.accent },
         { value: '56', label: 'قالب', color: colors.gold },
-        { value: '18', label: 'خبير', color: colors.sky },
+        { value: '18', label: 'خبير', color: colors.secondary },
       ]
     : [
         { value: '204', label: 'Resources', color: colors.accent },
         { value: '56', label: 'Templates', color: colors.gold },
-        { value: '18', label: 'Experts', color: colors.sky },
+        { value: '18', label: 'Experts', color: colors.secondary },
       ];
 
   return (

@@ -1,4 +1,4 @@
-// template
+// Muwassa Business Hub — +not-found screen
 import { Link, Stack } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -34,6 +34,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: "#2e78b7",
+    color: '#0F8B8D',
   },
 });

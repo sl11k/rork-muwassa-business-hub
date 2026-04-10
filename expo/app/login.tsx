@@ -1,3 +1,4 @@
+// Muwassa Business Hub — login screen
 import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,

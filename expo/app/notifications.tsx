@@ -1,3 +1,4 @@
+// Muwassa Business Hub — notifications screen
 import React, { useCallback, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -64,8 +65,8 @@ function getNotificationIcon(type: NotificationType) {
 
 function getNotificationColor(type: NotificationType, colors: any) {
   switch (type) {
-    case 'like': return colors.rose;
-    case 'comment': return colors.sky;
+    case 'like': return colors.error;
+    case 'comment': return colors.secondary;
     case 'service_request': return colors.gold;
     case 'message': return colors.accent;
     default: return colors.textMuted;

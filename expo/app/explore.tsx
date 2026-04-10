@@ -1,3 +1,4 @@
+// Muwassa Business Hub — explore screen
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -163,7 +164,7 @@ export default function ExploreScreen() {
   const renderTrending = useCallback(() => (
     <View style={styles.section}>
       <View style={[styles.sectionHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <TrendingUp color={colors.rose} size={18} />
+        <TrendingUp color={colors.error} size={18} />
         <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>
           {language === 'ar' ? 'المواضيع الرائجة' : 'Trending Topics'}
         </Text>
@@ -174,7 +175,7 @@ export default function ExploreScreen() {
           style={({ pressed }) => [styles.trendRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }, pressed && styles.pressed]}
         >
           <View style={[styles.trendIcon, topic.isHot ? styles.trendIconHot : null]}>
-            <TrendingUp color={topic.isHot ? colors.rose : colors.textMuted} size={14} />
+            <TrendingUp color={topic.isHot ? colors.error : colors.textMuted} size={14} />
           </View>
           <View style={[styles.trendInfo, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
             <Text style={styles.trendLabel}>{getLocalizedText(topic.label, language)}</Text>
@@ -341,7 +342,7 @@ export default function ExploreScreen() {
             </Text>
             <View style={[styles.postActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <View style={styles.postAction}>
-                <Heart color={post.isLiked ? colors.rose : colors.textMuted} size={14} />
+                <Heart color={post.isLiked ? colors.error : colors.textMuted} size={14} />
                 <Text style={styles.postActionText}>{post.likesCount}</Text>
               </View>
               <View style={styles.postAction}>

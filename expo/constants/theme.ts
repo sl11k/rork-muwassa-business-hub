@@ -1,19 +1,49 @@
 export const theme = {
   colors: {
-    bg: '#000000',
-    bgCard: '#111827',
-    bgMuted: '#161B22',
-    accent: '#2DD4BF',
-    accentLight: 'rgba(45,212,191,0.12)',
-    accentSoft: 'rgba(45,212,191,0.08)',
-    accentBlue: '#3B82F6',
-    text: '#F8FAFC',
-    textSecondary: '#CBD5E1',
-    textMuted: '#94A3B8',
-    border: 'rgba(255,255,255,0.08)',
-    error: '#F87171',
-    destructive: '#F87171',
-    white: '#FFFFFF',
+    light: {
+      bg: '#FFFFFF',
+      surface: '#F7F8FA',
+      card: '#FCFCFD',
+      border: '#E7EAF0',
+      textPrimary: '#101828',
+      textSecondary: '#475467',
+      textMuted: '#667085',
+      primary: '#0F8B8D',
+      primaryHover: '#0C6F70',
+      primaryLight: 'rgba(15,139,141,0.10)',
+      secondary: '#1D4ED8',
+      secondaryHover: '#1E40AF',
+      secondaryLight: 'rgba(29,78,216,0.10)',
+      gold: '#C8A96B',
+      success: '#12B76A',
+      warning: '#F59E0B',
+      error: '#EF4444',
+      info: '#2563EB',
+      iconInactive: '#98A2B3',
+      iconActive: '#0F8B8D',
+    },
+    dark: {
+      bg: '#000000',
+      surface: '#0B0F14',
+      card: '#111827',
+      border: 'rgba(255,255,255,0.08)',
+      textPrimary: '#F8FAFC',
+      textSecondary: '#CBD5E1',
+      textMuted: '#94A3B8',
+      primary: '#2DD4BF',
+      primaryHover: '#14B8A6',
+      primaryLight: 'rgba(45,212,191,0.15)',
+      secondary: '#3B82F6',
+      secondaryHover: '#2563EB',
+      secondaryLight: 'rgba(59,130,246,0.15)',
+      gold: '#D6B97A',
+      success: '#22C55E',
+      warning: '#F59E0B',
+      error: '#F87171',
+      info: '#60A5FA',
+      iconInactive: '#64748B',
+      iconActive: '#2DD4BF',
+    },
   },
   typography: {
     h1: { fontSize: 24, fontWeight: '700' as const },
@@ -29,21 +59,21 @@ export const theme = {
   shadow: {
     sm: {
       shadowColor: '#000000',
-      shadowOpacity: 0.06,
+      shadowOpacity: 0.04,
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
       elevation: 2,
     } as const,
     md: {
       shadowColor: '#000000',
-      shadowOpacity: 0.08,
+      shadowOpacity: 0.06,
       shadowRadius: 8,
       shadowOffset: { width: 0, height: 4 },
       elevation: 4,
     } as const,
     lg: {
       shadowColor: '#000000',
-      shadowOpacity: 0.12,
+      shadowOpacity: 0.08,
       shadowRadius: 16,
       shadowOffset: { width: 0, height: 8 },
       elevation: 8,
@@ -66,5 +96,24 @@ export const theme = {
     screenPadding: 16,
   },
 };
+
+export const AVATAR_COLORS = [
+  '#0F8B8D',
+  '#1D4ED8',
+  '#12B76A',
+  '#C8A96B',
+  '#0C6F70',
+  '#1E40AF',
+  '#14B8A6',
+  '#2563EB',
+];
+
+export function getAvatarColor(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export type Theme = typeof theme;

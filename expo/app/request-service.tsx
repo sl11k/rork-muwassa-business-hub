@@ -1,3 +1,4 @@
+// Muwassa Business Hub — request-service screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -163,7 +164,7 @@ export default function RequestServiceScreen() {
                     <Text style={styles.infoPillText}>{price}</Text>
                   </View>
                   <View style={[styles.infoPill, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                    <Clock color={colors.sky} size={14} />
+                    <Clock color={colors.secondary} size={14} />
                     <Text style={styles.infoPillText}>{delivery}</Text>
                   </View>
                 </View>
@@ -257,7 +258,7 @@ export default function RequestServiceScreen() {
                   {att.type === 'image' ? <ImageIcon color={colors.accent} size={14} /> : <FileText color={colors.textSecondary} size={14} />}
                   <Text style={[styles.attachItemText, { color: colors.text }]} numberOfLines={1}>{att.name}</Text>
                   <Pressable onPress={() => handleRemoveAttachment(idx)} hitSlop={8}>
-                    <Trash2 color={colors.error ?? '#FB7185'} size={14} />
+                    <Trash2 color={colors.error} size={14} />
                   </Pressable>
                 </View>
               ))}

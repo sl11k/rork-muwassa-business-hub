@@ -1,3 +1,4 @@
+// Muwassa Business Hub — events screen
 import React, { useMemo, useCallback, useState } from 'react';
 import {
   FlatList,
@@ -154,8 +155,8 @@ const EventCard = React.memo(function EventCard({ item }: { item: EventItem }) {
           <View style={[styles.cardMeta, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Text style={styles.cardHost}>{item.host}</Text>
             <View style={[styles.formatBadge, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              {isOnline ? <Monitor color={colors.sky} size={11} /> : <MapPin color={colors.rose} size={11} />}
-              <Text style={[styles.formatText, { color: isOnline ? colors.sky : colors.rose }]}>
+              {isOnline ? <Monitor color={colors.secondary} size={11} /> : <MapPin color={colors.error} size={11} />}
+              <Text style={[styles.formatText, { color: isOnline ? colors.secondary : colors.error }]}>
                 {getLocalizedText(item.format, language)}
               </Text>
             </View>
