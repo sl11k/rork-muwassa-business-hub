@@ -14,7 +14,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 
-function FeatureItem({ icon: Icon, title, color, delay }: { icon: typeof Users; title: string; color: string; delay: number }) {
+function FeatureItem({ icon: Icon, title, color, textColor, delay }: { icon: typeof Users; title: string; color: string; textColor: string; delay: number }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
@@ -30,7 +30,7 @@ function FeatureItem({ icon: Icon, title, color, delay }: { icon: typeof Users; 
       <View style={[styles.featureIcon, { backgroundColor: color + '15' }]}>
         <Icon color={color} size={20} strokeWidth={1.5} />
       </View>
-      <Text style={styles.featureText}>{title}</Text>
+      <Text style={[styles.featureText, { color: textColor }]}>{title}</Text>
     </Animated.View>
   );
 }
@@ -64,14 +64,14 @@ export default function WelcomeScreen() {
 
   const features = language === 'ar'
     ? [
-        { icon: Users, title: 'مجتمعات مهنية', color: colors.accent },
-        { icon: TrendingUp, title: 'سوق الخدمات', color: colors.orange },
-        { icon: Shield, title: 'مركز الحوكمة', color: colors.teal },
+        { icon: Users, title: 'مجتمعات مهنية', color: colors.accent, textColor: colors.textSecondary },
+        { icon: TrendingUp, title: 'سوق الخدمات', color: colors.orange, textColor: colors.textSecondary },
+        { icon: Shield, title: 'مركز الحوكمة', color: colors.teal, textColor: colors.textSecondary },
       ]
     : [
-        { icon: Users, title: 'Professional communities', color: colors.accent },
-        { icon: TrendingUp, title: 'Services marketplace', color: colors.orange },
-        { icon: Shield, title: 'Governance hub', color: colors.teal },
+        { icon: Users, title: 'Professional communities', color: colors.accent, textColor: colors.textSecondary },
+        { icon: TrendingUp, title: 'Services marketplace', color: colors.orange, textColor: colors.textSecondary },
+        { icon: Shield, title: 'Governance hub', color: colors.teal, textColor: colors.textSecondary },
       ];
 
   return (
@@ -89,15 +89,13 @@ export default function WelcomeScreen() {
             <Text style={[styles.appName, { color: colors.text, textAlign: 'center' }]}>
               {language === 'ar' ? 'مُوَثَّق' : 'Muwassa'}
             </Text>
-            <Text style={[styles.appSub, { color: colors.textSecondary, textAlign: 'center' }]}>
-              {language === 'ar' ? 'Business Hub' : 'Business Hub'}
-            </Text>
+            <Text style={[styles.appSub, { color: colors.textSecondary, textAlign: 'center' }]}>Business Hub</Text>
             <View style={[styles.accentLine, { backgroundColor: colors.accent }]} />
           </Animated.View>
 
           <View style={styles.features}>
             {features.map((f, i) => (
-              <FeatureItem key={i} icon={f.icon} title={f.title} color={f.color} delay={300 + i * 150} />
+              <FeatureItem key={i} icon={f.icon} title={f.title} color={f.color} textColor={f.textColor} delay={300 + i * 150} />
             ))}
           </View>
         </View>

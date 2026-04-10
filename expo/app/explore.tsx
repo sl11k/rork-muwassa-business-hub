@@ -681,7 +681,8 @@ const createStyles = (c: any) => StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionTitle: {
-    ...theme.typography.h2,
+    fontSize: 17,
+    fontWeight: '600' as const,
     color: c.text,
   },
   pressed: {
@@ -1063,11 +1064,12 @@ const createStyles = (c: any) => StyleSheet.create({
     gap: 12,
   },
   emptyTitle: {
-    ...theme.typography.h3,
+    fontSize: 15,
+    fontWeight: '600' as const,
     color: c.text,
   },
   emptyDesc: {
-    ...theme.typography.caption,
+    fontSize: 13,
     color: c.textMuted,
   },
 });

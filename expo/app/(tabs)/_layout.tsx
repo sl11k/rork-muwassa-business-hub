@@ -14,7 +14,7 @@ import { useTheme } from '@/providers/ThemeProvider';
 
 export default function TabLayout() {
   const { language } = useLanguage();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
 
   const tabLabels = {
     home: language === 'ar' ? 'الرئيسية' : 'Home',
@@ -59,10 +59,7 @@ export default function TabLayout() {
         options={{
           title: tabLabels.home,
           tabBarIcon: ({ color, focused }) => (
-            <View style={s.iconWrap}>
-              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
-              <Home color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
-            </View>
+            <Home color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
           ),
         }}
       />
@@ -71,10 +68,7 @@ export default function TabLayout() {
         options={{
           title: tabLabels.communities,
           tabBarIcon: ({ color, focused }) => (
-            <View style={s.iconWrap}>
-              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
-              <Compass color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
-            </View>
+            <Compass color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
           ),
         }}
       />
@@ -84,8 +78,8 @@ export default function TabLayout() {
           title: tabLabels.messages,
           tabBarIcon: ({ color, focused }) => (
             <View style={s.iconWrap}>
-              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
               <MessageSquare color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
+              <View style={[s.unreadDot, { backgroundColor: colors.error }]} />
             </View>
           ),
         }}
@@ -95,10 +89,7 @@ export default function TabLayout() {
         options={{
           title: tabLabels.marketplace,
           tabBarIcon: ({ color, focused }) => (
-            <View style={s.iconWrap}>
-              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
-              <ShoppingBag color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
-            </View>
+            <ShoppingBag color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
           ),
         }}
       />
@@ -107,10 +98,7 @@ export default function TabLayout() {
         options={{
           title: tabLabels.more,
           tabBarIcon: ({ color, focused }) => (
-            <View style={s.iconWrap}>
-              {focused && <View style={[s.activeLine, { backgroundColor: activeColor }]} />}
-              <User color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
-            </View>
+            <User color={color} size={22} strokeWidth={focused ? 2.2 : 1.5} />
           ),
         }}
       />
@@ -122,14 +110,14 @@ const s = StyleSheet.create({
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 48,
-    height: 32,
+    position: 'relative',
   },
-  activeLine: {
+  unreadDot: {
     position: 'absolute',
-    top: -6,
-    width: 20,
-    height: 2.5,
-    borderRadius: 2,
+    top: -2,
+    right: -4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 });

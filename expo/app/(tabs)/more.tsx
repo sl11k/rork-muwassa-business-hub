@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Animated,
   Pressable,
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
-  Switch,
   Text,
   View,
 } from 'react-native';
@@ -15,19 +14,18 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
   BookOpen,
+  Bookmark,
   Calendar,
   ChevronRight,
-  Bookmark,
   ClipboardList,
+  Grid3X3,
   Heart,
   LogOut,
   MessageCircle,
-  Moon,
   Settings,
   Shield,
-  Sun,
+  Tag,
   UserRound,
-  Users,
 } from 'lucide-react-native';
 
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -63,18 +61,29 @@ function formatTimeAgo(dateStr: string): string {
 function ProfileHeader({ stats }: { stats: UserStats | null }) {
   const router = useRouter();
   const { isRTL, language } = useLanguage();
-  const { profile, isAuthenticated } = useAuth();
-  const { colors, isDark, toggleTheme } = useTheme();
+  const { profile, isAuthenticated, user } = useAuth();
+  const { colors } = useTheme();
 
   const displayName = profile?.name || (language === 'ar' ? 'زائر' : 'Guest');
   const displayRole = profile?.role || (language === 'ar' ? 'مستخدم جديد' : 'New member');
   const nameInitial = displayName.charAt(0).toUpperCase();
+  const username = user?.email?.split('@')[0] ?? '';
+
+  const handleShare = useCallback(async () => {
+    try {
+      await Share.share({
+        message: `businesshub.app/u/${username}`,
+      });
+    } catch (err) {
+      console.log('[Profile] share error', err);
+    }
+  }, [username]);
 
   return (
     <View style={ph.section}>
       <View style={[ph.topRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={[ph.screenTitle, { color: colors.text }]}>
-          {isAuthenticated ? displayName : (language === 'ar' ? 'الملف الشخصي' : 'Profile')}
+          {isAuthenticated ? (username || displayName) : (language === 'ar' ? 'الملف الشخصي' : 'Profile')}
         </Text>
         <View style={[ph.topActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <LanguageToggle />
@@ -99,6 +108,9 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
         </View>
         <Text style={[ph.name, { color: colors.text }]}>{displayName}</Text>
         <Text style={[ph.role, { color: colors.textSecondary }]}>{displayRole}</Text>
+        {isAuthenticated && username ? (
+          <Text style={[ph.link, { color: colors.accent }]}>businesshub.app/u/{username}</Text>
+        ) : null}
       </View>
 
       <View style={[ph.statsCard, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
@@ -107,11 +119,11 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'منشورات' : 'Posts'}</Text>
         </View>
         <View style={ph.statItem}>
-          <Text style={[ph.statValue, { color: colors.text }]}>{stats?.receivedLikes ?? 0}</Text>
+          <Text style={[ph.statValue, { color: colors.text }]}>0</Text>
           <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'متابعين' : 'Followers'}</Text>
         </View>
         <View style={ph.statItem}>
-          <Text style={[ph.statValue, { color: colors.text }]}>{stats?.communitiesJoined ?? 0}</Text>
+          <Text style={[ph.statValue, { color: colors.text }]}>0</Text>
           <Text style={[ph.statLabel, { color: colors.textMuted }]}>{language === 'ar' ? 'يتابعهم' : 'Following'}</Text>
         </View>
       </View>
@@ -128,6 +140,7 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
             </Text>
           </Pressable>
           <Pressable
+            onPress={handleShare}
             style={({ pressed }) => [ph.editBtn, { backgroundColor: colors.bgMuted }, pressed && { opacity: 0.8 }]}
           >
             <Text style={[ph.editBtnText, { color: colors.text }]}>
@@ -146,30 +159,6 @@ function ProfileHeader({ stats }: { stats: UserStats | null }) {
           </Text>
         </Pressable>
       )}
-
-      <View style={[ph.themeRow, { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border }]}>
-        <View style={[ph.themeInner, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={[ph.themeIconWrap, { backgroundColor: isDark ? colors.indigoLight : colors.accentLight }]}>
-            {isDark ? (
-              <Moon color={colors.indigo} size={16} strokeWidth={1.5} />
-            ) : (
-              <Sun color={colors.accent} size={16} strokeWidth={1.5} />
-            )}
-          </View>
-          <Text style={[ph.themeLabel, { flex: 1, textAlign: isRTL ? 'right' : 'left', color: colors.text }]}>
-            {language === 'ar' ? (isDark ? 'الوضع الداكن' : 'الوضع الفاتح') : (isDark ? 'Dark Mode' : 'Light Mode')}
-          </Text>
-          <Switch
-            value={isDark}
-            onValueChange={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              toggleTheme();
-            }}
-            trackColor={{ false: colors.bgMuted, true: colors.accentLight }}
-            thumbColor={isDark ? colors.accent : colors.textMuted}
-          />
-        </View>
-      </View>
     </View>
   );
 }
@@ -184,6 +173,7 @@ const ph = StyleSheet.create({
   avatarText: { fontSize: 28, fontWeight: '700' as const, color: '#FFF' },
   name: { fontSize: 20, fontWeight: '700' as const },
   role: { fontSize: 14 },
+  link: { fontSize: 13 },
   statsCard: { flexDirection: 'row', marginHorizontal: 16, borderRadius: 12, padding: 16 },
   statItem: { flex: 1, alignItems: 'center', gap: 4 },
   statValue: { fontSize: 20, fontWeight: '700' as const },
@@ -193,17 +183,13 @@ const ph = StyleSheet.create({
   editBtnText: { fontSize: 13, fontWeight: '500' as const },
   signInBtn: { marginHorizontal: 16, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   signInBtnText: { fontSize: 15, fontWeight: '600' as const, color: '#FFF' },
-  themeRow: { marginHorizontal: 16, borderRadius: 12, overflow: 'hidden' },
-  themeInner: { alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  themeIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  themeLabel: { fontSize: 15, fontWeight: '500' as const },
 });
 
 function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i: number) => void }) {
   const { language } = useLanguage();
   const { colors } = useTheme();
   const tabs = language === 'ar' ? ['المنشورات', 'الخدمات'] : ['Posts', 'Services'];
-  const icons = [MessageCircle, Shield];
+  const icons = [Grid3X3, Tag];
 
   return (
     <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
@@ -216,7 +202,7 @@ function ProfileTabs({ activeTab, onSelect }: { activeTab: number; onSelect: (i:
             style={({ pressed }) => [styles.profileTabItem, pressed && { opacity: 0.6 }]}
           >
             <Icon color={activeTab === index ? colors.text : colors.textMuted} size={18} strokeWidth={1.5} />
-            <Text style={[styles.tabText, { color: colors.textMuted }, activeTab === index && { color: colors.text }]}>{item}</Text>
+            <Text style={[styles.tabText, { color: activeTab === index ? colors.text : colors.textMuted }]}>{item}</Text>
             {activeTab === index && <View style={[styles.tabIndicator, { backgroundColor: colors.accent }]} />}
           </Pressable>
         );
@@ -250,9 +236,9 @@ function MyPostsList({ userId }: { userId: string }) {
     return (
       <View style={styles.emptyTab}>
         <View style={[styles.emptyTabIcon, { backgroundColor: colors.accentLight }]}>
-          <MessageCircle color={colors.accent} size={22} strokeWidth={1.5} />
+          <Grid3X3 color={colors.accent} size={22} strokeWidth={1.5} />
         </View>
-        <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>{language === 'ar' ? 'لا توجد منشورات' : 'No posts yet'}</Text>
+        <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>{language === 'ar' ? 'لا توجد منشورات بعد' : 'No posts yet'}</Text>
       </View>
     );
   }
@@ -290,6 +276,31 @@ function MyPostsList({ userId }: { userId: string }) {
           </View>
         </Pressable>
       ))}
+    </View>
+  );
+}
+
+function ServicesTab() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { colors } = useTheme();
+
+  return (
+    <View style={styles.emptyTab}>
+      <View style={[styles.emptyTabIcon, { backgroundColor: colors.accentLight }]}>
+        <Tag color={colors.accent} size={22} strokeWidth={1.5} />
+      </View>
+      <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>
+        {language === 'ar' ? 'لا توجد خدمات بعد' : 'No services yet'}
+      </Text>
+      <Pressable
+        onPress={() => router.push('/my-requests')}
+        style={({ pressed }) => [styles.viewRequestsBtn, { backgroundColor: colors.accent }, pressed && { opacity: 0.85 }]}
+      >
+        <Text style={styles.viewRequestsBtnText}>
+          {language === 'ar' ? 'عرض الطلبات' : 'View Requests'}
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -412,14 +423,7 @@ export default function MoreScreen() {
               <ProfileTabs activeTab={activeTab} onSelect={setActiveTab} />
               <View style={styles.tabContent}>
                 {activeTab === 0 ? <MyPostsList userId={userId} /> : null}
-                {activeTab === 1 ? (
-                  <View style={styles.emptyTab}>
-                    <View style={[styles.emptyTabIcon, { backgroundColor: colors.accentLight }]}>
-                      <Shield color={colors.accent} size={22} strokeWidth={1.5} />
-                    </View>
-                    <Text style={[styles.emptyTabText, { color: colors.textSecondary }]}>No services yet</Text>
-                  </View>
-                ) : null}
+                {activeTab === 1 ? <ServicesTab /> : null}
               </View>
             </>
           )}
@@ -447,6 +451,8 @@ const styles = StyleSheet.create({
   emptyTab: { alignItems: 'center', paddingVertical: 44, gap: 10 },
   emptyTabIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   emptyTabText: { fontSize: 13 },
+  viewRequestsBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginTop: 8 },
+  viewRequestsBtnText: { color: '#FFF', fontSize: 13, fontWeight: '600' as const },
   postCard: { padding: 16, borderRadius: 12, gap: 8 },
   postContent: { fontSize: 15, lineHeight: 22 },
   topicBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },

@@ -62,13 +62,13 @@ function getNotificationIcon(type: NotificationType) {
   }
 }
 
-function getNotificationColor(type: NotificationType) {
+function getNotificationColor(type: NotificationType, colors: any) {
   switch (type) {
-    case 'like': return theme.colors.rose;
-    case 'comment': return theme.colors.sky;
-    case 'service_request': return theme.colors.gold;
-    case 'message': return theme.colors.accent;
-    default: return theme.colors.textMuted;
+    case 'like': return colors.rose;
+    case 'comment': return colors.sky;
+    case 'service_request': return colors.gold;
+    case 'message': return colors.accent;
+    default: return colors.textMuted;
   }
 }
 
@@ -108,7 +108,7 @@ const NotificationRow = React.memo(function NotificationRow({
   const { colors } = useTheme();
   const styles = useStyles();
   const Icon = getNotificationIcon(item.type);
-  const color = getNotificationColor(item.type);
+  const color = getNotificationColor(item.type, colors);
   const title = language === 'ar' ? item.title.ar : item.title.en;
   const body = language === 'ar' ? item.body.ar : item.body.en;
   const time = formatTimeAgo(item.createdAt, language);
@@ -386,7 +386,8 @@ const createStyles = (c: any) => StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    ...theme.typography.h1,
+    fontSize: 24,
+    fontWeight: '700' as const,
     color: c.text,
   },
   markReadBtn: {
@@ -396,7 +397,9 @@ const createStyles = (c: any) => StyleSheet.create({
     backgroundColor: c.accentLight,
   },
   markReadText: {
-    ...theme.typography.label,
+    fontSize: 11,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase' as const,
     color: c.accent,
   },
   unreadBanner: {
@@ -429,7 +432,8 @@ const createStyles = (c: any) => StyleSheet.create({
     backgroundColor: c.text,
   },
   filterText: {
-    ...theme.typography.captionSemibold,
+    fontSize: 13,
+    fontWeight: '600' as const,
     color: c.textSecondary,
   },
   filterTextActive: {
@@ -483,14 +487,15 @@ const createStyles = (c: any) => StyleSheet.create({
     gap: 3,
   },
   notifTitle: {
-    ...theme.typography.bodySemibold,
+    fontSize: 15,
+    fontWeight: '600' as const,
     color: c.text,
   },
   notifTitleUnread: {
     fontWeight: '700' as const,
   },
   notifBody: {
-    ...theme.typography.caption,
+    fontSize: 13,
     lineHeight: 20,
     color: c.textSecondary,
   },

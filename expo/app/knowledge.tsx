@@ -247,7 +247,8 @@ const createStyles = (c: any) => StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    ...theme.typography.h1,
+    fontSize: 24,
+    fontWeight: '700' as const,
     color: c.text,
   },
   headerSub: {
@@ -372,7 +373,8 @@ const createStyles = (c: any) => StyleSheet.create({
     fontWeight: '600' as const,
   },
   cardTitle: {
-    ...theme.typography.bodySemibold,
+    fontSize: 15,
+    fontWeight: '600' as const,
     color: c.text,
     lineHeight: 22,
   },

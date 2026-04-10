@@ -14,6 +14,17 @@ export const theme = {
     destructive: '#FB7185',
     white: '#FFFFFF',
   },
+  typography: {
+    h1: { fontSize: 24, fontWeight: '700' as const },
+    h2: { fontSize: 17, fontWeight: '600' as const },
+    h3: { fontSize: 15, fontWeight: '600' as const },
+    body: { fontSize: 15, fontWeight: '400' as const },
+    bodySemibold: { fontSize: 15, fontWeight: '600' as const },
+    caption: { fontSize: 13, fontWeight: '400' as const },
+    captionSemibold: { fontSize: 13, fontWeight: '600' as const },
+    small: { fontSize: 12, fontWeight: '400' as const },
+    label: { fontSize: 11, fontWeight: '600' as const, textTransform: 'uppercase' as const },
+  },
   shadow: {
     sm: {
       shadowColor: '#000000',

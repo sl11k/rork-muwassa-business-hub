@@ -400,7 +400,8 @@ const createStyles = (c: any) => StyleSheet.create({
     justifyContent: 'center',
   },
   navTitle: {
-    ...theme.typography.h3,
+    fontSize: 15,
+    fontWeight: '600' as const,
     color: c.text,
   },
   listContent: {
@@ -500,7 +501,8 @@ const createStyles = (c: any) => StyleSheet.create({
     color: c.textMuted,
   },
   commentsTitle: {
-    ...theme.typography.h3,
+    fontSize: 15,
+    fontWeight: '600' as const,
     color: c.text,
     paddingTop: 4,
     paddingBottom: 4,
