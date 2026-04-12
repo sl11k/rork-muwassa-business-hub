@@ -53,10 +53,8 @@ function LiquidGlassTabBar({
   ).current;
 
   useEffect(() => {
-    const isRTL = I18nManager.isRTL;
-    const adjustedIndex = isRTL ? (TAB_COUNT - 1 - state.index) : state.index;
     const targetX =
-      BAR_INNER_PADDING + adjustedIndex * ITEM_WIDTH + (ITEM_WIDTH - INDICATOR_SIZE) / 2;
+      BAR_INNER_PADDING + state.index * ITEM_WIDTH + (ITEM_WIDTH - INDICATOR_SIZE) / 2;
     Animated.spring(indicatorX, {
       toValue: targetX,
       useNativeDriver: true,
