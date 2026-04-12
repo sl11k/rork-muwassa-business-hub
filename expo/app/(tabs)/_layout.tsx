@@ -1,35 +1,28 @@
-// Muwassa Business Hub — _layout screen
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, View, StyleSheet } from 'react-native';
+import { Platform, View, StyleSheet, Image } from 'react-native';
 import { BlurView } from 'expo-blur';
-import {
-  LayoutGrid,
-  Compass,
-  MessageSquareText,
-  ShoppingBag,
-  UserCircle2,
-} from 'lucide-react-native';
 
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useTheme } from '@/providers/ThemeProvider';
+
+const TAB_ICONS = {
+  home: 'https://r2-pub.rork.com/generated-images/81076518-927d-41bf-ae3a-a034f6f78bda.png',
+  discover: 'https://r2-pub.rork.com/generated-images/d78832ae-1e72-4258-8895-9a93f8f2728d.png',
+  messages: 'https://r2-pub.rork.com/generated-images/58fa5ea7-5cdc-47ed-a86a-2781384f3595.png',
+  marketplace: 'https://r2-pub.rork.com/generated-images/e1001a4e-4d6f-4ebe-bd89-373faa7aa8e1.png',
+  profile: 'https://r2-pub.rork.com/generated-images/abc72434-7937-4e81-bd1a-203649b6d715.png',
+};
 
 export default function TabLayout() {
   const { language } = useLanguage();
   const { colors, isDark } = useTheme();
 
-  const tabLabels = {
-    home: language === 'ar' ? 'الرئيسية' : 'Home',
-    communities: language === 'ar' ? 'اكتشف' : 'Discover',
-    messages: language === 'ar' ? 'الرسائل' : 'Messages',
-    marketplace: language === 'ar' ? 'السوق' : 'Market',
-    more: language === 'ar' ? 'حسابي' : 'Profile',
-  };
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.iconInactive,
         tabBarStyle: {
@@ -50,15 +43,11 @@ export default function TabLayout() {
           borderColor: colors.tabBarBorder,
           overflow: 'hidden' as const,
         },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '500' as const,
-          marginTop: -2,
-          marginBottom: Platform.OS === 'ios' ? 8 : 10,
-          letterSpacing: 0.1,
-        },
         tabBarItemStyle: {
-          paddingTop: 10,
+          paddingTop: 6,
+          paddingBottom: 6,
+          justifyContent: 'center' as const,
+          alignItems: 'center' as const,
         },
         tabBarBackground: () => (
           Platform.OS === 'web' ? (
@@ -89,13 +78,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: tabLabels.home,
-          tabBarIcon: ({ color, focused }) => (
-            <LayoutGrid
-              color={color}
-              size={22}
-              strokeWidth={focused ? 2.2 : 1.5}
-              fill={focused ? color : 'transparent'}
+          title: '',
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={{ uri: TAB_ICONS.home }}
+              style={[s.tabIcon, focused ? s.tabIconActive : s.tabIconInactive]}
+              resizeMode="contain"
             />
           ),
         }}
@@ -103,12 +91,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="communities"
         options={{
-          title: tabLabels.communities,
-          tabBarIcon: ({ color, focused }) => (
-            <Compass
-              color={color}
-              size={22}
-              strokeWidth={focused ? 2.2 : 1.5}
+          title: '',
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={{ uri: TAB_ICONS.discover }}
+              style={[s.tabIcon, focused ? s.tabIconActive : s.tabIconInactive]}
+              resizeMode="contain"
             />
           ),
         }}
@@ -116,14 +104,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="messages"
         options={{
-          title: tabLabels.messages,
-          tabBarIcon: ({ color, focused }) => (
+          title: '',
+          tabBarIcon: ({ focused }) => (
             <View style={s.iconWrap}>
-              <MessageSquareText
-                color={color}
-                size={21}
-                strokeWidth={focused ? 2.2 : 1.5}
-                fill={focused ? color : 'transparent'}
+              <Image
+                source={{ uri: TAB_ICONS.messages }}
+                style={[s.tabIcon, focused ? s.tabIconActive : s.tabIconInactive]}
+                resizeMode="contain"
               />
               <View style={[s.unreadDot, { backgroundColor: colors.error }]} />
             </View>
@@ -133,13 +120,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="marketplace"
         options={{
-          title: tabLabels.marketplace,
-          tabBarIcon: ({ color, focused }) => (
-            <ShoppingBag
-              color={color}
-              size={22}
-              strokeWidth={focused ? 2.2 : 1.5}
-              fill={focused ? color : 'transparent'}
+          title: '',
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={{ uri: TAB_ICONS.marketplace }}
+              style={[s.tabIcon, focused ? s.tabIconActive : s.tabIconInactive]}
+              resizeMode="contain"
             />
           ),
         }}
@@ -147,12 +133,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="more"
         options={{
-          title: tabLabels.more,
-          tabBarIcon: ({ color, focused }) => (
-            <UserCircle2
-              color={color}
-              size={22}
-              strokeWidth={focused ? 2.2 : 1.5}
+          title: '',
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={{ uri: TAB_ICONS.profile }}
+              style={[s.tabIcon, focused ? s.tabIconActive : s.tabIconInactive]}
+              resizeMode="contain"
             />
           ),
         }}
@@ -162,6 +148,17 @@ export default function TabLayout() {
 }
 
 const s = StyleSheet.create({
+  tabIcon: {
+    width: 36,
+    height: 36,
+  },
+  tabIconActive: {
+    opacity: 1,
+    transform: [{ scale: 1.1 }],
+  },
+  tabIconInactive: {
+    opacity: 0.5,
+  },
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
