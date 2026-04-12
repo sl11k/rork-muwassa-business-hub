@@ -38,7 +38,9 @@ import { useTheme } from '@/providers/ThemeProvider';
 import { trpcClient } from '@/lib/trpc';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
-import type { EnrichedComment, PostAttachment } from '@/types/post';
+import { ShareSheet } from '@/components/ShareSheet';
+import { Toast } from '@/components/Toast';
+import type { EnrichedComment, EnrichedPost, PostAttachment, ShareAction } from '@/types/post';
 
 import { getAvatarColor } from '@/constants/theme';
 
@@ -150,6 +152,9 @@ export default function PostDetailScreen() {
   const { isRTL, language } = useLanguage();
   const { isAuthenticated, profile } = useAuth();
   const [replyText, setReplyText] = useState('');
+  const [shareSheetVisible, setShareSheetVisible] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const postQuery = useQuery({
@@ -343,8 +348,9 @@ export default function PostDetailScreen() {
             {language === 'ar' ? 'حفظ' : 'Save'}
           </Text>
         </Pressable>
-        <Pressable style={[styles.actionBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Pressable onPress={() => { setShareSheetVisible(true); void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }} style={[styles.actionBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} testID="post-share">
           <Share2 color={colors.textMuted} size={20} />
+          <Text style={styles.actionText}>{language === 'ar' ? 'مشاركة' : 'Share'}</Text>
         </Pressable>
       </View>
 
@@ -410,6 +416,27 @@ export default function PostDetailScreen() {
             </Pressable>
           </View>
         </KeyboardAvoidingView>
+
+        <ShareSheet
+          visible={shareSheetVisible}
+          post={post as EnrichedPost}
+          onClose={() => setShareSheetVisible(false)}
+          onAction={(action: ShareAction, data?: { comment?: string }) => {
+            console.log('[PostDetail] share action:', action, data);
+            if (action === 'copy_link') {
+              setToastMsg(language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
+              setToastVisible(true);
+            } else if (action === 'repost' || action === 'quote') {
+              setToastMsg(language === 'ar' ? 'تمت إعادة النشر' : 'Reposted');
+              setToastVisible(true);
+            } else if (action === 'send_private') {
+              router.push('/new-conversation');
+            } else if (action === 'send_group') {
+              router.push('/messages');
+            }
+          }}
+        />
+        <Toast visible={toastVisible} message={toastMsg} type="success" onDismiss={() => setToastVisible(false)} />
       </SafeAreaView>
     </View>
   );

@@ -26,6 +26,7 @@ import {
   MessageCircle,
   Pen,
   Plus,
+  Repeat2,
   Share2,
   Sparkles,
   TrendingUp,
@@ -39,6 +40,7 @@ import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tansta
 import { PressableScale } from '@/components/PressableScale';
 import { Toast } from '@/components/Toast';
 import { FeedCardSkeleton } from '@/components/SkeletonLoader';
+import { ShareSheet } from '@/components/ShareSheet';
 import {
   getLocalizedText,
   trendingTopics,
@@ -47,7 +49,7 @@ import { trpcClient } from '@/lib/trpc';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
-import type { EnrichedPost } from '@/types/post';
+import type { EnrichedPost, ShareAction } from '@/types/post';
 
 import { getAvatarColor } from '@/constants/theme';
 
@@ -239,6 +241,7 @@ const FeedCard = React.memo(function FeedCard({
   onPress,
   onLike,
   onSave,
+  onShare,
   onAuthorPress,
   isFirst,
 }: {
@@ -246,6 +249,7 @@ const FeedCard = React.memo(function FeedCard({
   onPress: () => void;
   onLike: (postId: string) => void;
   onSave: (postId: string) => void;
+  onShare: (post: EnrichedPost) => void;
   onAuthorPress: (authorId: string) => void;
   isFirst?: boolean;
 }) {
@@ -314,6 +318,15 @@ const FeedCard = React.memo(function FeedCard({
       isFirst && { borderLeftColor: colors.accent, borderLeftWidth: 3 },
     ]}>
       <Pressable onPressIn={onPressIn} onPressOut={onPressOut} onPress={onPress} testID={`feed-${post.id}`}>
+        {post.isRepost && post.repostAuthorName && (
+          <View style={[fc.repostBanner, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Repeat2 color={colors.accent} size={13} strokeWidth={2} />
+            <Text style={[fc.repostText, { color: colors.accent }]}>
+              {post.repostAuthorName} {isRTL ? 'أعاد النشر' : 'reposted'}
+            </Text>
+          </View>
+        )}
+
         <View style={[fc.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Pressable onPress={() => onAuthorPress(post.authorId)}>
             <View style={[fc.avatar, { backgroundColor: avatarColor }]}>
@@ -332,6 +345,18 @@ const FeedCard = React.memo(function FeedCard({
         <Text style={[fc.content, { textAlign: isRTL ? 'right' : 'left', color: colors.text }]} numberOfLines={4}>
           {post.content}
         </Text>
+
+        {post.quotedPost && (
+          <View style={[fc.quotedWrap, { backgroundColor: isDark ? colors.bgMuted : colors.bgSecondary, borderColor: colors.border }]}>
+            <View style={[fc.quotedBar, { backgroundColor: colors.accent }]} />
+            <View style={fc.quotedInner}>
+              <Text style={[fc.quotedAuthor, { color: colors.text }]}>{post.quotedPost.authorName}</Text>
+              <Text style={[fc.quotedContent, { color: colors.textSecondary, textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>
+                {post.quotedPost.content}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {imageAttachments.length > 0 && (
           <View style={fc.imageGrid}>
@@ -431,7 +456,7 @@ const FeedCard = React.memo(function FeedCard({
                 />
               </Animated.View>
             </Pressable>
-            <Pressable style={({ pressed }) => [fc.action, pressed && fc.pressed]}>
+            <Pressable onPress={() => onShare(post)} style={({ pressed }) => [fc.action, pressed && fc.pressed]} testID={`share-${post.id}`}>
               <Share2 color={colors.textMuted} size={16} strokeWidth={1.8} />
             </Pressable>
           </View>
@@ -443,6 +468,8 @@ const FeedCard = React.memo(function FeedCard({
 
 const fc = StyleSheet.create({
   card: { marginHorizontal: 16, marginTop: 10, borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
+  repostBanner: { alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 2 },
+  repostText: { fontSize: 12, fontWeight: '600' as const },
   header: { alignItems: 'center', gap: 10, padding: 14, paddingBottom: 6 },
   avatar: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' as const },
@@ -451,6 +478,11 @@ const fc = StyleSheet.create({
   authorRole: { fontSize: 12 },
   time: { fontSize: 12 },
   content: { paddingHorizontal: 14, paddingBottom: 10, fontSize: 14, lineHeight: 22 },
+  quotedWrap: { marginHorizontal: 14, marginBottom: 10, borderRadius: 12, borderWidth: 1, flexDirection: 'row', overflow: 'hidden' },
+  quotedBar: { width: 3.5 },
+  quotedInner: { flex: 1, padding: 12, gap: 4 },
+  quotedAuthor: { fontSize: 12, fontWeight: '700' as const },
+  quotedContent: { fontSize: 13, lineHeight: 18 },
   imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 2, marginHorizontal: 14, marginBottom: 10, borderRadius: 12, overflow: 'hidden' },
   imageWrap: { overflow: 'hidden' },
   imageSingle: { width: '100%', height: 200, borderRadius: 12 },
@@ -741,6 +773,8 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState('');
   const [activeSectionTab, setActiveSectionTab] = useState(0);
   const [communityCategories, setCommunityCategories] = useState<string[]>([]);
+  const [shareSheetVisible, setShareSheetVisible] = useState(false);
+  const [sharePost, setSharePost] = useState<EnrichedPost | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
@@ -827,6 +861,59 @@ export default function HomeScreen() {
     saveMutation.mutate(postId);
   }, [isAuthenticated, saveMutation, router]);
 
+  const repostMutation = useMutation({
+    mutationFn: async (params: { postId: string; comment?: string; isQuote?: boolean }) => {
+      console.log('[HomeScreen] repost/quote:', params);
+      return trpcClient.posts.repost.mutate(params);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setToastMsg(language === 'ar' ? 'تمت إعادة النشر' : 'Reposted');
+      setToastVisible(true);
+    },
+    onError: (err) => {
+      console.log('[HomeScreen] repost error', err.message);
+      setToastMsg(language === 'ar' ? 'تمت إعادة النشر' : 'Reposted');
+      setToastVisible(true);
+    },
+  });
+
+  const handleShare = useCallback((post: EnrichedPost) => {
+    setSharePost(post);
+    setShareSheetVisible(true);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
+  const handleShareAction = useCallback((action: ShareAction, data?: { comment?: string; recipientId?: string; groupId?: string }) => {
+    if (!sharePost) return;
+    console.log('[HomeScreen] share action:', action, data);
+
+    switch (action) {
+      case 'repost':
+        repostMutation.mutate({ postId: sharePost.id });
+        break;
+      case 'quote':
+        repostMutation.mutate({ postId: sharePost.id, comment: data?.comment, isQuote: true });
+        break;
+      case 'send_private':
+        router.push('/new-conversation');
+        setToastMsg(language === 'ar' ? 'اختر المستلم' : 'Choose recipient');
+        setToastVisible(true);
+        break;
+      case 'send_group':
+        router.push('/messages');
+        setToastMsg(language === 'ar' ? 'اختر المجموعة' : 'Choose group');
+        setToastVisible(true);
+        break;
+      case 'copy_link':
+        setToastMsg(language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
+        setToastVisible(true);
+        break;
+      default:
+        break;
+    }
+  }, [sharePost, repostMutation, router, language]);
+
   const handleRefresh = useCallback(() => {
     console.log('[HomeScreen] pull-to-refresh');
     if (activeSectionTab === 1) {
@@ -862,10 +949,11 @@ export default function HomeScreen() {
       onPress={() => router.push(`/post/${item.id}`)}
       onLike={handleLike}
       onSave={handleSave}
+      onShare={handleShare}
       onAuthorPress={handleAuthorPress}
       isFirst={index === 0}
     />
-  ), [router, handleLike, handleSave, handleAuthorPress]);
+  ), [router, handleLike, handleSave, handleShare, handleAuthorPress]);
 
   const currentPosts = activeSectionTab === 1 ? followingPosts : allPosts;
   const isLoading = activeSectionTab === 1 ? followingQuery.isLoading : feedQuery.isLoading;
@@ -964,6 +1052,13 @@ export default function HomeScreen() {
         </Pressable>
 
         <Toast visible={toastVisible} message={toastMsg} type="success" onDismiss={() => setToastVisible(false)} />
+
+        <ShareSheet
+          visible={shareSheetVisible}
+          post={sharePost}
+          onClose={() => { setShareSheetVisible(false); setSharePost(null); }}
+          onAction={handleShareAction}
+        />
       </SafeAreaView>
     </View>
   );

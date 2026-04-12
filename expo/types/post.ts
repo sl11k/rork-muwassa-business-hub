@@ -4,6 +4,14 @@ export interface PostAttachment {
   name?: string;
 }
 
+export interface QuotedPost {
+  id: string;
+  authorName: string;
+  authorInitial: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface EnrichedPost {
   id: string;
   authorId: string;
@@ -18,8 +26,13 @@ export interface EnrichedPost {
   likesCount: number;
   commentsCount: number;
   savesCount: number;
+  sharesCount: number;
   isLiked: boolean;
   isSaved: boolean;
+  isRepost?: boolean;
+  repostAuthorName?: string;
+  repostAuthorId?: string;
+  quotedPost?: QuotedPost | null;
 }
 
 export interface EnrichedComment {
@@ -33,3 +46,11 @@ export interface EnrichedComment {
   authorRole: string;
   authorInitial: string;
 }
+
+export type ShareAction =
+  | 'repost'
+  | 'quote'
+  | 'send_private'
+  | 'send_group'
+  | 'copy_link'
+  | 'external';

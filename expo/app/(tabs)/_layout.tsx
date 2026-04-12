@@ -4,34 +4,36 @@ import {
   Platform,
   View,
   StyleSheet,
-  Image,
   Animated,
   Pressable,
   Dimensions,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Home,
+  Search,
+  MessageSquare,
+  ShoppingBag,
+  User,
+} from 'lucide-react-native';
 
 import { useTheme } from '@/providers/ThemeProvider';
 
-const TAB_ICONS = {
-  home: 'https://r2-pub.rork.com/generated-images/6eed80cc-7aca-48e8-bd7f-dd6c5d44dc13.png',
-  discover: 'https://r2-pub.rork.com/generated-images/95fa5eed-f2a1-45a3-b14b-01dd3c05973b.png',
-  messages: 'https://r2-pub.rork.com/generated-images/21f5c451-5542-4b76-856b-1be207911847.png',
-  marketplace: 'https://r2-pub.rork.com/generated-images/30e567a6-0cda-4e66-b4a2-ed9e3cd87710.png',
-  profile: 'https://r2-pub.rork.com/generated-images/b9eab633-4c74-496a-be8d-70fc2c56511b.png',
-};
-
 const TAB_COUNT = 5;
-const BAR_H_PADDING = 24;
-const BAR_INNER_PADDING = 6;
+const BAR_H_PADDING = 20;
+const BAR_INNER_PADDING = 8;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BAR_WIDTH = SCREEN_WIDTH - BAR_H_PADDING * 2;
 const ITEM_AREA_WIDTH = BAR_WIDTH - BAR_INNER_PADDING * 2;
 const ITEM_WIDTH = ITEM_AREA_WIDTH / TAB_COUNT;
-const INDICATOR_WIDTH = ITEM_WIDTH - 4;
-const BAR_HEIGHT = 64;
+const INDICATOR_SIZE = 44;
+const BAR_HEIGHT = 62;
 const BAR_RADIUS = BAR_HEIGHT / 2;
+
+const TAB_ICON_COMPONENTS = [Home, Search, MessageSquare, ShoppingBag, User];
+const ICON_SIZE = 22;
+const ICON_STROKE = 1.8;
 
 function LiquidGlassTabBar({
   state,
@@ -51,11 +53,11 @@ function LiquidGlassTabBar({
 
   useEffect(() => {
     const targetX =
-      BAR_INNER_PADDING + state.index * ITEM_WIDTH + (ITEM_WIDTH - INDICATOR_WIDTH) / 2;
+      BAR_INNER_PADDING + state.index * ITEM_WIDTH + (ITEM_WIDTH - INDICATOR_SIZE) / 2;
     Animated.spring(indicatorX, {
       toValue: targetX,
       useNativeDriver: true,
-      tension: 68,
+      tension: 80,
       friction: 12,
     }).start();
   }, [state.index]);
@@ -74,30 +76,22 @@ function LiquidGlassTabBar({
 
       Animated.sequence([
         Animated.timing(scaleAnims[index], {
-          toValue: 0.82,
-          duration: 80,
+          toValue: 0.78,
+          duration: 70,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnims[index], {
           toValue: 1,
           useNativeDriver: true,
-          tension: 300,
-          friction: 15,
+          tension: 320,
+          friction: 14,
         }),
       ]).start();
     },
     [navigation, scaleAnims]
   );
 
-  const tabIcons = [
-    TAB_ICONS.home,
-    TAB_ICONS.discover,
-    TAB_ICONS.messages,
-    TAB_ICONS.marketplace,
-    TAB_ICONS.profile,
-  ];
-
-  const bottomOffset = Platform.OS === 'web' ? 14 : Math.max(insets.bottom, 12) + 4;
+  const bottomOffset = Platform.OS === 'web' ? 16 : Math.max(insets.bottom, 14) + 2;
 
   return (
     <View
@@ -117,8 +111,8 @@ function LiquidGlassTabBar({
               StyleSheet.absoluteFill,
               {
                 backgroundColor: isDark
-                  ? 'rgba(8,8,10,0.82)'
-                  : 'rgba(255,255,255,0.78)',
+                  ? 'rgba(6,6,8,0.85)'
+                  : 'rgba(255,255,255,0.82)',
                 borderRadius: BAR_RADIUS,
               },
             ]}
@@ -131,7 +125,7 @@ function LiquidGlassTabBar({
             ]}
           >
             <BlurView
-              intensity={isDark ? 55 : 70}
+              intensity={isDark ? 60 : 80}
               tint={isDark ? 'dark' : 'light'}
               style={StyleSheet.absoluteFill}
             />
@@ -140,8 +134,8 @@ function LiquidGlassTabBar({
                 StyleSheet.absoluteFill,
                 {
                   backgroundColor: isDark
-                    ? 'rgba(8,8,10,0.55)'
-                    : 'rgba(255,255,255,0.45)',
+                    ? 'rgba(6,6,8,0.52)'
+                    : 'rgba(255,255,255,0.48)',
                 },
               ]}
             />
@@ -153,10 +147,10 @@ function LiquidGlassTabBar({
             StyleSheet.absoluteFill,
             {
               borderRadius: BAR_RADIUS,
-              borderWidth: 1,
+              borderWidth: 0.5,
               borderColor: isDark
-                ? 'rgba(255,255,255,0.08)'
-                : 'rgba(0,0,0,0.06)',
+                ? 'rgba(255,255,255,0.10)'
+                : 'rgba(0,0,0,0.05)',
             },
           ]}
           pointerEvents="none"
@@ -166,16 +160,12 @@ function LiquidGlassTabBar({
           style={[
             styles.indicator,
             {
-              width: INDICATOR_WIDTH,
-              height: BAR_HEIGHT - BAR_INNER_PADDING * 2 - 4,
-              borderRadius: (BAR_HEIGHT - BAR_INNER_PADDING * 2 - 4) / 2,
+              width: INDICATOR_SIZE,
+              height: INDICATOR_SIZE,
+              borderRadius: INDICATOR_SIZE / 2,
               backgroundColor: isDark
-                ? 'rgba(45,212,191,0.14)'
-                : 'rgba(15,139,141,0.10)',
-              borderWidth: 1,
-              borderColor: isDark
-                ? 'rgba(45,212,191,0.20)'
-                : 'rgba(15,139,141,0.15)',
+                ? 'rgba(45,212,191,0.16)'
+                : 'rgba(15,139,141,0.11)',
               transform: [{ translateX: indicatorX }],
             },
           ]}
@@ -184,7 +174,7 @@ function LiquidGlassTabBar({
         <View style={styles.tabRow}>
           {state.routes.map((route: any, index: number) => {
             const isFocused = state.index === index;
-            const iconUri = tabIcons[index];
+            const IconComponent = TAB_ICON_COMPONENTS[index];
 
             return (
               <Pressable
@@ -200,15 +190,13 @@ function LiquidGlassTabBar({
                     justifyContent: 'center' as const,
                   }}
                 >
-                  <Image
-                    source={{ uri: iconUri }}
-                    style={[
-                      styles.icon,
-                      {
-                        opacity: isFocused ? 1 : 0.45,
-                      },
-                    ]}
-                    resizeMode="contain"
+                  <IconComponent
+                    color={isFocused
+                      ? (isDark ? colors.iconActive : colors.iconActive)
+                      : (isDark ? colors.iconInactive : colors.iconInactive)
+                    }
+                    size={ICON_SIZE}
+                    strokeWidth={isFocused ? 2.2 : ICON_STROKE}
                   />
                   {index === 2 && (
                     <View
@@ -259,21 +247,21 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOpacity: 0.18,
-        shadowRadius: 20,
-        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.14,
+        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 10 },
       },
       android: {
-        elevation: 12,
+        elevation: 14,
       },
       web: {
-        boxShadow: '0 8px 32px rgba(0,0,0,0.16)',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
       } as any,
     }),
   },
   indicator: {
     position: 'absolute',
-    top: BAR_INNER_PADDING + 2,
+    top: (BAR_HEIGHT - INDICATOR_SIZE) / 2,
     left: 0,
   },
   tabRow: {
@@ -288,18 +276,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: '100%',
   },
-  icon: {
-    width: 34,
-    height: 34,
-  },
   unreadDot: {
     position: 'absolute',
-    top: -1,
-    right: -4,
+    top: -2,
+    right: -5,
     width: 7,
     height: 7,
     borderRadius: 3.5,
     borderWidth: 1.5,
-    borderColor: 'rgba(0,0,0,0.3)',
+    borderColor: 'rgba(0,0,0,0.2)',
   },
 });
