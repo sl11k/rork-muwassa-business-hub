@@ -71,6 +71,8 @@ export interface ThemeColors {
   iconInactive: string;
   iconActive: string;
   iconActiveSecondary: string;
+  sky: string;
+  skyLight: string;
 }
 
 const darkColors: ThemeColors = {
@@ -137,6 +139,8 @@ const darkColors: ThemeColors = {
   iconInactive: '#64748B',
   iconActive: '#2DD4BF',
   iconActiveSecondary: '#60A5FA',
+  sky: '#38BDF8',
+  skyLight: 'rgba(56,189,248,0.15)',
 };
 
 const lightColors: ThemeColors = {
@@ -203,6 +207,8 @@ const lightColors: ThemeColors = {
   iconInactive: '#98A2B3',
   iconActive: '#0F8B8D',
   iconActiveSecondary: '#1D4ED8',
+  sky: '#0EA5E9',
+  skyLight: 'rgba(14,165,233,0.10)',
 };
 
 function getSystemTheme(): 'dark' | 'light' {

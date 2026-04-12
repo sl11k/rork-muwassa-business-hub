@@ -906,6 +906,12 @@ export const store = {
     return (follows[userId] ?? []).length;
   },
 
+  async getFollowingIds(userId: string): Promise<string[]> {
+    await ensureInit();
+    const follows = get<Record<string, string[]>>(KEYS.FOLLOWS, {});
+    return follows[userId] ?? [];
+  },
+
   async getUserPosts(userId: string): Promise<Post[]> {
     await ensureInit();
     const posts = get<Post[]>(KEYS.POSTS, []);

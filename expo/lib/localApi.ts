@@ -151,6 +151,31 @@ export const localApi = {
         return { success: true };
       },
     },
+    followingFeed: {
+      async query(input: { cursor?: number; limit?: number }) {
+        const userId = await getCurrentUserId();
+        if (!userId) return { posts: [], nextCursor: null };
+        const followingIds = await store.getFollowingIds(userId);
+        if (followingIds.length === 0) return { posts: [], nextCursor: null };
+        const result = await store.listPosts(input.cursor ?? 0, input.limit ?? 20);
+        const filtered = result.posts.filter((p) => followingIds.includes(p.authorId));
+        const enriched = await Promise.all(filtered.map((p) => enrichPost(p, userId)));
+        return { posts: enriched, nextCursor: result.nextCursor };
+      },
+    },
+    repost: {
+      async mutate(input: { postId: string; comment?: string; isQuote?: boolean }) {
+        const userId = await getCurrentUserId();
+        if (!userId) throw new Error('Not authenticated');
+        const original = await store.getPost(input.postId);
+        if (!original) throw new Error('Post not found');
+        const content = input.isQuote && input.comment
+          ? input.comment
+          : `[Repost] ${original.content}`;
+        const post = await store.createPost(userId, content, original.topic);
+        return await enrichPost(post, userId);
+      },
+    },
     toggleLike: {
       async mutate(input: { postId: string }) {
         const userId = await getCurrentUserId();

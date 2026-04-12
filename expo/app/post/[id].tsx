@@ -98,7 +98,7 @@ function CommentItem({ comment }: { comment: EnrichedComment }) {
   );
 }
 
-function renderAttachments(attachments: PostAttachment[], colors: any, isRTL: boolean, c: any) {
+function PostAttachmentList({ attachments, themeColors, isRTL }: { attachments: PostAttachment[]; themeColors: any; isRTL: boolean }) {
   if (!attachments || attachments.length === 0) return null;
   const images = attachments.filter(a => a.type === 'image');
   const files = attachments.filter(a => a.type === 'file');
@@ -110,7 +110,7 @@ function renderAttachments(attachments: PostAttachment[], colors: any, isRTL: bo
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, borderRadius: 12, overflow: 'hidden' }}>
           {images.slice(0, 4).map((att, idx) => (
             <View key={`img-${idx}`} style={[
-              { overflow: 'hidden', backgroundColor: c.bgMuted },
+              { overflow: 'hidden', backgroundColor: themeColors.bgMuted },
               images.length === 1 ? { width: '100%', height: 220, borderRadius: 12 } : { width: '48%', height: 150 },
             ]}>
               <Image source={{ uri: att.url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
@@ -120,23 +120,23 @@ function renderAttachments(attachments: PostAttachment[], colors: any, isRTL: bo
       )}
       {files.map((att, idx) => (
         <View key={`file-${idx}`} style={[
-          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgMuted },
+          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: themeColors.border, backgroundColor: themeColors.bgMuted },
         ]}>
-          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.secondaryLight || c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
-            <FileText color={c.secondary || c.accent} size={16} strokeWidth={1.8} />
+          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: themeColors.secondaryLight || themeColors.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+            <FileText color={themeColors.secondary || themeColors.accent} size={16} strokeWidth={1.8} />
           </View>
-          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: c.text }} numberOfLines={1}>{att.name || 'File'}</Text>
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: themeColors.text }} numberOfLines={1}>{att.name || 'File'}</Text>
         </View>
       ))}
       {links.map((att, idx) => (
         <Pressable key={`link-${idx}`} onPress={() => { void Linking.openURL(att.url).catch(() => {}); }} style={[
-          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgMuted },
+          { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: themeColors.border, backgroundColor: themeColors.bgMuted },
         ]}>
-          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
-            <Link2 color={c.accent} size={16} strokeWidth={1.8} />
+          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: themeColors.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+            <Link2 color={themeColors.accent} size={16} strokeWidth={1.8} />
           </View>
-          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: c.accent }} numberOfLines={1}>{att.name || att.url}</Text>
-          <ExternalLink color={c.textMuted} size={12} strokeWidth={1.5} />
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: themeColors.accent }} numberOfLines={1}>{att.name || att.url}</Text>
+          <ExternalLink color={themeColors.textMuted} size={12} strokeWidth={1.5} />
         </Pressable>
       ))}
     </View>
@@ -313,7 +313,7 @@ export default function PostDetailScreen() {
         {post.content}
       </Text>
 
-      {renderAttachments(post.attachments ?? [], colors, isRTL, colors)}
+      <PostAttachmentList attachments={post.attachments ?? []} themeColors={colors} isRTL={isRTL} />
 
       <View style={styles.divider} />
 
