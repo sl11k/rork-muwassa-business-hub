@@ -122,8 +122,8 @@ function renderAttachments(attachments: PostAttachment[], colors: any, isRTL: bo
         <View key={`file-${idx}`} style={[
           { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgMuted },
         ]}>
-          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.accentBlueLight || c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
-            <FileText color={c.accentBlue || c.accent} size={16} strokeWidth={1.8} />
+          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: c.secondaryLight || c.accentLight, alignItems: 'center', justifyContent: 'center' }}>
+            <FileText color={c.secondary || c.accent} size={16} strokeWidth={1.8} />
           </View>
           <Text style={{ flex: 1, fontSize: 13, fontWeight: '500' as const, color: c.text }} numberOfLines={1}>{att.name || 'File'}</Text>
         </View>
@@ -313,7 +313,7 @@ export default function PostDetailScreen() {
         {post.content}
       </Text>
 
-      {renderAttachments(post.attachments ?? [], colors, isRTL, c)}
+      {renderAttachments(post.attachments ?? [], colors, isRTL, colors)}
 
       <View style={styles.divider} />
 
